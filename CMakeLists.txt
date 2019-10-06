@@ -16,8 +16,8 @@ find_package(catkin REQUIRED COMPONENTS
 )
 
 ## System dependencies are found with CMake's conventions
-# find_package(Boost REQUIRED COMPONENTS system)
-
+find_package(gazebo REQUIRED)
+find_package(Boost REQUIRED COMPONENTS thread)
 
 ## Uncomment this if the package has a setup.py. This macro ensures
 ## modules and global scripts declared therein get installed
@@ -105,10 +105,10 @@ find_package(catkin REQUIRED COMPONENTS
 ## CATKIN_DEPENDS: catkin_packages dependent projects also need
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
-#  INCLUDE_DIRS include
-#  LIBRARIES agribot_simulation
+ INCLUDE_DIRS include
+ LIBRARIES gazebo_ros_agribot
 #  CATKIN_DEPENDS gazebo_ros geometry_msgs nav_msgs roscpp tf
-#  DEPENDS system_lib
+ DEPENDS gazebo_ros
 )
 
 ###########
@@ -117,9 +117,21 @@ catkin_package(
 
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
-include_directories(
-# include
+include_directories(include
+  ${Boost_INCLUDE_DIRS}
   ${catkin_INCLUDE_DIRS}
+  ${GAZEBO_INCLUDE_DIRS}
+)
+
+link_directories(
+  ${GAZEBO_LIBRARY_DIRS}
+)
+
+add_library(gazebo_ros_agribot
+  src/gazebo_ros_agribot.cpp
+)
+target_link_libraries(gazebo_ros_agribot
+  ${GAZEBO_LIBRARIES} ${catkin_LIBRARIES} ${Boost_LIBRARIES}
 )
 
 ## Declare a C++ library
@@ -158,6 +170,11 @@ include_directories(
 
 # all install targets should use catkin DESTINATION variables
 # See http://ros.org/doc/api/catkin/html/adv_user_guide/variables.html
+# install(TARGETS
+#   gazebo_ros_agribot
+#   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+#   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+# )
 
 ## Mark executable scripts (Python etc.) for installation
 ## in contrast to setup.py, you can choose the destination

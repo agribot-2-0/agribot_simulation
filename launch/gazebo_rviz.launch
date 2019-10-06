@@ -1,0 +1,6 @@
+<launch>
+
+    <include file="$(find agribot_description)/launch/robot_model.launch" />
+    <include file="$(find agribot_simulation)/launch/gazebo.launch" />
+
+</launch>
