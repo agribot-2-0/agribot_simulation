@@ -15,8 +15,10 @@ namespace gazebo
 {
 
 enum {
-    RIGHT,
-    LEFT,
+    FRONT_RIGHT,
+    FRONT_LEFT,
+    BACK_RIGHT,
+    BACK_LEFT
 };
 
 GazeboRosAgribot::GazeboRosAgribot() {}
@@ -27,48 +29,54 @@ GazeboRosAgribot::~GazeboRosAgribot() {}
 // Load the controller
 void GazeboRosAgribot::Load ( physics::ModelPtr _parent, sdf::ElementPtr _sdf )
 {
+    ROS_INFO_STREAM("Test");
 
     this->parent = _parent;
-    // gazebo_ros_ = GazeboRosPtr ( new GazeboRos ( _parent, _sdf, "Agribot" ) );
+    // gazebo_ros_ = GazeboRosPtr ( new GazeboRos ( _parent, _sdf, "agribot" ) );
     // Make sure the ROS node for Gazebo has already been initialized
-    // gazebo_ros_->isInitialized();
+    // if (!ros::isInitialized())
+    // {
+    //   ROS_FATAL_STREAM("A ROS node for Gazebo has not been initialized, unable to load plugin. "
+    //     << "Load the Gazebo system plugin 'libgazebo_ros_api_plugin.so' in the gazebo_ros package)");
+    //   return;
+    // }
 
-    // gazebo_ros_->getParameter<std::string> ( command_topic_, "commandTopic", "cmd_vel" );
+    node_handle_ = gazebo::transport::NodePtr(new transport::Node());
+    // Initialise with default namespace (typically /gazebo/default/)
+    node_handle_->Init();
+
+    command_topic_ = "/agribot/front";
+    // gazebo_ros_->getParameter<std::string> ( command_topic_, "commandTopic", "agribot/front" );
     // gazebo_ros_->getParameter<std::string> ( odometry_topic_, "odometryTopic", "odom" );
     // gazebo_ros_->getParameter<std::string> ( odometry_frame_, "odometryFrame", "odom" );
     // gazebo_ros_->getParameter<std::string> ( robot_base_frame_, "robotBaseFrame", "base_footprint" );
     // gazebo_ros_->getParameterBoolean ( publishWheelTF_, "publishWheelTF", false );
     // gazebo_ros_->getParameterBoolean ( publishOdomTF_, "publishOdomTF", true);
     // gazebo_ros_->getParameterBoolean ( publishWheelJointState_, "publishWheelJointState", false );
-    // gazebo_ros_->getParameterBoolean ( legacy_mode_, "legacyMode", true );
-//
-//     if (!_sdf->HasElement("legacyMode"))
-//     {
-//       ROS_ERROR_NAMED("diff_drive", "GazeboRosAgribot Plugin missing <legacyMode>, defaults to true\n"
-// 	       "This setting assumes you have a old package, where the right and left wheel are changed to fix a former code issue\n"
-// 	       "To get rid of this error just set <legacyMode> to false if you just created a new package.\n"
-// 	       "To fix an old package you have to exchange left wheel by the right wheel.\n"
-// 	       "If you do not want to fix this issue in an old package or your z axis points down instead of the ROS standard defined in REP 103\n"
-// 	       "just set <legacyMode> to true.\n"
-//       );
-//     }
-//
-//     gazebo_ros_->getParameter<double> ( wheel_separation_, "wheelSeparation", 0.34 );
-//     gazebo_ros_->getParameter<double> ( wheel_diameter_, "wheelDiameter", 0.15 );
-//     gazebo_ros_->getParameter<double> ( wheel_accel, "wheelAcceleration", 0.0 );
-//     gazebo_ros_->getParameter<double> ( wheel_torque, "wheelTorque", 5.0 );
-//     gazebo_ros_->getParameter<double> ( update_rate_, "updateRate", 100.0 );
-//     std::map<std::string, OdomSource> odomOptions;
-//     odomOptions["encoder"] = ENCODER;
-//     odomOptions["world"] = WORLD;
-//     gazebo_ros_->getParameter<OdomSource> ( odom_source_, "odometrySource", odomOptions, WORLD );
-//
-//
-//     joints_.resize ( 2 );
-//     joints_[LEFT] = gazebo_ros_->getJoint ( parent, "leftJoint", "left_joint" );
-//     joints_[RIGHT] = gazebo_ros_->getJoint ( parent, "rightJoint", "right_joint" );
-//     joints_[LEFT]->SetParam ( "fmax", 0, wheel_torque );
-//     joints_[RIGHT]->SetParam ( "fmax", 0, wheel_torque );
+
+    // gazebo_ros_->getParameter<double> ( wheel_separation_, "wheelSeparation", 0.34 );
+    // gazebo_ros_->getParameter<double> ( wheel_diameter_, "wheelDiameter", 0.15 );
+    // gazebo_ros_->getParameter<double> ( wheel_accel, "wheelAcceleration", 0.0 );
+    // gazebo_ros_->getParameter<double> ( wheel_torque, "wheelTorque", 5.0 );
+    wheel_torque = 5.0;
+    // gazebo_ros_->getParameter<double> ( update_rate_, "updateRate", 100.0 );
+    // std::map<std::string, OdomSource> odomOptions;
+    // odomOptions["encoder"] = ENCODER;
+    // odomOptions["world"] = WORLD;
+    // gazebo_ros_->getParameter<OdomSource> ( odom_source_, "odometrySource", odomOptions, WORLD );
+
+
+    joints_.resize ( 4 );
+    joints_[FRONT_LEFT] = _parent->GetJoint ( "front_left_wheel_joint" );
+    joints_[FRONT_RIGHT] = _parent->GetJoint ( "front_right_wheel_joint" );
+    joints_[BACK_LEFT] = _parent->GetJoint (  "back_left_wheel_joint");
+    joints_[BACK_RIGHT] = _parent->GetJoint (  "back_right_wheel_joint");
+
+    // joints_[FRONT_LEFT]->SetParam ( "fmax", 0, wheel_torque );
+    // joints_[FRONT_RIGHT]->SetParam ( "fmax", 0, wheel_torque );
+    // joints_[BACK_LEFT]->SetParam ( "fmax", 0, wheel_torque );
+    // joints_[BACK_RIGHT]->SetParam ( "fmax", 0, wheel_torque );
+
 //
 //
 //
@@ -89,13 +97,17 @@ void GazeboRosAgribot::Load ( physics::ModelPtr _parent, sdf::ElementPtr _sdf )
 //     last_update_time_ = parent->GetWorld()->GetSimTime();
 // #endif
 //
-//     // Initialize velocity stuff
-//     wheel_speed_[RIGHT] = 0;
-//     wheel_speed_[LEFT] = 0;
-//
-//     // Initialize velocity support stuff
-//     wheel_speed_instr_[RIGHT] = 0;
-//     wheel_speed_instr_[LEFT] = 0;
+    // Initialize velocity stuff
+    wheel_speed_[FRONT_LEFT] = 1.0;
+    wheel_speed_[FRONT_RIGHT] = 1.0;
+    wheel_speed_[BACK_LEFT] = 1.0;
+    wheel_speed_[BACK_RIGHT] = 1.0;
+
+    // Initialize velocity support stuff
+    // wheel_speed_instr_[FRONT_LEFT] = 0;
+    // wheel_speed_instr_[FRONT_RIGHT] = 0;
+    // wheel_speed_instr_[BACK_LEFT] = 0;
+    // wheel_speed_instr_[BACK_RIGHT] = 0;
 //
 //     x_ = 0;
 //     rot_ = 0;
@@ -110,16 +122,19 @@ void GazeboRosAgribot::Load ( physics::ModelPtr _parent, sdf::ElementPtr _sdf )
 //
 //     transform_broadcaster_ = boost::shared_ptr<tf::TransformBroadcaster>(new tf::TransformBroadcaster());
 //
-//     // ROS: Subscribe to the velocity command topic (usually "cmd_vel")
-//     ROS_INFO_NAMED("diff_drive", "%s: Try to subscribe to %s", gazebo_ros_->info(), command_topic_.c_str());
-//
-//     ros::SubscribeOptions so =
-//         ros::SubscribeOptions::create<geometry_msgs::Twist>(command_topic_, 1,
-//                 boost::bind(&GazeboRosAgribot::cmdVelCallback, this, _1),
-//                 ros::VoidPtr(), &queue_);
-//
-//     cmd_vel_subscriber_ = gazebo_ros_->node()->subscribe(so);
-//     ROS_INFO_NAMED("diff_drive", "%s: Subscribe to %s", gazebo_ros_->info(), command_topic_.c_str());
+    // ROS: Subscribe to the velocity command topic (usually "cmd_vel")
+    // ROS_INFO_NAMED("agribot", "%s: Try to subscribe to %s", gazebo_ros_->info(), command_topic_.c_str());
+    // ROS_INFO("%s: Try to subscribe to %s", gazebo_ros_->info(), command_topic_.c_str());
+    //
+    // ros::SubscribeOptions so =
+    //     ros::SubscribeOptions::create<agribot_msgs::AgribotCaterpillar>(command_topic_, 1,
+    //             boost::bind(&GazeboRosAgribot::cmdVelCallback, this, _1),
+    //             ros::VoidPtr(), &queue_);
+
+
+    // cmd_vel_subscriber_ = node_handle_->Subscribe( command_topic_, &GazeboRosAgribot::cmdVelCallback, this);
+    // cmd_vel_subscriber_ = gazebo_ros_->node()->subscribe(so);
+    // ROS_INFO_NAMED("agribot", "%s: Subscribe to %s", gazebo_ros_->info(), command_topic_.c_str());
 //
 //     if (this->publish_tf_)
 //     {
@@ -128,12 +143,14 @@ void GazeboRosAgribot::Load ( physics::ModelPtr _parent, sdf::ElementPtr _sdf )
 //     }
 //
 //     // start custom queue for diff drive
-//     this->callback_queue_thread_ =
-//         boost::thread ( boost::bind ( &GazeboRosAgribot::QueueThread, this ) );
-//
-//     // listen to the update event (broadcast every simulation iteration)
-//     this->update_connection_ =
-//         event::Events::ConnectWorldUpdateBegin ( boost::bind ( &GazeboRosAgribot::UpdateChild, this ) );
+    // this->callback_queue_thread_ =
+    //     boost::thread ( boost::bind ( &GazeboRosAgribot::QueueThread, this ) );
+
+    // listen to the update event (broadcast every simulation iteration)
+        this->update_connection_ = event::Events::ConnectWorldUpdateBegin (
+              std::bind ( &GazeboRosAgribot::onUpdate, this ) );
+
+        ROS_INFO_STREAM("End");
 
 }
 
@@ -197,9 +214,9 @@ void GazeboRosAgribot::Reset()
 //     }
 // }
 //
-// // Update the controller
-// void GazeboRosAgribot::UpdateChild()
-// {
+// Update the controller
+void GazeboRosAgribot::onUpdate()
+{
 //
 //     /* force reset SetParam("fmax") since Joint::Reset reset MaxForce to zero at
 //        https://bitbucket.org/osrf/gazebo/src/8091da8b3c529a362f39b042095e12c94656a5d1/gazebo/physics/Joint.cc?at=gazebo2_2.2.5#cl-331
@@ -207,11 +224,11 @@ void GazeboRosAgribot::Reset()
 //        and Joint::Reset is called after ModelPlugin::Reset, so we need to set maxForce to wheel_torque other than GazeboRosAgribot::Reset
 //        (this seems to be solved in https://bitbucket.org/osrf/gazebo/commits/ec8801d8683160eccae22c74bf865d59fac81f1e)
 //     */
-//     for ( int i = 0; i < 2; i++ ) {
-//       if ( fabs(wheel_torque -joints_[i]->GetParam ( "fmax", 0 )) > 1e-6 ) {
-//         joints_[i]->SetParam ( "fmax", 0, wheel_torque );
-//       }
-//     }
+    // for ( int i = 0; i < 4; i++ ) {
+    //   if ( fabs(wheel_torque -joints_[i]->GetParam ( "fmax", 0 )) > 1e-6 ) {
+    //     joints_[i]->SetParam ( "fmax", 0, wheel_torque );
+    //   }
+    // }
 //
 //
 //     if ( odom_source_ == ENCODER ) UpdateOdometryEncoder();
@@ -230,18 +247,24 @@ void GazeboRosAgribot::Reset()
 //         // Update robot in case new velocities have been requested
 //         getWheelVelocities();
 //
-//         double current_speed[2];
-//
-//         current_speed[LEFT] = joints_[LEFT]->GetVelocity ( 0 )   * ( wheel_diameter_ / 2.0 );
-//         current_speed[RIGHT] = joints_[RIGHT]->GetVelocity ( 0 ) * ( wheel_diameter_ / 2.0 );
-//
-//         if ( wheel_accel == 0 ||
-//                 ( fabs ( wheel_speed_[LEFT] - current_speed[LEFT] ) < 0.01 ) ||
-//                 ( fabs ( wheel_speed_[RIGHT] - current_speed[RIGHT] ) < 0.01 ) ) {
-//             //if max_accel == 0, or target speed is reached
-//             joints_[LEFT]->SetParam ( "vel", 0, wheel_speed_[LEFT]/ ( wheel_diameter_ / 2.0 ) );
-//             joints_[RIGHT]->SetParam ( "vel", 0, wheel_speed_[RIGHT]/ ( wheel_diameter_ / 2.0 ) );
-//         } else {
+        // double current_speed[4];
+        //
+        // current_speed[FRONT_LEFT] = joints_[FRONT_LEFT]->GetVelocity ( 0 )   * ( wheel_diameter_ / 2.0 );
+        // current_speed[FRONT_RIGHT] = joints_[FRONT_RIGHT]->GetVelocity ( 0 ) * ( wheel_diameter_ / 2.0 );
+
+        joints_[FRONT_LEFT]->SetVelocity (0, wheel_speed_[FRONT_LEFT]);
+        joints_[FRONT_RIGHT]->SetVelocity (0, wheel_speed_[FRONT_RIGHT]);
+        joints_[BACK_LEFT]->SetVelocity (0, wheel_speed_[BACK_LEFT]);
+        joints_[BACK_RIGHT]->SetVelocity (0, wheel_speed_[BACK_RIGHT]);
+
+        // if ( wheel_accel == 0 ||
+                // ( fabs ( wheel_speed_[FRONT_LEFT] - current_speed[FRONT_LEFT] ) < 0.01 ) ||
+                // ( fabs ( wheel_speed_[FRONT_RIGHT] - current_speed[FRONT_RIGHT] ) < 0.01 ) ) {
+            //if max_accel == 0, or target speed is reached
+            // joints_[FRONT_LEFT]->SetParam ( "vel", 0, wheel_speed_[FRONT_LEFT]/ ( wheel_diameter_ / 2.0 ) );
+            // joints_[FRONT_RIGHT]->SetParam ( "vel", 0, wheel_speed_[FRONT_RIGHT]/ ( wheel_diameter_ / 2.0 ) );
+        // }
+        // else {
 //             if ( wheel_speed_[LEFT]>=current_speed[LEFT] )
 //                 wheel_speed_instr_[LEFT]+=fmin ( wheel_speed_[LEFT]-current_speed[LEFT],  wheel_accel * seconds_since_last_update );
 //             else
@@ -258,46 +281,30 @@ void GazeboRosAgribot::Reset()
 //             joints_[LEFT]->SetParam ( "vel", 0, wheel_speed_instr_[LEFT] / ( wheel_diameter_ / 2.0 ) );
 //             joints_[RIGHT]->SetParam ( "vel", 0, wheel_speed_instr_[RIGHT] / ( wheel_diameter_ / 2.0 ) );
 //         }
-//         last_update_time_+= common::Time ( update_period_ );
+        // last_update_time_+= common::Time ( update_period_ );
 //     }
-// }
-//
-// // Finalize the controller
-// void GazeboRosAgribot::FiniChild()
-// {
-//     alive_ = false;
-//     queue_.clear();
-//     queue_.disable();
-//     gazebo_ros_->node()->shutdown();
-//     callback_queue_thread_.join();
-// }
-//
-// void GazeboRosAgribot::getWheelVelocities()
-// {
-//     boost::mutex::scoped_lock scoped_lock ( lock );
-//
-//     double vr = x_;
-//     double va = rot_;
-//
-//     if(legacy_mode_)
-//     {
-//       wheel_speed_[LEFT] = vr + va * wheel_separation_ / 2.0;
-//       wheel_speed_[RIGHT] = vr - va * wheel_separation_ / 2.0;
-//     }
-//     else
-//     {
-//       wheel_speed_[LEFT] = vr - va * wheel_separation_ / 2.0;
-//       wheel_speed_[RIGHT] = vr + va * wheel_separation_ / 2.0;
-//     }
-// }
-//
-// void GazeboRosAgribot::cmdVelCallback ( const geometry_msgs::Twist::ConstPtr& cmd_msg )
-// {
-//     boost::mutex::scoped_lock scoped_lock ( lock );
-//     x_ = cmd_msg->linear.x;
-//     rot_ = cmd_msg->angular.z;
-// }
-//
+}
+
+// Finalize the controller
+void GazeboRosAgribot::FiniChild()
+{
+    // alive_ = false;
+    // queue_.clear();
+    // queue_.disable();
+    // gazebo_ros_->node()->shutdown();
+    // callback_queue_thread_.join();
+}
+
+
+
+void GazeboRosAgribot::cmdVelCallback ( const agribot_msgs::AgribotCaterpillar::ConstPtr& cmd_msg )
+{
+    boost::mutex::scoped_lock scoped_lock ( lock );
+    ROS_INFO_NAMED("agribot", "received cmd");
+    // wheel_speed_[FRONT_LEFT] = cmd_msg->left;
+    // wheel_speed_[FRONT_RIGHT] = cmd_msg->right;
+}
+
 // void GazeboRosAgribot::QueueThread()
 // {
 //     static const double timeout = 0.01;
@@ -366,7 +373,7 @@ void GazeboRosAgribot::Reset()
 //     odom_.twist.twist.linear.x = dx/seconds_since_last_update;
 //     odom_.twist.twist.linear.y = dy/seconds_since_last_update;
 // }
-//
+
 // void GazeboRosAgribot::publishOdometry ( double step_time )
 // {
 //
