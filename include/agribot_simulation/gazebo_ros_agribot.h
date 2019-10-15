@@ -45,23 +45,20 @@ namespace gazebo {
       GazeboRosAgribot();
       ~GazeboRosAgribot();
       void Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf);
-      void Reset();
       void onUpdate();
 
-    protected:
-      virtual void FiniChild();
-
-    // private:
+    private:
     //   void publishOdometry(double step_time);
     //   void getWheelVelocities();
     //   void publishWheelTF(); /// publishes the wheel tf's
     //   void publishWheelJointState();
     //   void UpdateOdometryEncoder();
+      void CreatePubsAndSubs();
+      void UpdateVelocities();
 
-    gazebo::transport::NodePtr node_handle_;
 
       GazeboRosPtr gazebo_ros_;
-      physics::ModelPtr parent;
+      physics::ModelPtr model_;
       event::ConnectionPtr update_connection_;
 
       // double wheel_separation_;
@@ -72,23 +69,19 @@ namespace gazebo {
       double wheel_speed_instr_[4];
 
       std::vector<physics::JointPtr> joints_;
+      std::vector<std::string> joints_name_;
 
-      // // ROS STUFF
-      // ros::Publisher odometry_publisher_;
+      // ROS STUFF
+      gazebo::transport::NodePtr node_handle_;
       gazebo::transport::SubscriberPtr cmd_vel_subscriber_;
-      // boost::shared_ptr<tf::TransformBroadcaster> transform_broadcaster_;
-      // sensor_msgs::JointState joint_state_;
-      // ros::Publisher joint_state_publisher_;
-      // nav_msgs::Odometry odom_;
-      // std::string tf_prefix_;
 
       boost::mutex lock;
 
       // std::string robot_namespace_;
-      std::string command_topic_;
-      std::string odometry_topic_;
-      std::string odometry_frame_;
-      std::string robot_base_frame_;
+      std::string command_sub_topic_;
+      // std::string odometry_topic_;
+      // std::string odometry_frame_;
+      // std::string robot_base_frame_;
       // bool publish_tf_;
 
       // Custom Callback Queue
