@@ -44,7 +44,6 @@ void GazeboRosAgribot::Load ( physics::ModelPtr _model, sdf::ElementPtr _sdf )
         _sdf->GetElement("robotNamespace")->Get<std::string>() + "/";
     }
 
-
     alive_ = true;
 
     /*TODO: Get this data from urdf */
@@ -80,7 +79,6 @@ void GazeboRosAgribot::Load ( physics::ModelPtr _model, sdf::ElementPtr _sdf )
       wheel_speed = 0.0;
     }
 
-    
     CreatePubsAndSubs();
 
     this->callback_queue_thread_ =
@@ -88,14 +86,13 @@ void GazeboRosAgribot::Load ( physics::ModelPtr _model, sdf::ElementPtr _sdf )
 
     // listen to the update event (broadcast every simulation iteration)
     update_connection_ = event::Events::ConnectWorldUpdateBegin (
-              std::bind ( &GazeboRosAgribot::onUpdate, this ) );
+              boost::bind ( &GazeboRosAgribot::onUpdate, this ) );
 }
 
 // Update the controller
 void GazeboRosAgribot::onUpdate()
 {
   UpdateVelocities();
-
 }
 
 void GazeboRosAgribot::UpdateVelocities()
@@ -119,13 +116,12 @@ void GazeboRosAgribot::CreatePubsAndSubs()
 
     rosnode_ = new ros::NodeHandle(this->robot_namespace_);
     cmd_front_vel_subscriber_ = rosnode_->subscribe(so_front);
-    cmd_back_vel_subscriber_ = rosnode_->subscribe(so_back);  
+    cmd_back_vel_subscriber_ = rosnode_->subscribe(so_back);
 }
 
 void GazeboRosAgribot::cmdFrontVelCallback ( const agribot_msgs::AgribotCaterpillar::ConstPtr& cmd_msg )
 {
     boost::mutex::scoped_lock scoped_lock ( lock );
-    ROS_INFO_NAMED("agribot", "received front cmd");
     wheel_speed_[FRONT_LEFT] = cmd_msg->left;
     wheel_speed_[FRONT_RIGHT] = cmd_msg->right;
 }
@@ -133,15 +129,16 @@ void GazeboRosAgribot::cmdFrontVelCallback ( const agribot_msgs::AgribotCaterpil
 void GazeboRosAgribot::cmdBackVelCallback ( const agribot_msgs::AgribotCaterpillar::ConstPtr& cmd_msg )
 {
     boost::mutex::scoped_lock scoped_lock ( lock );
-    ROS_INFO_NAMED("agribot", "received back cmd");
     wheel_speed_[BACK_LEFT] = cmd_msg->left;
     wheel_speed_[BACK_RIGHT] = cmd_msg->right;
 }
 
-void GazeboRosAgribot::QueueThread() {
+void GazeboRosAgribot::QueueThread()
+{
     static const double timeout = 0.01;
 
-    while (alive_ && rosnode_->ok()) {
+    while (alive_ && rosnode_->ok())
+    {
       queue_.callAvailable(ros::WallDuration(timeout));
     }
   }
