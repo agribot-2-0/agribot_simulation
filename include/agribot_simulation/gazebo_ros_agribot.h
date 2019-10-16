@@ -14,8 +14,8 @@
 
 // ROS
 #include <ros/ros.h>
-// #include <tf/transform_broadcaster.h>
-// #include <tf/transform_listener.h>
+#include <tf/transform_broadcaster.h>
+#include <tf/transform_listener.h>
 #include <agribot_msgs/AgribotCaterpillar.h>
 // #include <geometry_msgs/Pose2D.h>
 // #include <nav_msgs/Odometry.h>
@@ -45,26 +45,22 @@ namespace gazebo {
       GazeboRosAgribot();
       ~GazeboRosAgribot();
       void Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf);
-      void Reset();
       void onUpdate();
 
-    protected:
-      virtual void FiniChild();
-
-    // private:
+    private:
     //   void publishOdometry(double step_time);
     //   void getWheelVelocities();
     //   void publishWheelTF(); /// publishes the wheel tf's
     //   void publishWheelJointState();
     //   void UpdateOdometryEncoder();
+      void CreatePubsAndSubs();
+      void UpdateVelocities();
 
-    gazebo::transport::NodePtr node_handle_;
 
       GazeboRosPtr gazebo_ros_;
-      physics::ModelPtr parent;
+      physics::ModelPtr model_;
       event::ConnectionPtr update_connection_;
 
-      // double wheel_separation_;
       double wheel_diameter_;
       double wheel_torque;
       double wheel_speed_[4];
@@ -72,36 +68,34 @@ namespace gazebo {
       double wheel_speed_instr_[4];
 
       std::vector<physics::JointPtr> joints_;
+      std::vector<std::string> joints_name_;
 
-      // // ROS STUFF
-      // ros::Publisher odometry_publisher_;
-      gazebo::transport::SubscriberPtr cmd_vel_subscriber_;
-      // boost::shared_ptr<tf::TransformBroadcaster> transform_broadcaster_;
-      // sensor_msgs::JointState joint_state_;
-      // ros::Publisher joint_state_publisher_;
-      // nav_msgs::Odometry odom_;
-      // std::string tf_prefix_;
+      // ROS STUFF
+      ros::NodeHandle* rosnode_;
+      ros::Subscriber cmd_front_vel_subscriber_;
+      ros::Subscriber cmd_back_vel_subscriber_;
+      gazebo::transport::NodePtr node_handle_;
 
       boost::mutex lock;
 
-      // std::string robot_namespace_;
-      std::string command_topic_;
-      std::string odometry_topic_;
-      std::string odometry_frame_;
-      std::string robot_base_frame_;
+      std::string robot_namespace_;
+      std::string command_front_sub_topic_;
+      std::string command_back_sub_topic_;
+      // std::string odometry_topic_;
+      // std::string odometry_frame_;
+      // std::string robot_base_frame_;
       // bool publish_tf_;
 
       // Custom Callback Queue
-      // ros::CallbackQueue queue_;
-      // boost::thread callback_queue_thread_;
-      // void QueueThread();
+      ros::CallbackQueue queue_;
+      boost::thread callback_queue_thread_;
+      void QueueThread();
 
       // DiffDrive stuff
-      void cmdVelCallback(const agribot_msgs::AgribotCaterpillar::ConstPtr& cmd_msg);
+      void cmdFrontVelCallback(const agribot_msgs::AgribotCaterpillar::ConstPtr& cmd_msg);
+      void cmdBackVelCallback(const agribot_msgs::AgribotCaterpillar::ConstPtr& cmd_msg);
 
-      // double x_;
-      // double rot_;
-      // bool alive_;
+      bool alive_;
       //
       // // Update Rate
       double update_rate_;
