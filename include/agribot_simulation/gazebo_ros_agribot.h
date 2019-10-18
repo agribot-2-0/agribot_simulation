@@ -4,7 +4,7 @@
 #include <map>
 
 // Gazebo
-// #include <gazebo/common/common.hh>
+#include <gazebo/common/common.hh>
 #include <gazebo/physics/physics.hh>
 #include <gazebo_plugins/gazebo_ros_utils.h>
 
@@ -17,9 +17,9 @@
 #include <tf/transform_broadcaster.h>
 #include <tf/transform_listener.h>
 #include <agribot_msgs/AgribotCaterpillar.h>
-// #include <geometry_msgs/Pose2D.h>
-// #include <nav_msgs/Odometry.h>
-// #include <sensor_msgs/JointState.h>
+#include <geometry_msgs/Pose2D.h>
+#include <nav_msgs/Odometry.h>
+#include <sensor_msgs/JointState.h>
 
 // Custom Callback Queue
 #include <ros/callback_queue.h>
@@ -48,22 +48,24 @@ namespace gazebo {
       void onUpdate();
 
     private:
-    //   void publishOdometry(double step_time);
-    //   void getWheelVelocities();
-    //   void publishWheelTF(); /// publishes the wheel tf's
-    //   void publishWheelJointState();
+      void publishOdometry(double step_time);
+      // void getWheelVelocities();
+      void publishWheelTF(); /// publishes the wheel tf's
+      // void publishWheelJointState();
     //   void UpdateOdometryEncoder();
       void CreatePubsAndSubs();
       void UpdateVelocities();
 
 
       GazeboRosPtr gazebo_ros_;
+      physics::WorldPtr world;
       physics::ModelPtr model_;
       event::ConnectionPtr update_connection_;
 
-      double wheel_diameter_;
+      double wheel_separation_;
       double wheel_torque;
       double wheel_speed_[4];
+      double cart_speed_[4];
       double wheel_accel;
       double wheel_speed_instr_[4];
 
@@ -72,19 +74,22 @@ namespace gazebo {
 
       // ROS STUFF
       ros::NodeHandle* rosnode_;
-      ros::Subscriber cmd_front_vel_subscriber_;
-      ros::Subscriber cmd_back_vel_subscriber_;
+      ros::Subscriber cmd_vel_subscriber_;
+      ros::Publisher odometry_publisher_;
       gazebo::transport::NodePtr node_handle_;
+      tf::TransformBroadcaster *transform_broadcaster_;
+      nav_msgs::Odometry odom_;
+      std::string tf_prefix_;
+      bool broadcast_tf_;
 
       boost::mutex lock;
 
       std::string robot_namespace_;
-      std::string command_front_sub_topic_;
-      std::string command_back_sub_topic_;
-      // std::string odometry_topic_;
-      // std::string odometry_frame_;
-      // std::string robot_base_frame_;
-      // bool publish_tf_;
+      std::string command_sub_topic_;
+      std::string odometry_topic_;
+      std::string odometry_frame_;
+      std::string robot_base_frame_;
+      
 
       // Custom Callback Queue
       ros::CallbackQueue queue_;
@@ -92,24 +97,29 @@ namespace gazebo {
       void QueueThread();
 
       // DiffDrive stuff
-      void cmdFrontVelCallback(const agribot_msgs::AgribotCaterpillar::ConstPtr& cmd_msg);
-      void cmdBackVelCallback(const agribot_msgs::AgribotCaterpillar::ConstPtr& cmd_msg);
+      void cmdVelCallback(const agribot_msgs::AgribotCaterpillar::ConstPtr& cmd_msg);
 
       bool alive_;
       //
       // // Update Rate
       double update_rate_;
-      // double update_period_;
-      // common::Time last_update_time_;
+      double update_period_;
+      common::Time last_update_time_;
       //
-      // OdomSource odom_source_;
-      // geometry_msgs::Pose2D pose_encoder_;
-      // common::Time last_odom_update_;
+      OdomSource odom_source_;
+      geometry_msgs::Pose2D pose_encoder_;
+      common::Time last_odom_update_;
+
+      double covariance_x_;
+      double covariance_y_;
+      double covariance_yaw_;
 
     // Flags
     bool publishWheelTF_;
     bool publishOdomTF_;
     bool publishWheelJointState_;
+
+      
 
   };
 
