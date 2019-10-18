@@ -160,7 +160,7 @@ void GazeboRosAgribot::Load ( physics::ModelPtr _model, sdf::ElementPtr _sdf )
 
     // listen to the update event (broadcast every simulation iteration)
     update_connection_ = event::Events::ConnectWorldUpdateBegin (
-              std::bind ( &GazeboRosAgribot::onUpdate, this ) );
+              boost::bind ( &GazeboRosAgribot::onUpdate, this ) );
 }
 
 
