@@ -112,11 +112,6 @@ Visualization Manager:
           Show Axes: false
           Show Trail: false
           Value: true
-        back_support_link:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
         base_footprint:
           Alpha: 1
           Show Axes: false
@@ -137,11 +132,6 @@ Visualization Manager:
           Show Trail: false
           Value: true
         front_right_wheel_link:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        front_support_link:
           Alpha: 1
           Show Axes: false
           Show Trail: false
