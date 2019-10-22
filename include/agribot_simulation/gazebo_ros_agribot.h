@@ -19,6 +19,7 @@
 #include <agribot_msgs/AgribotCaterpillar.h>
 #include <geometry_msgs/Pose2D.h>
 #include <nav_msgs/Odometry.h>
+#include <std_msgs/Float32.h>
 #include <sensor_msgs/JointState.h>
 
 // Custom Callback Queue
@@ -49,6 +50,8 @@ namespace gazebo {
 
     private:
       void publishOdometry(double step_time);
+      void publishEncoder();
+      void publishCarts();
       // void getWheelVelocities();
       void publishWheelTF(); /// publishes the wheel tf's
       // void publishWheelJointState();
@@ -63,6 +66,7 @@ namespace gazebo {
       event::ConnectionPtr update_connection_;
 
       double wheel_separation_;
+      double wheel_radius_;
       double wheel_torque;
       double wheel_speed_[4];
       double cart_speed_[4];
@@ -76,8 +80,14 @@ namespace gazebo {
       ros::NodeHandle* rosnode_;
       ros::Subscriber cmd_vel_subscriber_;
       ros::Publisher odometry_publisher_;
+      ros::Publisher encoder_publisher_;
+      ros::Publisher front_cart_publisher_;
+      ros::Publisher back_cart_publisher_;
       gazebo::transport::NodePtr node_handle_;
       tf::TransformBroadcaster *transform_broadcaster_;
+      agribot_msgs::AgribotCaterpillar encoder_;
+      std_msgs::Float32 FrontAngleMsg_;
+      std_msgs::Float32 BackAngleMsg_;
       nav_msgs::Odometry odom_;
       std::string tf_prefix_;
       bool broadcast_tf_;
@@ -87,6 +97,7 @@ namespace gazebo {
       std::string robot_namespace_;
       std::string command_sub_topic_;
       std::string odometry_topic_;
+      std::string encoder_topic_;
       std::string odometry_frame_;
       std::string robot_base_frame_;
       

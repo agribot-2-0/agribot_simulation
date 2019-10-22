@@ -1,15 +1,14 @@
 #include <algorithm>
 #include <assert.h>
-
 #include <agribot_simulation/gazebo_ros_agribot.h>
-
 #include <ignition/math/Angle.hh>
 #include <ignition/math/Pose3.hh>
 #include <ignition/math/Quaternion.hh>
 #include <ignition/math/Vector3.hh>
 #include <sdf/sdf.hh>
-
 #include <ros/ros.h>
+
+//#define DEBUG
 
 namespace gazebo
 {
@@ -17,12 +16,11 @@ namespace gazebo
 enum {
     FRONT_RIGHT,
     FRONT_LEFT,
-    FRONT_CART,
     BACK_RIGHT,
     BACK_LEFT,
+    FRONT_CART,
     BACK_CART
 };
-
 enum {
     FRONT_LINEAR,
     FRONT_ANGULAR,
@@ -46,75 +44,116 @@ void GazeboRosAgribot::Load ( physics::ModelPtr _model, sdf::ElementPtr _sdf )
     node_handle_->Init();
 
     this->robot_namespace_ = "";
-    if (!_sdf->HasElement("robotNamespace")) {
+    if (!_sdf->HasElement("robotNamespace")) 
+    {
       ROS_INFO_NAMED("agribot_drive", "AgribotDrive Plugin missing <robotNamespace>, defaults to \"%s\"",
           this->robot_namespace_.c_str());
-    } else {
+    } 
+    else 
+    {
       this->robot_namespace_ =
         _sdf->GetElement("robotNamespace")->Get<std::string>() + "/";
     }
 
     this->broadcast_tf_ = true;
-    if (!_sdf->HasElement("broadcastTF")) {
+    if (!_sdf->HasElement("broadcastTF")) 
+    {
       if (!this->broadcast_tf_)
     	  ROS_INFO_NAMED("agribot_drive", "AgribotDrive Plugin (ns = %s) missing <broadcastTF>, defaults to false.",this->robot_namespace_.c_str());
       else ROS_INFO_NAMED("agribot_drive", "AgribotDrive Plugin (ns = %s) missing <broadcastTF>, defaults to true.",this->robot_namespace_.c_str());
 
-    } else {
+    } 
+    else 
+    {
       this->broadcast_tf_ = _sdf->GetElement("broadcastTF")->Get<bool>();
     }
 
-    this->odometry_topic_ = "/agribot/encoder/caterpillar";
-    if (!_sdf->HasElement("odometryTopic")) {
+    this->odometry_topic_ = "/agribot/odometry";
+    if (!_sdf->HasElement("odometryTopic")) 
+    {
       ROS_WARN_NAMED("agribot_drive", "AgribotDrive Plugin (ns = %s) missing <odometryTopic>, defaults to \"%s\"",
           this->robot_namespace_.c_str(), this->odometry_topic_.c_str());
-    } else {
+    } 
+    else 
+    {
       this->odometry_topic_ = _sdf->GetElement("odometryTopic")->Get<std::string>();
     }
 
+    this->encoder_topic_ = "/agribot/encoder/caterpillar";
+    if (!_sdf->HasElement("encoderTopic")) 
+    {
+      ROS_WARN_NAMED("agribot_drive", "AgribotDrive Plugin (ns = %s) missing <encoderTopic>, defaults to \"%s\"",
+          this->robot_namespace_.c_str(), this->encoder_topic_.c_str());
+    } 
+    else 
+    {
+      this->encoder_topic_ = _sdf->GetElement("encoderTopic")->Get<std::string>();
+    }
+
     this->odometry_frame_ = "odom";
-    if (!_sdf->HasElement("odometryFrame")) {
+    if (!_sdf->HasElement("odometryFrame")) 
+    {
       ROS_WARN_NAMED("agribot_drive", "AgribotDrive Plugin (ns = %s) missing <odometryFrame>, defaults to \"%s\"",
           this->robot_namespace_.c_str(), this->odometry_frame_.c_str());
-    } else {
+    } else 
+    {
       this->odometry_frame_ = _sdf->GetElement("odometryFrame")->Get<std::string>();
     }
 
     this->robot_base_frame_ = "base_footprint";
-    if (!_sdf->HasElement("robotBaseFrame")) {
+    if (!_sdf->HasElement("robotBaseFrame")) 
+    {
       ROS_WARN_NAMED("agribot_drive", "AgribotDrive Plugin (ns = %s) missing <robotBaseFrame>, defaults to \"%s\"",
           this->robot_namespace_.c_str(), this->robot_base_frame_.c_str());
-    } else {
+    } 
+    else 
+    {
       this->robot_base_frame_ = _sdf->GetElement("robotBaseFrame")->Get<std::string>();
     }
 
     this->update_rate_ = 10000.0;
-    if (!_sdf->HasElement("updateRate")) {
+    if (!_sdf->HasElement("updateRate")) 
+    {
       ROS_WARN_NAMED("agribot_drive", "AgribotDrive Plugin (ns = %s) missing <updateRate>, defaults to %f",
           this->robot_namespace_.c_str(), this->update_rate_);
-    } else {
+    } 
+    else 
+    {
       this->update_rate_ = _sdf->GetElement("updateRate")->Get<double>();
     }
 
      this->wheel_separation_ = 0.22;
-    if (!_sdf->HasElement("wheelSeparation")) {
+    if (!_sdf->HasElement("wheelSeparation")) 
+    {
       ROS_WARN_NAMED("agribot_drive", "AgribotDrive Plugin (ns = %s) missing <wheelSeparation>, defaults to %f",
           this->robot_namespace_.c_str(), this->wheel_separation_);
-    } else {
+    } 
+    else 
+    {
       this->wheel_separation_ = _sdf->GetElement("wheelSeparation")->Get<double>();
     }
 
-     if (this->update_rate_ > 0.0) {
+     this->wheel_radius_ = 0.04;
+    if (!_sdf->HasElement("wheelRadius")) 
+    {
+      ROS_WARN_NAMED("agribot_drive", "AgribotDrive Plugin (ns = %s) missing <wheelRadius>, defaults to %f",
+          this->robot_namespace_.c_str(), this->wheel_radius_);
+    } else 
+    {
+      this->wheel_radius_ = _sdf->GetElement("wheelRadius")->Get<double>();
+    }
+
+     if (this->update_rate_ > 0.0) 
+     {
       this->update_period_ = 1.0 / this->update_rate_;
-    } else {
+    } 
+    else 
+    {
       this->update_period_ = 0.0;
     }
     last_update_time_ = this->world->SimTime();
 
     alive_ = true;
-
-
-
 
     /*TODO: Get this data from urdf */
     command_sub_topic_ = "/agribot/control/caterpillar";
@@ -138,7 +177,7 @@ void GazeboRosAgribot::Load ( physics::ModelPtr _model, sdf::ElementPtr _sdf )
 
     for(auto joint: joints_)
     {
-      if (joint == nullptr)
+      if (joint == nullptr) 
       {
         gzthrow("[gazebo_ros_agribot] Couldn't find specified joint");
       }
@@ -158,10 +197,8 @@ void GazeboRosAgribot::Load ( physics::ModelPtr _model, sdf::ElementPtr _sdf )
     }
 
     CreatePubsAndSubs();
-
     this->callback_queue_thread_ =
       boost::thread(boost::bind(&GazeboRosAgribot::QueueThread, this));
-
     // listen to the update event (broadcast every simulation iteration)
     update_connection_ = event::Events::ConnectWorldUpdateBegin (
               boost::bind ( &GazeboRosAgribot::onUpdate, this ) );
@@ -174,11 +211,12 @@ void GazeboRosAgribot::CreatePubsAndSubs()
       ros::SubscribeOptions::create<agribot_msgs::AgribotCaterpillar>(command_sub_topic_, 1,
           boost::bind(&GazeboRosAgribot::cmdVelCallback, this, _1),
           ros::VoidPtr(), &queue_);
-
     rosnode_ = new ros::NodeHandle(this->robot_namespace_);
     cmd_vel_subscriber_ = rosnode_->subscribe(so);
     odometry_publisher_ = rosnode_->advertise<nav_msgs::Odometry>(odometry_topic_, 1);
-
+    encoder_publisher_ = rosnode_->advertise<agribot_msgs::AgribotCaterpillar>(encoder_topic_, 1);
+    front_cart_publisher_ = rosnode_->advertise<std_msgs::Float32>("agribot/encoder/cart/front", 1);
+    back_cart_publisher_ = rosnode_->advertise<std_msgs::Float32>("agribot/encoder/cart/back", 1);
     tf_prefix_ = tf::getPrefixParam(*rosnode_);
     transform_broadcaster_ = new tf::TransformBroadcaster();
 }
@@ -188,8 +226,11 @@ void GazeboRosAgribot::onUpdate()
 {
   common::Time current_time = this->world->SimTime();
   double seconds_since_last_update = (current_time - last_update_time_).Double();
-  if (seconds_since_last_update > update_period_) {
+  if (seconds_since_last_update > update_period_) 
+  {
     publishOdometry(seconds_since_last_update);
+    publishEncoder();
+    publishCarts();
   }
   UpdateVelocities();
   last_update_time_+= common::Time(update_period_);
@@ -197,15 +238,32 @@ void GazeboRosAgribot::onUpdate()
 
 void GazeboRosAgribot::UpdateVelocities()
 {
+  #ifdef DEBUG
+  double current_speed[4];
+  current_speed[FRONT_LEFT] = joints_[FRONT_LEFT]->GetVelocity (0);
+  current_speed[FRONT_RIGHT] = joints_[FRONT_RIGHT]->GetVelocity (0);
+  current_speed[BACK_LEFT] = joints_[BACK_LEFT]->GetVelocity (0);
+  current_speed[BACK_RIGHT] = joints_[BACK_RIGHT]->GetVelocity (0);
+  #endif
+  //v_r = ((2 * v) + (w * L)) / (2 * R) = (2*v+w*L/2)/R
+  //v_l = ((2 * v) - (w * L)) / (2 * R) = (2*v-w*L/2)/R
   wheel_speed_[FRONT_LEFT] = cart_speed_[FRONT_LINEAR] + cart_speed_[FRONT_ANGULAR] * wheel_separation_ / 2.0;
   wheel_speed_[FRONT_RIGHT] = cart_speed_[FRONT_LINEAR] - cart_speed_[FRONT_ANGULAR] * wheel_separation_ / 2.0;
   wheel_speed_[BACK_LEFT] = cart_speed_[BACK_LINEAR] + cart_speed_[BACK_ANGULAR] * wheel_separation_ / 2.0;
   wheel_speed_[BACK_RIGHT] = cart_speed_[BACK_LINEAR] - cart_speed_[BACK_ANGULAR] * wheel_separation_ / 2.0;
+  joints_[FRONT_LEFT]->SetVelocity (0, wheel_speed_[FRONT_LEFT]/wheel_radius_);
+  joints_[FRONT_RIGHT]->SetVelocity (0, wheel_speed_[FRONT_RIGHT]/wheel_radius_);
+  joints_[BACK_LEFT]->SetVelocity (0, wheel_speed_[BACK_LEFT]/wheel_radius_);
+  joints_[BACK_RIGHT]->SetVelocity (0, wheel_speed_[BACK_RIGHT]/wheel_radius_);
+  #ifdef DEBUG
+  ROS_INFO_NAMED("agribot_drive", "Read FL speed = %lf, FR speed= %lf, BL speed = %lf, BR speed= %lf", 
+                  current_speed[FRONT_LEFT], current_speed[FRONT_RIGHT],
+                  current_speed[BACK_LEFT] , current_speed[BACK_RIGHT]);
 
-  joints_[FRONT_LEFT]->SetVelocity (0, wheel_speed_[FRONT_LEFT]);
-  joints_[FRONT_RIGHT]->SetVelocity (0, wheel_speed_[FRONT_RIGHT]);
-  joints_[BACK_LEFT]->SetVelocity (0, wheel_speed_[BACK_LEFT]);
-  joints_[BACK_RIGHT]->SetVelocity (0, wheel_speed_[BACK_RIGHT]);
+  ROS_INFO_NAMED("agribot_drive", "Set  FL speed = %lf, FR speed= %lf, BL speed = %lf, BR speed= %lf", 
+                  wheel_speed_[FRONT_LEFT]/wheel_radius_, wheel_speed_[FRONT_RIGHT]/wheel_radius_,
+                  wheel_speed_[BACK_LEFT]/wheel_radius_, wheel_speed_[BACK_RIGHT]/wheel_radius_);
+  #endif
 }
 
 void GazeboRosAgribot::cmdVelCallback ( const agribot_msgs::AgribotCaterpillar::ConstPtr& cmd_msg )
@@ -218,16 +276,17 @@ void GazeboRosAgribot::cmdVelCallback ( const agribot_msgs::AgribotCaterpillar::
 }
 
 
-void GazeboRosAgribot::QueueThread() {
+void GazeboRosAgribot::QueueThread() 
+{
     static const double timeout = 0.01;
-
-    while (alive_ && rosnode_->ok()) {
+    while (alive_ && rosnode_->ok()) 
+    {
       queue_.callAvailable(ros::WallDuration(timeout));
     }
   }
 
-  void GazeboRosAgribot::publishOdometry(double step_time) {
-
+  void GazeboRosAgribot::publishOdometry(double step_time) 
+  {
     ros::Time current_time = ros::Time::now();
     std::string odom_frame = tf::resolve(tf_prefix_, odometry_frame_);
     std::string base_footprint_frame = tf::resolve(tf_prefix_, robot_base_frame_);
@@ -236,12 +295,11 @@ void GazeboRosAgribot::QueueThread() {
     // getting data for base_footprint to odom transform
 
     ignition::math::Pose3d pose = this->model_->WorldPose();
-
     tf::Quaternion qt(pose.Rot().X(), pose.Rot().Y(), pose.Rot().Z(), pose.Rot().W());
     tf::Vector3 vt(pose.Pos().X(), pose.Pos().Y(), pose.Pos().Z());
-
     tf::Transform base_footprint_to_odom(qt, vt);
-    if (this->broadcast_tf_) {
+    if (this->broadcast_tf_) 
+    {
     	transform_broadcaster_->sendTransform(tf::StampedTransform(base_footprint_to_odom, current_time, odom_frame, base_footprint_frame));
       publishWheelTF();
     }
@@ -249,7 +307,6 @@ void GazeboRosAgribot::QueueThread() {
     // publish odom topic
     odom_.pose.pose.position.x = pose.Pos().X();
     odom_.pose.pose.position.y = pose.Pos().Y();
-
     odom_.pose.pose.orientation.x = pose.Rot().X();
     odom_.pose.pose.orientation.y = pose.Rot().Y();
     odom_.pose.pose.orientation.z = pose.Rot().Z();
@@ -260,14 +317,10 @@ void GazeboRosAgribot::QueueThread() {
     odom_.pose.covariance[21] = 1000000000000.0;
     odom_.pose.covariance[28] = 1000000000000.0;
     odom_.pose.covariance[35] = this->covariance_yaw_;
-
     // get velocity in /odom frame
     ignition::math::Vector3d linear;
-
     linear = this->model_->WorldLinearVel();
     odom_.twist.twist.angular.z = this->model_->WorldAngularVel().Z();
-
-
     // convert velocity to child_frame_id (aka base_footprint)
     float yaw = pose.Rot().Yaw();
     odom_.twist.twist.linear.x = cosf(yaw) * linear.X() + sinf(yaw) * linear.Y();
@@ -278,11 +331,9 @@ void GazeboRosAgribot::QueueThread() {
     odom_.twist.covariance[21] = 1000000000000.0;
     odom_.twist.covariance[28] = 1000000000000.0;
     odom_.twist.covariance[35] = this->covariance_yaw_;
-
     odom_.header.stamp = current_time;
     odom_.header.frame_id = odom_frame;
     odom_.child_frame_id = base_footprint_frame;
-
     odometry_publisher_.publish(odom_);
   }
 
@@ -309,6 +360,29 @@ void GazeboRosAgribot::QueueThread() {
     }
   }
 
+  void GazeboRosAgribot::publishEncoder()
+  {
+    double current_speed[4];
+    current_speed[FRONT_LEFT] = joints_[FRONT_LEFT]->GetVelocity (0);
+    current_speed[FRONT_RIGHT] = joints_[FRONT_RIGHT]->GetVelocity (0);
+    current_speed[BACK_LEFT] = joints_[BACK_LEFT]->GetVelocity (0);
+    current_speed[BACK_RIGHT] = joints_[BACK_RIGHT]->GetVelocity (0);
+    //w=(VR-VL)/d
+    //v=(VR+VL)/2
+    encoder_.front_linear=(current_speed[FRONT_LEFT]*wheel_radius_+current_speed[FRONT_RIGHT]*wheel_radius_)/2;
+    encoder_.front_angular=(current_speed[FRONT_LEFT]*wheel_radius_-current_speed[FRONT_RIGHT]*wheel_radius_)/wheel_separation_;
+    encoder_.back_linear=(current_speed[BACK_LEFT]*wheel_radius_+current_speed[BACK_RIGHT]*wheel_radius_)/2;
+    encoder_.back_angular=(current_speed[BACK_LEFT]*wheel_radius_-current_speed[BACK_RIGHT]*wheel_radius_)/wheel_separation_;
+    encoder_publisher_.publish(encoder_);
+  }
+
+  void GazeboRosAgribot::publishCarts()
+  {
+    FrontAngleMsg_.data=joints_[FRONT_CART]->GetVelocity(0);
+    BackAngleMsg_.data=joints_[BACK_CART]->GetVelocity(0);
+    front_cart_publisher_.publish(FrontAngleMsg_);
+    back_cart_publisher_.publish(BackAngleMsg_);
+  }
 
 GZ_REGISTER_MODEL_PLUGIN ( GazeboRosAgribot )
 }
