@@ -64,7 +64,7 @@ void GazeboRosAgribot::Load ( physics::ModelPtr _model, sdf::ElementPtr _sdf )
       this->broadcast_tf_ = _sdf->GetElement("broadcastTF")->Get<bool>();
     }
 
-    this->odometry_topic_ = "/agribot/encoder";
+    this->odometry_topic_ = "/agribot/encoder/caterpillar";
     if (!_sdf->HasElement("odometryTopic")) {
       ROS_WARN_NAMED("agribot_drive", "AgribotDrive Plugin (ns = %s) missing <odometryTopic>, defaults to \"%s\"",
           this->robot_namespace_.c_str(), this->odometry_topic_.c_str());
@@ -117,7 +117,7 @@ void GazeboRosAgribot::Load ( physics::ModelPtr _model, sdf::ElementPtr _sdf )
 
 
     /*TODO: Get this data from urdf */
-    command_sub_topic_ = "/agribot/cmdvel";
+    command_sub_topic_ = "/agribot/control/caterpillar";
     wheel_torque = 5.0;
     joints_name_.resize ( 6 );
     joints_name_[FRONT_LEFT] = "front_left_wheel_joint";
