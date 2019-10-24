@@ -70,6 +70,7 @@ namespace gazebo {
       double wheel_torque;
       double wheel_speed_[4];
       double cart_speed_[4];
+      double cart_angle_[2];
       double wheel_accel;
       double wheel_speed_instr_[4];
 
