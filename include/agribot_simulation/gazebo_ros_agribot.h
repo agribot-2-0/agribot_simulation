@@ -53,7 +53,7 @@ namespace gazebo {
       void publishEncoder();
       void publishCarts();
       // void getWheelVelocities();
-      void publishWheelTF(); /// publishes the wheel tf's
+      void publishJointTF(); /// publishes the wheel tf's
       // void publishWheelJointState();
     //   void UpdateOdometryEncoder();
       void CreatePubsAndSubs();
@@ -67,6 +67,7 @@ namespace gazebo {
 
       double wheel_separation_;
       double wheel_radius_;
+      double chasis_length_;
       double wheel_torque;
       double wheel_speed_[4];
       double cart_speed_[4];
@@ -127,7 +128,7 @@ namespace gazebo {
       double covariance_yaw_;
 
     // Flags
-    bool publishWheelTF_;
+    bool publishJointTF_;
     bool publishOdomTF_;
     bool publishWheelJointState_;
 

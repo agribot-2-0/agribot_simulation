@@ -9,7 +9,8 @@
 #include <sdf/sdf.hh>
 #include <ros/ros.h>
 
-// #define DEBUG
+ //#define DEBUG_VEL
+ #define DEBUG_TF
 
 namespace gazebo
 {
@@ -144,6 +145,16 @@ void GazeboRosAgribot::Load ( physics::ModelPtr _model, sdf::ElementPtr _sdf )
       this->wheel_radius_ = _sdf->GetElement("wheelRadius")->Get<double>();
     }
 
+    this->chasis_length_ = 1;
+    if (!_sdf->HasElement("chasisLength")) 
+    {
+      ROS_WARN_NAMED("agribot_drive", "AgribotDrive Plugin (ns = %s) missing <chasisLength>, defaults to %f",
+          this->robot_namespace_.c_str(), this->chasis_length_);
+    } else 
+    {
+      this->chasis_length_ = _sdf->GetElement("chasisLength")->Get<double>();
+    }
+
      if (this->update_rate_ > 0.0) 
      {
       this->update_period_ = 1.0 / this->update_rate_;
@@ -166,7 +177,6 @@ void GazeboRosAgribot::Load ( physics::ModelPtr _model, sdf::ElementPtr _sdf )
     joints_name_[BACK_RIGHT] = "back_right_wheel_joint";
     joints_name_[FRONT_CART] = "front_cart_joint";
     joints_name_[BACK_CART] = "back_cart_joint";
-
     // Initialize joints
     joints_.resize ( 6 );
     joints_[FRONT_LEFT] = model_->GetJoint ( joints_name_[FRONT_LEFT] );
@@ -175,17 +185,16 @@ void GazeboRosAgribot::Load ( physics::ModelPtr _model, sdf::ElementPtr _sdf )
     joints_[BACK_LEFT] = model_->GetJoint (  joints_name_[BACK_LEFT] );
     joints_[BACK_RIGHT] = model_->GetJoint (  joints_name_[BACK_RIGHT] );
     joints_[BACK_CART] = model_->GetJoint (  joints_name_[BACK_CART] );
-
     for(auto joint: joints_)
     {
       if (joint == nullptr) 
       {
+        ROS_WARN_NAMED("agribot_drive", "Couldn't find specified joint");
         gzthrow("[gazebo_ros_agribot] Couldn't find specified joint");
       }
 
       joint->SetForce(0, wheel_torque);
     }
-
     // Initialize velocity stuff
     for(auto wheel_speed: wheel_speed_)
     {
@@ -196,7 +205,6 @@ void GazeboRosAgribot::Load ( physics::ModelPtr _model, sdf::ElementPtr _sdf )
     {
       cart_speed = 0.0;
     }
-
     CreatePubsAndSubs();
     this->callback_queue_thread_ =
       boost::thread(boost::bind(&GazeboRosAgribot::QueueThread, this));
@@ -244,32 +252,54 @@ void GazeboRosAgribot::UpdateVelocities()
   //v_r_p = ((2 * v_t) + (w_t * L)) / (2 * R) = (2*v+w*L/2)/R
   //v_l_p = ((2 * v_t) - (w_t * L)) / (2 * R) = (2*v-w*L/2)/R
   //v_t=sin(theta_1)/sin(theta_2)*v_p
-  #ifdef DEBUG
+  #ifdef DEBUG_VEL
   double current_speed[4];
   current_speed[FRONT_LEFT] = joints_[FRONT_LEFT]->GetVelocity (0);
   current_speed[FRONT_RIGHT] = joints_[FRONT_RIGHT]->GetVelocity (0);
   current_speed[BACK_LEFT] = joints_[BACK_LEFT]->GetVelocity (0);
   current_speed[BACK_RIGHT] = joints_[BACK_RIGHT]->GetVelocity (0);
   #endif
-  cart_angle_[FRONT_CART] = joints_[FRONT_CART]->Position (0)+ignition::math::Angle::HalfPi.Radian();
-  cart_angle_[BACK_CART] = joints_[BACK_CART]->Position (0)+ignition::math::Angle::HalfPi.Radian();
-  cart_speed_[BACK_LINEAR]=sin(cart_angle_[FRONT_CART])/sin(cart_angle_[BACK_CART])*cart_speed_[FRONT_LINEAR];  
-  wheel_speed_[FRONT_LEFT] = cart_speed_[FRONT_LINEAR] - cart_speed_[FRONT_ANGULAR] * wheel_separation_ / 2.0;
-  wheel_speed_[FRONT_RIGHT] = cart_speed_[FRONT_LINEAR] + cart_speed_[FRONT_ANGULAR] * wheel_separation_ / 2.0;
-  wheel_speed_[BACK_LEFT] = cart_speed_[BACK_LINEAR] - cart_speed_[BACK_ANGULAR] * wheel_separation_ / 2.0;
-  wheel_speed_[BACK_RIGHT] = cart_speed_[BACK_LINEAR] + cart_speed_[BACK_ANGULAR] * wheel_separation_ / 2.0;
+  cart_angle_[FRONT_CART] = joints_[FRONT_CART]->Position (0);
+  cart_angle_[BACK_CART] = joints_[BACK_CART]->Position (0);
+  wheel_speed_[FRONT_RIGHT] = cart_speed_[FRONT_LINEAR] 
+                          + wheel_separation_ / 2.0 * (cart_speed_[FRONT_ANGULAR]
+                          + sin(cart_angle_[FRONT_CART]-cart_angle_[BACK_CART])/cos(cart_angle_[BACK_CART])
+                          * cart_speed_[FRONT_LINEAR] /chasis_length_);
+  wheel_speed_[FRONT_LEFT] = cart_speed_[FRONT_LINEAR] 
+                          - wheel_separation_ / 2.0 * (cart_speed_[FRONT_ANGULAR]
+                          + sin(cart_angle_[FRONT_CART]-cart_angle_[BACK_CART])/cos(cart_angle_[BACK_CART])
+                          * cart_speed_[FRONT_LINEAR] /chasis_length_);
+  wheel_speed_[BACK_RIGHT] = cos(cart_angle_[FRONT_CART])/cos(cart_angle_[BACK_CART])*cart_speed_[FRONT_LINEAR] 
+                          + wheel_separation_ / 2.0 * (cart_speed_[BACK_ANGULAR]
+                          + sin(cart_angle_[FRONT_CART]-cart_angle_[BACK_CART])/cos(cart_angle_[BACK_CART])
+                          * cart_speed_[FRONT_LINEAR] /chasis_length_);
+  wheel_speed_[BACK_LEFT] = cos(cart_angle_[FRONT_CART])/cos(cart_angle_[BACK_CART])*cart_speed_[FRONT_LINEAR] 
+                          - wheel_separation_ / 2.0 * (cart_speed_[BACK_ANGULAR]
+                          + sin(cart_angle_[FRONT_CART]-cart_angle_[BACK_CART])/cos(cart_angle_[BACK_CART])
+                          * cart_speed_[FRONT_LINEAR] /chasis_length_);
   joints_[FRONT_LEFT]->SetVelocity (0, wheel_speed_[FRONT_LEFT]/wheel_radius_);
   joints_[FRONT_RIGHT]->SetVelocity (0, wheel_speed_[FRONT_RIGHT]/wheel_radius_);
   joints_[BACK_LEFT]->SetVelocity (0, wheel_speed_[BACK_LEFT]/wheel_radius_);
   joints_[BACK_RIGHT]->SetVelocity (0, wheel_speed_[BACK_RIGHT]/wheel_radius_);
-  #ifdef DEBUG
-  ROS_INFO_NAMED("agribot_drive", "Read FL speed = %lf, FR speed= %lf, BL speed = %lf, BR speed= %lf", 
-                  current_speed[FRONT_LEFT], current_speed[FRONT_RIGHT],
-                  current_speed[BACK_LEFT] , current_speed[BACK_RIGHT]);
+  #ifdef DEBUG_VEL
+  ROS_DEBUG_NAMED("agribot_drive", "FRONT %lf +/- %lf ,", 
+                  cart_speed_[FRONT_LINEAR], 
+                  wheel_separation_/2.0*(cart_speed_[FRONT_ANGULAR]+
+                  sin(cart_angle_[FRONT_CART]-cart_angle_[BACK_CART])/cos(cart_angle_[BACK_CART])
+                  *cart_speed_[FRONT_LINEAR]/chasis_length_));
+  
+  ROS_DEBUG_NAMED("agribot_drive", "BACK %lf +/- %lf ,", 
+                  cos(cart_angle_[FRONT_CART])/cos(cart_angle_[BACK_CART])* cart_speed_[FRONT_LINEAR], 
+                  wheel_separation_/2.0*(cart_speed_[BACK_ANGULAR]+
+                  sin(cart_angle_[FRONT_CART]-cart_angle_[BACK_CART])/cos(cart_angle_[BACK_CART])
+                  *cart_speed_[FRONT_LINEAR]/chasis_length_));               
+  // ROS_DEBUG_NAMED("agribot_drive", "Read FL speed = %lf, FR speed= %lf, BL speed = %lf, BR speed= %lf", 
+  //                 current_speed[FRONT_LEFT]/wheel_radius_, current_speed[FRONT_RIGHT]/wheel_radius_,
+  //                 current_speed[BACK_LEFT]/wheel_radius_ , current_speed[BACK_RIGHT]/wheel_radius_);
 
-  ROS_INFO_NAMED("agribot_drive", "Set  FL speed = %lf, FR speed= %lf, BL speed = %lf, BR speed= %lf", 
-                  wheel_speed_[FRONT_LEFT]/wheel_radius_, wheel_speed_[FRONT_RIGHT]/wheel_radius_,
-                  wheel_speed_[BACK_LEFT]/wheel_radius_, wheel_speed_[BACK_RIGHT]/wheel_radius_);
+  ROS_DEBUG_NAMED("agribot_drive", "Set  FL speed = %lf, FR speed= %lf, BL speed = %lf, BR speed= %lf", 
+                  wheel_speed_[FRONT_LEFT], wheel_speed_[FRONT_RIGHT],
+                  wheel_speed_[BACK_LEFT], wheel_speed_[BACK_RIGHT]);
   #endif
 }
 
@@ -297,10 +327,8 @@ void GazeboRosAgribot::QueueThread()
     ros::Time current_time = ros::Time::now();
     std::string odom_frame = tf::resolve(tf_prefix_, odometry_frame_);
     std::string base_footprint_frame = tf::resolve(tf_prefix_, robot_base_frame_);
-
     // TODO create some non-perfect odometry!
     // getting data for base_footprint to odom transform
-
     ignition::math::Pose3d pose = this->model_->WorldPose();
     tf::Quaternion qt(pose.Rot().X(), pose.Rot().Y(), pose.Rot().Z(), pose.Rot().W());
     tf::Vector3 vt(pose.Pos().X(), pose.Pos().Y(), pose.Pos().Z());
@@ -308,7 +336,7 @@ void GazeboRosAgribot::QueueThread()
     if (this->broadcast_tf_) 
     {
     	transform_broadcaster_->sendTransform(tf::StampedTransform(base_footprint_to_odom, current_time, odom_frame, base_footprint_frame));
-      publishWheelTF();
+      publishJointTF();
     }
 
     // publish odom topic
@@ -344,27 +372,38 @@ void GazeboRosAgribot::QueueThread()
     odometry_publisher_.publish(odom_);
   }
 
-  void GazeboRosAgribot::publishWheelTF()
+  void GazeboRosAgribot::publishJointTF()
   {
     ros::Time current_time = ros::Time::now();
     for(auto joint: joints_)
     {
-        std::string wheel_frame = joint->GetChild()->GetName();
-        std::string wheel_parent_frame = joint->GetParent()->GetName();
-
+        std::string joint_frame = joint->GetChild()->GetName();
+        std::string joint_parent_frame = joint->GetParent()->GetName();
     #if GAZEBO_MAJOR_VERSION >= 8
-        ignition::math::Pose3d poseWheel = joint->GetChild()->RelativePose();
+        ignition::math::Pose3d poseJoint = joint->GetChild()->RelativePose();
+        ignition::math::Pose3d initialPoseJoint = joint->GetChild()->InitialRelativePose();
+        ignition::math::Pose3d parentInitialPoseJoint = joint->GetParent()->InitialRelativePose();
     #else
-        ignition::math::Pose3d poseWheel = joint->GetChild()->GetRelativePose().Ign();
+        ignition::math::Pose3d poseJoint = joint->GetChild()->GetInitialRelativePose().Ign();
     #endif
-
-        tf::Quaternion qt ( poseWheel.Rot().X(), poseWheel.Rot().Y(), poseWheel.Rot().Z(), poseWheel.Rot().W() );
-        tf::Vector3 vt ( poseWheel.Pos().X(), poseWheel.Pos().Y(), poseWheel.Pos().Z() );
-
-        tf::Transform tfWheel ( qt, vt );
-        transform_broadcaster_->sendTransform (
-            tf::StampedTransform ( tfWheel, current_time, wheel_parent_frame, wheel_frame ) );
+        tf::Quaternion qt ( poseJoint.Rot().X(), poseJoint.Rot().Y(), poseJoint.Rot().Z(), poseJoint.Rot().W() );
+        tf::Vector3 vt ( initialPoseJoint.Pos().X(), initialPoseJoint.Pos().Y(), initialPoseJoint.Pos().Z() );
+        tf::Vector3 vpt ( parentInitialPoseJoint.Pos().X(), parentInitialPoseJoint.Pos().Y(), parentInitialPoseJoint.Pos().Z() );
+        tf::Transform tfJoint ( qt, vt-vpt );
+    #ifdef DEBUG_TF
+        ROS_INFO_STREAM_NAMED("agribot_drive", "TF parent = " << joint_parent_frame);
+        ROS_INFO_STREAM_NAMED("agribot_drive", "TF child  = " << joint_frame);
+        ROS_INFO_NAMED("agribot_drive", "TF pose  x = %lf, y = %lf, z = %lf", 
+                      tfJoint.getOrigin().getX(),tfJoint.getOrigin().getY(),tfJoint.getOrigin().getZ());
+        ROS_INFO_NAMED("agribot_drive", "TF twist angle = %lf",
+                      tfJoint.getRotation().getAngle());
+    #endif
+        transform_broadcaster_->sendTransform(
+          tf::StampedTransform ( tfJoint, current_time, joint_parent_frame, joint_frame ) );
     }
+    #ifdef DEBUG_TF
+    ROS_INFO_NAMED("agribot_drive", ".......................................................");
+    #endif
   }
 
   void GazeboRosAgribot::publishEncoder()
@@ -385,8 +424,8 @@ void GazeboRosAgribot::QueueThread()
 
   void GazeboRosAgribot::publishCarts()
   {
-    FrontAngleMsg_.data=joints_[FRONT_CART]->GetPose(0);
-    BackAngleMsg_.data=joints_[BACK_CART]->GetPose(0);
+    FrontAngleMsg_.data=joints_[FRONT_CART]->Position(0);
+    BackAngleMsg_.data=joints_[BACK_CART]->Position(0);
     front_cart_publisher_.publish(FrontAngleMsg_);
     back_cart_publisher_.publish(BackAngleMsg_);
   }
