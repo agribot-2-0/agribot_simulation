@@ -260,12 +260,11 @@ void GazeboRosAgribot::UpdateVelocities()
   current_speed[BACK_LEFT] = joints_[BACK_LEFT]->GetVelocity(0);
   current_speed[BACK_RIGHT] = joints_[BACK_RIGHT]->GetVelocity(0);
 #endif
-  cart_angle_[FRONT_CART] = joints_[FRONT_CART]->Position(0);
-  cart_angle_[BACK_CART] = joints_[BACK_CART]->Position(0);
-  wheel_speed_[FRONT_RIGHT] = cart_speed_[FRONT_LINEAR] + wheel_separation_ / 2.0 * (cart_speed_[FRONT_ANGULAR] + sin(cart_angle_[FRONT_CART] - cart_angle_[BACK_CART]) / cos(cart_angle_[BACK_CART]) * cart_speed_[FRONT_LINEAR] / chasis_length_);
-  wheel_speed_[FRONT_LEFT] = cart_speed_[FRONT_LINEAR] - wheel_separation_ / 2.0 * (cart_speed_[FRONT_ANGULAR] + sin(cart_angle_[FRONT_CART] - cart_angle_[BACK_CART]) / cos(cart_angle_[BACK_CART]) * cart_speed_[FRONT_LINEAR] / chasis_length_);
-  wheel_speed_[BACK_RIGHT] = cos(cart_angle_[FRONT_CART]) / cos(cart_angle_[BACK_CART]) * cart_speed_[FRONT_LINEAR] + wheel_separation_ / 2.0 * (cart_speed_[BACK_ANGULAR] + sin(cart_angle_[FRONT_CART] - cart_angle_[BACK_CART]) / cos(cart_angle_[BACK_CART]) * cart_speed_[FRONT_LINEAR] / chasis_length_);
-  wheel_speed_[BACK_LEFT] = cos(cart_angle_[FRONT_CART]) / cos(cart_angle_[BACK_CART]) * cart_speed_[FRONT_LINEAR] - wheel_separation_ / 2.0 * (cart_speed_[BACK_ANGULAR] + sin(cart_angle_[FRONT_CART] - cart_angle_[BACK_CART]) / cos(cart_angle_[BACK_CART]) * cart_speed_[FRONT_LINEAR] / chasis_length_);
+  wheel_speed_[FRONT_RIGHT] = cart_speed_[FRONT_LINEAR] + wheel_separation_ / 2.0 * cart_speed_[FRONT_ANGULAR]);
+  wheel_speed_[FRONT_LEFT] = cart_speed_[FRONT_LINEAR] - wheel_separation_ / 2.0 * cart_speed_[FRONT_ANGULAR]);
+  wheel_speed_[BACK_RIGHT] = cart_speed_[BACK_LINEAR] + wheel_separation_ / 2.0 * cart_speed_[BACK_ANGULAR]);
+  wheel_speed_[BACK_LEFT] = cart_speed_[BACK_LINEAR] - wheel_separation_ / 2.0 * cart_speed_[BACK_ANGULAR]);
+  
   joints_[FRONT_LEFT]->SetVelocity(0, wheel_speed_[FRONT_LEFT] / wheel_radius_);
   joints_[FRONT_RIGHT]->SetVelocity(0, wheel_speed_[FRONT_RIGHT] / wheel_radius_);
   joints_[BACK_LEFT]->SetVelocity(0, wheel_speed_[BACK_LEFT] / wheel_radius_);
@@ -285,7 +284,7 @@ void GazeboRosAgribot::cmdVelCallback(const agribot_msgs::AgribotCaterpillar::Co
   boost::mutex::scoped_lock scoped_lock(lock);
   cart_speed_[FRONT_LINEAR] = cmd_msg->front_linear;
   cart_speed_[FRONT_ANGULAR] = cmd_msg->front_angular;
-  //cart_speed_[BACK_LINEAR] = cmd_msg->back_linear;  We need 3 controls, not 4. This one will be computed.
+  cart_speed_[BACK_LINEAR] = cmd_msg->back_linear;  We need 3 controls, not 4. This one will be computed.
   cart_speed_[BACK_ANGULAR] = cmd_msg->back_angular;
 }
 
