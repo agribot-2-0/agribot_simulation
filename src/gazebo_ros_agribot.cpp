@@ -220,7 +220,7 @@ void GazeboRosAgribot::CreatePubsAndSubs()
 {
   ros::SubscribeOptions so =
       ros::SubscribeOptions::create<agribot_msgs::AgribotCaterpillar>
-      (command_sub_topic_, 1, boost::bind(&GazeboRosAgribot::cmdVelCallback, 
+      (command_sub_topic_, 1, boost::bind(&GazeboRosAgribot::cmdVelCallback,
       this, _1), ros::VoidPtr(), &queue_);
   rosnode_ = new ros::NodeHandle(this->robot_namespace_);
   cmd_vel_subscriber_ = rosnode_->subscribe(so);
@@ -264,7 +264,7 @@ void GazeboRosAgribot::UpdateVelocities()
   wheel_speed_[FRONT_LEFT] = cart_speed_[FRONT_LINEAR] - wheel_separation_ / 2.0 * cart_speed_[FRONT_ANGULAR];
   wheel_speed_[BACK_RIGHT] = cart_speed_[BACK_LINEAR] + wheel_separation_ / 2.0 * cart_speed_[BACK_ANGULAR];
   wheel_speed_[BACK_LEFT] = cart_speed_[BACK_LINEAR] - wheel_separation_ / 2.0 * cart_speed_[BACK_ANGULAR];
-  
+
   joints_[FRONT_LEFT]->SetVelocity(0, wheel_speed_[FRONT_LEFT] / wheel_radius_);
   joints_[FRONT_RIGHT]->SetVelocity(0, wheel_speed_[FRONT_RIGHT] / wheel_radius_);
   joints_[BACK_LEFT]->SetVelocity(0, wheel_speed_[BACK_LEFT] / wheel_radius_);
@@ -284,7 +284,7 @@ void GazeboRosAgribot::cmdVelCallback(const agribot_msgs::AgribotCaterpillar::Co
   boost::mutex::scoped_lock scoped_lock(lock);
   cart_speed_[FRONT_LINEAR] = cmd_msg->front_linear;
   cart_speed_[FRONT_ANGULAR] = cmd_msg->front_angular;
-  cart_speed_[BACK_LINEAR] = cmd_msg->back_linear; 
+  cart_speed_[BACK_LINEAR] = cmd_msg->back_linear;
   cart_speed_[BACK_ANGULAR] = cmd_msg->back_angular;
 }
 
@@ -308,11 +308,18 @@ void GazeboRosAgribot::publishOdometry(double step_time)
   tf::Quaternion qt(pose.Rot().X(), pose.Rot().Y(), pose.Rot().Z(), pose.Rot().W());
   tf::Vector3 vt(pose.Pos().X(), pose.Pos().Y(), pose.Pos().Z());
   tf::Transform base_footprint_to_odom(qt, vt);
+
   if (this->broadcast_tf_)
   {
     transform_broadcaster_->sendTransform(tf::StampedTransform(base_footprint_to_odom, current_time, odom_frame, base_footprint_frame));
     publishJointTF();
   }
+
+  /*TODO Remove it when robot_localization package will transmit map->odom tf */
+  tf::Quaternion qt_map(0, 0, 0, 1);
+  tf::Vector3 vt_map(0, 0, 0);
+  tf::Transform map_to_odom(qt_map, vt_map);
+  transform_broadcaster_->sendTransform(tf::StampedTransform(map_to_odom, current_time, "map", odom_frame));
 
   // publish odom topic
   odom_.pose.pose.position.x = pose.Pos().X();
