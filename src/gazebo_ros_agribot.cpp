@@ -285,9 +285,9 @@ void GazeboRosAgribot::cmdVelCallback(const agribot_msgs::AgribotCaterpillar::Co
 {
   boost::mutex::scoped_lock scoped_lock(lock);
   cart_speed_[FRONT_LINEAR] = cmd_msg->front_linear;
-  cart_speed_[FRONT_ANGULAR] = cmd_msg->front_angular;
+  cart_speed_[FRONT_ANGULAR] = cmd_msg->front_angular*PI/180;
   cart_speed_[BACK_LINEAR] = cmd_msg->back_linear;
-  cart_speed_[BACK_ANGULAR] = cmd_msg->back_angular;
+  cart_speed_[BACK_ANGULAR] = cmd_msg->back_angular*PI/180;
 }
 
 void GazeboRosAgribot::QueueThread()
