@@ -17,6 +17,7 @@
 #include <tf/transform_broadcaster.h>
 #include <tf/transform_listener.h>
 #include <agribot_msgs/AgribotCaterpillar.h>
+#include <agribot_msgs/AgribotHeading.h>
 #include <geometry_msgs/Pose2D.h>
 #include <nav_msgs/Odometry.h>
 #include <std_msgs/Float32.h>
@@ -51,6 +52,7 @@ namespace gazebo {
     private:
       void publishOdometry(double step_time);
       void publishEncoder();
+      void publishHeading();
       void publishCarts();
       // void getWheelVelocities();
       void publishJointTF(); /// publishes the wheel tf's
@@ -85,9 +87,11 @@ namespace gazebo {
       ros::Publisher encoder_publisher_;
       ros::Publisher front_cart_publisher_;
       ros::Publisher back_cart_publisher_;
+      ros::Publisher heading_publisher_;
       gazebo::transport::NodePtr node_handle_;
       tf::TransformBroadcaster *transform_broadcaster_;
       agribot_msgs::AgribotCaterpillar encoder_;
+      agribot_msgs::AgribotHeading heading_;
       std_msgs::Float32 FrontAngleMsg_;
       std_msgs::Float32 BackAngleMsg_;
       nav_msgs::Odometry odom_;

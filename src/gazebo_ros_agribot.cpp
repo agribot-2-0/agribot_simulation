@@ -11,6 +11,7 @@
 
 //#define DEBUG_VEL
 //#define DEBUG_TF
+#define PI 3.14159265359
 
 namespace gazebo
 {
@@ -228,6 +229,7 @@ void GazeboRosAgribot::CreatePubsAndSubs()
   encoder_publisher_ = rosnode_->advertise<agribot_msgs::AgribotCaterpillar>(encoder_topic_, 1);
   front_cart_publisher_ = rosnode_->advertise<std_msgs::Float32>("agribot/encoder/cart/front", 1);
   back_cart_publisher_ = rosnode_->advertise<std_msgs::Float32>("agribot/encoder/cart/back", 1);
+  heading_publisher_ = rosnode_->advertise<std_msgs::Float32>("agribot/heading", 1);
   tf_prefix_ = tf::getPrefixParam(*rosnode_);
   transform_broadcaster_ = new tf::TransformBroadcaster();
 }
@@ -406,10 +408,18 @@ void GazeboRosAgribot::publishEncoder()
 
 void GazeboRosAgribot::publishCarts()
 {
-  FrontAngleMsg_.data = joints_[FRONT_CART]->Position(0);
-  BackAngleMsg_.data = joints_[BACK_CART]->Position(0);
+  FrontAngleMsg_.data = joints_[FRONT_CART]->Position(0)*PI/180;
+  BackAngleMsg_.data = joints_[BACK_CART]->Position(0)*PI/180;
   front_cart_publisher_.publish(FrontAngleMsg_);
   back_cart_publisher_.publish(BackAngleMsg_);
+}
+
+void GazeboRosAgribot::publishHeading()
+{
+  ignition::math::Pose3d pose = this->model_->WorldPose();
+  heading_.heading = pose.Pos().Z()*PI/180;
+  heading_.heading_accuracy = 0;
+  heading_publisher_.publish(heading_);
 }
 
 GZ_REGISTER_MODEL_PLUGIN(GazeboRosAgribot)
