@@ -229,7 +229,7 @@ void GazeboRosAgribot::CreatePubsAndSubs()
   encoder_publisher_ = rosnode_->advertise<agribot_msgs::AgribotCaterpillar>(encoder_topic_, 1);
   front_cart_publisher_ = rosnode_->advertise<std_msgs::Float32>("agribot/encoder/cart/front", 1);
   back_cart_publisher_ = rosnode_->advertise<std_msgs::Float32>("agribot/encoder/cart/back", 1);
-  heading_publisher_ = rosnode_->advertise<std_msgs::Float32>("agribot/heading", 1);
+  heading_publisher_ = rosnode_->advertise<agribot_msgs::AgribotHeading>("agribot/heading", 1);
   tf_prefix_ = tf::getPrefixParam(*rosnode_);
   transform_broadcaster_ = new tf::TransformBroadcaster();
 }

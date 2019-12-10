@@ -131,7 +131,13 @@ link_directories(
 add_library(gazebo_ros_agribot
   src/gazebo_ros_agribot.cpp
 )
+
+add_library(gazebo_inclinometer
+  src/gazebo_inclinometer.cpp
+)
+
 target_link_libraries(gazebo_ros_agribot
+  gazebo_inclinometer
   ${GAZEBO_LIBRARIES}
   ${catkin_LIBRARIES}
   ${Boost_LIBRARIES}
@@ -175,6 +181,7 @@ target_link_libraries(gazebo_ros_agribot
 # See http://ros.org/doc/api/catkin/html/adv_user_guide/variables.html
 install(TARGETS
   gazebo_ros_agribot
+  gazebo_inclinometer
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
 )

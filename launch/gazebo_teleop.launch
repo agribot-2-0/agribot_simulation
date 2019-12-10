@@ -1,0 +1,7 @@
+<launch>
+
+    <include file="$(find agribot_description)/launch/robot_model.launch" />
+    <include file="$(find agribot_simulation)/launch/gazebo.launch" />
+    <include file="$(find agribot_navigation)/launch/kinematics_control.launch" />
+    <include file="$(find agribot_teleop)/launch/teleop_keyboard.launch" />
+</launch>
