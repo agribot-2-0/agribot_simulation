@@ -8,11 +8,11 @@ add_compile_options(-std=c++11)
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
+  roscpp
   gazebo_ros
   agribot_msgs
   geometry_msgs
   nav_msgs
-  roscpp
   tf
 )
 
@@ -108,7 +108,7 @@ find_package(Boost REQUIRED COMPONENTS thread)
 catkin_package(
  INCLUDE_DIRS include
  LIBRARIES gazebo_ros_agribot
- CATKIN_DEPENDS gazebo_ros geometry_msgs nav_msgs roscpp tf
+ CATKIN_DEPENDS roscpp gazebo_ros geometry_msgs nav_msgs tf
  DEPENDS gazebo_ros
 )
 
@@ -134,6 +134,16 @@ add_library(gazebo_ros_agribot
 
 add_library(gazebo_inclinometer
   src/gazebo_inclinometer.cpp
+)
+
+add_executable(simulation_sensors
+  src/simulation_sensors_node.cpp 
+)
+
+target_link_libraries(simulation_sensors
+  ${GAZEBO_LIBRARIES}
+  ${catkin_LIBRARIES}
+  ${Boost_LIBRARIES}
 )
 
 target_link_libraries(gazebo_ros_agribot
@@ -182,6 +192,7 @@ target_link_libraries(gazebo_ros_agribot
 install(TARGETS
   gazebo_ros_agribot
   gazebo_inclinometer
+  simulation_sensors
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
 )

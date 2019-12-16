@@ -116,7 +116,7 @@ void GazeboRosAgribot::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
     this->robot_base_frame_ = _sdf->GetElement("robotBaseFrame")->Get<std::string>();
   }
 
-  this->update_rate_ = 10000.0;
+  this->update_rate_ = 10.0;
   if (!_sdf->HasElement("updateRate"))
   {
     ROS_WARN_NAMED("agribot_drive", "AgribotDrive Plugin (ns = %s) missing <updateRate>, defaults to %f",
@@ -229,7 +229,7 @@ void GazeboRosAgribot::CreatePubsAndSubs()
   encoder_publisher_ = rosnode_->advertise<agribot_msgs::AgribotCaterpillar>(encoder_topic_, 1);
   front_cart_publisher_ = rosnode_->advertise<std_msgs::Float32>("agribot/encoder/cart/front", 1);
   back_cart_publisher_ = rosnode_->advertise<std_msgs::Float32>("agribot/encoder/cart/back", 1);
-  heading_publisher_ = rosnode_->advertise<agribot_msgs::AgribotHeading>("agribot/heading", 1);
+  heading_publisher_ = rosnode_->advertise<agribot_msgs::AgribotHeading>("simulation/heading", 1);
   tf_prefix_ = tf::getPrefixParam(*rosnode_);
   transform_broadcaster_ = new tf::TransformBroadcaster();
 }
@@ -243,9 +243,9 @@ void GazeboRosAgribot::onUpdate()
     publishOdometry(seconds_since_last_update);
     publishEncoder();
     publishCarts();
+    last_update_time_ = current_time;
   }
   UpdateVelocities();
-  last_update_time_ += common::Time(update_period_);
 }
 
 void GazeboRosAgribot::UpdateVelocities()
@@ -408,8 +408,8 @@ void GazeboRosAgribot::publishEncoder()
 
 void GazeboRosAgribot::publishCarts()
 {
-  FrontAngleMsg_.data = joints_[FRONT_CART]->Position(0)*PI/180;
-  BackAngleMsg_.data = joints_[BACK_CART]->Position(0)*PI/180;
+  FrontAngleMsg_.data = joints_[FRONT_CART]->Position(0)*180/PI;
+  BackAngleMsg_.data = joints_[BACK_CART]->Position(0)*180/PI;
   front_cart_publisher_.publish(FrontAngleMsg_);
   back_cart_publisher_.publish(BackAngleMsg_);
 }

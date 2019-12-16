@@ -42,7 +42,7 @@ void GazeboInclinometer::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
         _sdf->GetElement("robotNamespace")->Get<std::string>() + "/";
   }
 
-  this->inclinometer_topic_ = "/agribot/inclinometer";
+  this->inclinometer_topic_ = "/simulation/inclinometer";
   if (!_sdf->HasElement("inclinometerTopic"))
   {
     ROS_WARN_NAMED("agribot_drive", "Inclinometer Plugin (ns = %s) missing <inclinometerTopic>, defaults to \"%s\"",
