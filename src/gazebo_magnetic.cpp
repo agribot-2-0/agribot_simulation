@@ -134,7 +134,7 @@ void GazeboMagnetic::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
   }
 
   node_handle_ = new ros::NodeHandle(namespace_);
-  publisher_ = node_handle_->advertise<geometry_msgs::Vector3Stamped>(topic_, 1);
+  publisher_ = node_handle_->advertise<sensor_msgs::MagneticField>(topic_, 1);
 
   Reset();
 
@@ -161,9 +161,9 @@ void GazeboMagnetic::Update()
   ignition::math::Vector3d field = sensor_model_(pose.Rot().RotateVectorReverse(magnetic_field_world_), dt);
 
   magnetic_field_.header.stamp = ros::Time(sim_time.sec, sim_time.nsec);
-  magnetic_field_.vector.x = field.X();
-  magnetic_field_.vector.y = field.Y();
-  magnetic_field_.vector.z = field.Z();
+  magnetic_field_.magnetic_field.x = field.X();
+  magnetic_field_.magnetic_field.y = field.Y();
+  magnetic_field_.magnetic_field.z = field.Z();
 #else
   common::Time sim_time = world->GetSimTime();
   double dt = updateTimer.getTimeSinceLastUpdate().Double();
@@ -172,9 +172,9 @@ void GazeboMagnetic::Update()
   math::Vector3 field = sensor_model_(pose.rot.RotateVectorReverse(magnetic_field_world_), dt);
 
   magnetic_field_.header.stamp = ros::Time(sim_time.sec, sim_time.nsec);
-  magnetic_field_.vector.x = field.x;
-  magnetic_field_.vector.y = field.y;
-  magnetic_field_.vector.z = field.z;
+  magnetic_field_.magnetic_field.x = field.x;
+  magnetic_field_.magnetic_field.y = field.y;
+  magnetic_field_.magnetic_field.z = field.z;
 #endif
 
   publisher_.publish(magnetic_field_);
