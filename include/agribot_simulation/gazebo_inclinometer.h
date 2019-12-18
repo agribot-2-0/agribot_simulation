@@ -14,7 +14,7 @@
 
 // ROS
 #include <ros/ros.h>
-#include <agribot_msgs/AgribotInclinometer.h>
+#include <sensor_msgs/Imu.h>
 
 // Custom Callback Queue
 #include <ros/callback_queue.h>
@@ -52,7 +52,7 @@ namespace gazebo {
       ros::NodeHandle* rosnode_;
       ros::Publisher inclinometer_publisher_;
       gazebo::transport::NodePtr node_handle_;
-      agribot_msgs::AgribotInclinometer inclinometer_;
+      sensor_msgs::Imu inclinometer_;
 
       boost::mutex lock;
 

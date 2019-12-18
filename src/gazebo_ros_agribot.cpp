@@ -59,7 +59,7 @@ void GazeboRosAgribot::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
         _sdf->GetElement("robotNamespace")->Get<std::string>() + "/";
   }
 
-  this->broadcast_tf_ = true;
+  this->broadcast_tf_ = false;
   if (!_sdf->HasElement("broadcastTF"))
   {
     if (!this->broadcast_tf_)
@@ -229,7 +229,7 @@ void GazeboRosAgribot::CreatePubsAndSubs()
   encoder_publisher_ = rosnode_->advertise<agribot_msgs::AgribotCaterpillar>(encoder_topic_, 1);
   front_cart_publisher_ = rosnode_->advertise<std_msgs::Float32>("agribot/encoder/cart/front", 1);
   back_cart_publisher_ = rosnode_->advertise<std_msgs::Float32>("agribot/encoder/cart/back", 1);
-  heading_publisher_ = rosnode_->advertise<agribot_msgs::AgribotHeading>("simulation/heading", 1);
+  heading_publisher_ = rosnode_->advertise<sensor_msgs::Imu>("simulation/heading", 1);
   tf_prefix_ = tf::getPrefixParam(*rosnode_);
   transform_broadcaster_ = new tf::TransformBroadcaster();
 }
@@ -417,8 +417,9 @@ void GazeboRosAgribot::publishCarts()
 void GazeboRosAgribot::publishHeading()
 {
   ignition::math::Pose3d pose = this->model_->WorldPose();
-  heading_.heading = pose.Pos().Z()*PI/180;
-  heading_.heading_accuracy = 0;
+  heading_.header.stamp = ros::Time::now();
+  heading_.header.frame_id = "heading";
+  heading_.orientation = tf::createQuaternionMsgFromRollPitchYaw(0,0,pose.Pos().Z());  
   heading_publisher_.publish(heading_);
 }
 

@@ -8,6 +8,7 @@
 #include <math.h>
 #include <sdf/sdf.hh>
 #include <ros/ros.h>
+#include <tf/tf.h>
 
 //#define DEBUG_VEL
 //#define DEBUG_TF
@@ -42,7 +43,7 @@ void GazeboInclinometer::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
         _sdf->GetElement("robotNamespace")->Get<std::string>() + "/";
   }
 
-  this->inclinometer_topic_ = "/simulation/inclinometer";
+  this->inclinometer_topic_ = "/agribot/inclinometer";
   if (!_sdf->HasElement("inclinometerTopic"))
   {
     ROS_WARN_NAMED("agribot_drive", "Inclinometer Plugin (ns = %s) missing <inclinometerTopic>, defaults to \"%s\"",
@@ -105,7 +106,7 @@ void GazeboInclinometer::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
 void GazeboInclinometer::CreatePubsAndSubs()
 {
   rosnode_ = new ros::NodeHandle(this->robot_namespace_);
-  inclinometer_publisher_ = rosnode_->advertise<agribot_msgs::AgribotInclinometer>(inclinometer_topic_, 1);
+  inclinometer_publisher_ = rosnode_->advertise<sensor_msgs::Imu>(inclinometer_topic_, 1);
 }
 
 void GazeboInclinometer::onUpdate()
@@ -131,8 +132,9 @@ void GazeboInclinometer::QueueThread()
 void GazeboInclinometer::publishInclinometer()
 {
     ignition::math::Pose3d pose = this->link_->WorldPose();
-    inclinometer_.pitch=pose.Pos().X()*PI/180;
-    inclinometer_.roll=pose.Pos().Y()*PI/180;
+    inclinometer_.header.stamp = ros::Time::now();
+    inclinometer_.header.frame_id = "heading";
+    inclinometer_.orientation = tf::createQuaternionMsgFromRollPitchYaw(pose.Pos().X(),pose.Pos().Y(),0);  
     inclinometer_publisher_.publish(inclinometer_);
 }
 

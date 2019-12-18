@@ -17,7 +17,7 @@
 #include <tf/transform_broadcaster.h>
 #include <tf/transform_listener.h>
 #include <agribot_msgs/AgribotCaterpillar.h>
-#include <agribot_msgs/AgribotHeading.h>
+#include <sensor_msgs/Imu.h>
 #include <geometry_msgs/Pose2D.h>
 #include <nav_msgs/Odometry.h>
 #include <std_msgs/Float32.h>
@@ -91,7 +91,7 @@ namespace gazebo {
       gazebo::transport::NodePtr node_handle_;
       tf::TransformBroadcaster *transform_broadcaster_;
       agribot_msgs::AgribotCaterpillar encoder_;
-      agribot_msgs::AgribotHeading heading_;
+      sensor_msgs::Imu heading_;
       std_msgs::Float32 FrontAngleMsg_;
       std_msgs::Float32 BackAngleMsg_;
       nav_msgs::Odometry odom_;

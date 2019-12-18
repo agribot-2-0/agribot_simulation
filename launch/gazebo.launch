@@ -17,6 +17,5 @@
 
   <node name="spawn_urdf" pkg="gazebo_ros" type="spawn_model"
         args="-urdf -model agribot -x $(arg x_pos) -y $(arg y_pos) -z $(arg z_pos) -param robot_description" />
-  <node name="simulation_sensors" pkg="agribot_simulation" type="simulation_sensors"/>
-
+        
 </launch>

@@ -136,18 +136,28 @@ add_library(gazebo_inclinometer
   src/gazebo_inclinometer.cpp
 )
 
-add_executable(simulation_sensors
-  src/simulation_sensors_node.cpp 
+add_library(gazebo_heading
+  src/gazebo_heading.cpp
 )
 
-target_link_libraries(simulation_sensors
-  ${GAZEBO_LIBRARIES}
-  ${catkin_LIBRARIES}
-  ${Boost_LIBRARIES}
+add_library(gazebo_imu
+  src/gazebo_imu.cpp
+)
+
+add_library(gazebo_gps
+  src/gazebo_gps.cpp
+)
+
+add_library(gazebo_magnetic
+  src/gazebo_magnetic.cpp
 )
 
 target_link_libraries(gazebo_ros_agribot
   gazebo_inclinometer
+  gazebo_heading
+  gazebo_imu
+  gazebo_gps
+  gazebo_magnetic
   ${GAZEBO_LIBRARIES}
   ${catkin_LIBRARIES}
   ${Boost_LIBRARIES}
@@ -192,7 +202,10 @@ target_link_libraries(gazebo_ros_agribot
 install(TARGETS
   gazebo_ros_agribot
   gazebo_inclinometer
-  simulation_sensors
+  gazebo_heading
+  gazebo_imu
+  gazebo_gps
+  gazebo_magnetic
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
 )
