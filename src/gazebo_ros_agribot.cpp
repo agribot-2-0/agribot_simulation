@@ -399,6 +399,8 @@ void GazeboRosAgribot::publishEncoder()
   current_speed[BACK_RIGHT] = joints_[BACK_RIGHT]->GetVelocity(0);
   //w=(VR-VL)/d
   //v=(VR+VL)/2
+  encoder_.header.stamp = ros::Time::now();
+  encoder_.header.frame_id = "control";
   encoder_.front_linear = (current_speed[FRONT_LEFT] * wheel_radius_ + current_speed[FRONT_RIGHT] * wheel_radius_) / 2;
   encoder_.front_angular = (current_speed[FRONT_LEFT] * wheel_radius_ - current_speed[FRONT_RIGHT] * wheel_radius_) / wheel_separation_;
   encoder_.back_linear = (current_speed[BACK_LEFT] * wheel_radius_ + current_speed[BACK_RIGHT] * wheel_radius_) / 2;
