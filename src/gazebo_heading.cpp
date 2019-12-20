@@ -1,142 +1,179 @@
-#include <algorithm>
-#include <assert.h>
+//=================================================================================================
+// Copyright (c) 2012, Johannes Meyer, TU Darmstadt
+// All rights reserved.
+
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are met:
+//     * Redistributions of source code must retain the above copyright
+//       notice, this list of conditions and the following disclaimer.
+//     * Redistributions in binary form must reproduce the above copyright
+//       notice, this list of conditions and the following disclaimer in the
+//       documentation and/or other materials provided with the distribution.
+//     * Neither the name of the Flight Systems and Automatic Control group,
+//       TU Darmstadt, nor the names of its contributors may be used to
+//       endorse or promote products derived from this software without
+//       specific prior written permission.
+
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+// ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+// WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+// DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE FOR ANY
+// DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+// (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+// LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+// ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+// SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+//=================================================================================================
+
 #include <agribot_simulation/gazebo_heading.h>
-#include <ignition/math/Angle.hh>
-#include <ignition/math/Pose3.hh>
-#include <ignition/math/Quaternion.hh>
-#include <ignition/math/Vector3.hh>
-#include <math.h>
-#include <sdf/sdf.hh>
-#include <ros/ros.h>
+#include <gazebo/common/Events.hh>
+#include <gazebo/physics/physics.hh>
 #include <tf/tf.h>
 
-//#define DEBUG_VEL
-//#define DEBUG_TF
-#define PI 3.14159265359
+namespace gazebo {
 
-namespace gazebo
+GazeboHeading::GazeboHeading()
 {
+}
 
-GazeboHeading::GazeboHeading() {}
-
+////////////////////////////////////////////////////////////////////////////////
 // Destructor
-GazeboHeading::~GazeboHeading() {}
+GazeboHeading::~GazeboHeading()
+{
+  updateTimer.Disconnect(updateConnection);
 
+  node_handle_->shutdown();
+  delete node_handle_;
+}
+
+////////////////////////////////////////////////////////////////////////////////
 // Load the controller
 void GazeboHeading::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
 {
-  model_ = _model;
-  this->world = _model->GetWorld();
+  world = _model->GetWorld();
 
-  node_handle_ = gazebo::transport::NodePtr(new transport::Node());
-  node_handle_->Init();
+  // load parameters
+  if (_sdf->HasElement("robotNamespace"))
+    namespace_ = _sdf->GetElement("robotNamespace")->GetValue()->GetAsString();
+  else
+    namespace_.clear();
 
-  this->robot_namespace_ = "";
-  if (!_sdf->HasElement("robotNamespace"))
+  if (!_sdf->HasElement("topicName"))
+    topic_ = "heading";
+  else
+    topic_ = _sdf->GetElement("topicName")->Get<std::string>();
+
+
+  if (_sdf->HasElement("bodyName"))
   {
-    ROS_INFO_NAMED("agribot_drive", "Heading Plugin missing <robotNamespace>, defaults to \"%s\"",
-                   this->robot_namespace_.c_str());
+    link_name_ = _sdf->GetElement("bodyName")->GetValue()->GetAsString();
+    link = _model->GetLink(link_name_);
   }
   else
   {
-    this->robot_namespace_ =
-        _sdf->GetElement("robotNamespace")->Get<std::string>() + "/";
+    link = _model->GetLink();
+    link_name_ = link->GetName();
   }
 
-  this->heading_topic_ = "/agribot/heading";
-  if (!_sdf->HasElement("headingTopic"))
+  if (!link)
   {
-    ROS_WARN_NAMED("agribot_drive", "Heading Plugin (ns = %s) missing <headingTopic>, defaults to \"%s\"",
-                   this->robot_namespace_.c_str(), this->heading_topic_.c_str());
-  }
-  else
-  {
-    this->heading_topic_ = _sdf->GetElement("headingTopic")->Get<std::string>();
+    ROS_FATAL("GazeboHeading plugin error: bodyName: %s does not exist\n", link_name_.c_str());
+    return;
   }
 
-  this->update_rate_ = 10000.0;
-  if (!_sdf->HasElement("updateRate"))
-  {
-    ROS_WARN_NAMED("agribot_drive", "Heading Plugin (ns = %s) missing <updateRate>, defaults to %f",
-                   this->robot_namespace_.c_str(), this->update_rate_);
-  }
-  else
-  {
-    this->update_rate_ = _sdf->GetElement("updateRate")->Get<double>();
-  }
+  // default parameters
+  frame_id_ = link_name_;
 
-  if (this->update_rate_ > 0.0)
-  {
-    this->update_period_ = 1.0 / this->update_rate_;
-  }
-  else
-  {
-    this->update_period_ = 0.0;
-  }
-  last_update_time_ = this->world->SimTime();
+  if (_sdf->HasElement("frameId"))
+    frame_id_ = _sdf->GetElement("frameId")->GetValue()->GetAsString();
 
-  alive_ = true;
+  heading_.header.frame_id = frame_id_;
 
-//   const std::string & abc ="base_footprint";
+  sensor_model_.Load(_sdf);
 
-  this->link_name = "base_footprint";
-  if (!_sdf->HasElement("headingLink"))
-  {
-    ROS_WARN_NAMED("agribot_drive", "Heading Plugin (ns = %s) missing <headingLink>, defaults to \"%s\"",
-                   this->robot_namespace_.c_str(), this->link_name.c_str());
-  }
-  else
-  {
-    this->link_name = _sdf->GetElement("headingLink")->Get<std::string>();
-  }
-  link_ = this->model_->GetLink("base_footprint"); // TODO find out why  this->link_name doesn't work
-  if (link_ == nullptr)
-    {
-      ROS_WARN_NAMED("agribot_drive", "Couldn't find specified link %s",this->link_name.c_str());
-      gzthrow("[gazebo_ros_agribot] Couldn't find specified link");
+  if (_sdf->HasElement("GaussianNoise")) {
+    double gaussianNoise;
+    if (_sdf->GetElement("GaussianNoise")->GetValue()->Get(gaussianNoise) && gaussianNoise != 0.0) {
+      sensor_model_.gaussian_noise = gaussianNoise;
     }
-  CreatePubsAndSubs();
-  this->callback_queue_thread_ =
-      boost::thread(boost::bind(&GazeboHeading::QueueThread, this));
-  // listen to the update event (broadcast every simulation iteration)
-  update_connection_ = event::Events::ConnectWorldUpdateBegin(
-      boost::bind(&GazeboHeading::onUpdate, this));
-}
-
-void GazeboHeading::CreatePubsAndSubs()
-{
-  rosnode_ = new ros::NodeHandle(this->robot_namespace_);
-  heading_publisher_ = rosnode_->advertise<sensor_msgs::Imu>(heading_topic_, 1);
-}
-
-void GazeboHeading::onUpdate()
-{
-  common::Time current_time = this->world->SimTime();
-  double seconds_since_last_update = (current_time - last_update_time_).Double();
-  if (seconds_since_last_update > update_period_)
-  {
-    publishHeading();
   }
-  last_update_time_ += common::Time(update_period_);
-}
 
-void GazeboHeading::QueueThread()
-{
-  static const double timeout = 0.01;
-  while (alive_ && rosnode_->ok())
-  {
-    queue_.callAvailable(ros::WallDuration(timeout));
+  if (_sdf->HasElement("Drift")) {
+    double drift;
+    if (_sdf->GetElement("Drift")->GetValue()->Get(drift) && drift != 0.0) {
+      sensor_model_.drift = drift;
+    }
   }
+
+#if (GAZEBO_MAJOR_VERSION >= 8)
+  heading_.orientation_covariance[0] = sensor_model_.drift.X()*sensor_model_.drift.X() + sensor_model_.gaussian_noise.X()*sensor_model_.gaussian_noise.X();
+  heading_.orientation_covariance[4] = sensor_model_.drift.Y()*sensor_model_.drift.Y() + sensor_model_.gaussian_noise.Y()*sensor_model_.gaussian_noise.Y();
+  heading_.orientation_covariance[8] = sensor_model_.drift.Z()*sensor_model_.drift.Z() + sensor_model_.gaussian_noise.Z()*sensor_model_.gaussian_noise.Z();
+#else
+  heading_.orientation_covariance[0] = sensor_model_.drift.x*sensor_model_.drift.x + sensor_model_.gaussian_noise.x*sensor_model_.gaussian_noise.x;
+  heading_.orientation_covariance[4] = sensor_model_.drift.y*sensor_model_.drift.y + sensor_model_.gaussian_noise.y*sensor_model_.gaussian_noise.y;
+  heading_.orientation_covariance[8] = sensor_model_.drift.z*sensor_model_.drift.z + sensor_model_.gaussian_noise.z*sensor_model_.gaussian_noise.z;
+#endif
+
+  // start ros node
+  if (!ros::isInitialized())
+  {
+    int argc = 0;
+    char** argv = NULL;
+    ros::init(argc,argv,"gazebo",ros::init_options::NoSigintHandler|ros::init_options::AnonymousName);
+  }
+
+  node_handle_ = new ros::NodeHandle(namespace_);
+  publisher_ = node_handle_->advertise<sensor_msgs::Imu>(topic_, 1);
+
+  Reset();
+
+  // connect Update function
+  updateTimer.Load(world, _sdf);
+  updateConnection = updateTimer.Connect(boost::bind(&GazeboHeading::Update, this));
 }
 
-void GazeboHeading::publishHeading()
+void GazeboHeading::Reset()
 {
-    ignition::math::Pose3d pose = this->link_->WorldPose();
-    heading_.header.stamp = ros::Time::now();
-    heading_.header.frame_id = "heading";
-    heading_.orientation = tf::createQuaternionMsgFromRollPitchYaw(0,0,pose.Pos().Z());  
-    heading_publisher_.publish(heading_);
+  updateTimer.Reset();
+  sensor_model_.reset();
 }
 
+////////////////////////////////////////////////////////////////////////////////
+// Update the controller
+void GazeboHeading::Update()
+{
+#if (GAZEBO_MAJOR_VERSION >= 8)
+  common::Time sim_time = world->SimTime();
+  double dt = updateTimer.getTimeSinceLastUpdate().Double();
+
+  ignition::math::Pose3d pose = link->WorldPose();
+  ignition::math::Vector3d orientation = sensor_model_(pose.Rot().Euler(), dt);
+
+  heading_.header.stamp = ros::Time(sim_time.sec, sim_time.nsec);
+  heading_.orientation = tf::createQuaternionMsgFromRollPitchYaw(0,0,orientation.Z());
+  heading_.orientation_covariance[0] = sensor_model_.drift.X()*sensor_model_.drift.X() + sensor_model_.gaussian_noise.X()*sensor_model_.gaussian_noise.X();
+  heading_.orientation_covariance[4] = sensor_model_.drift.Y()*sensor_model_.drift.Y() + sensor_model_.gaussian_noise.Y()*sensor_model_.gaussian_noise.Y();
+  heading_.orientation_covariance[8] = sensor_model_.drift.Z()*sensor_model_.drift.Z() + sensor_model_.gaussian_noise.Z()*sensor_model_.gaussian_noise.Z();
+#else
+  common::Time sim_time = world->GetSimTime();
+  double dt = updateTimer.getTimeSinceLastUpdate().Double();
+
+  math::Pose pose = link->GetWorldPose();
+  math::Vector3 orientation = sensor_model_(pose.rot.Euler()), dt);
+
+  heading_.header.stamp = ros::Time(sim_time.sec, sim_time.nsec);
+  heading_.orientation = tf::createQuaternionMsgFromRollPitchYaw(0,0,orientation.z);
+  heading_.orientation_covariance[0] = sensor_model_.drift.x*sensor_model_.drift.x + sensor_model_.gaussian_noise.x*sensor_model_.gaussian_noise.x;
+  heading_.orientation_covariance[4] = sensor_model_.drift.y*sensor_model_.drift.y + sensor_model_.gaussian_noise.y*sensor_model_.gaussian_noise.y;
+  heading_.orientation_covariance[8] = sensor_model_.drift.z*sensor_model_.drift.z + sensor_model_.gaussian_noise.z*sensor_model_.gaussian_noise.z;  
+#endif
+
+  publisher_.publish(heading_);
+}
+
+// Register this plugin with the simulator
 GZ_REGISTER_MODEL_PLUGIN(GazeboHeading)
+
 } // namespace gazebo

@@ -125,6 +125,30 @@ void GazeboMagnetic::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
 
   sensor_model_.Load(_sdf);
 
+  if (_sdf->HasElement("GaussianNoise")) {
+    double gaussianNoise;
+    if (_sdf->GetElement("GaussianNoise")->GetValue()->Get(gaussianNoise) && gaussianNoise != 0.0) {
+      sensor_model_.gaussian_noise = gaussianNoise;
+    }
+  }
+
+  if (_sdf->HasElement("Drift")) {
+    double drift;
+    if (_sdf->GetElement("Drift")->GetValue()->Get(drift) && drift != 0.0) {
+      sensor_model_.drift = drift;
+    }
+  }
+
+#if (GAZEBO_MAJOR_VERSION >= 8)
+  magnetic_field_.magnetic_field_covariance[0] = sensor_model_.drift.X()*sensor_model_.drift.X() + sensor_model_.gaussian_noise.X()*sensor_model_.gaussian_noise.X();
+  magnetic_field_.magnetic_field_covariance[4] = sensor_model_.drift.Y()*sensor_model_.drift.Y() + sensor_model_.gaussian_noise.Y()*sensor_model_.gaussian_noise.Y();
+  magnetic_field_.magnetic_field_covariance[8] = sensor_model_.drift.Z()*sensor_model_.drift.Z() + sensor_model_.gaussian_noise.Z()*sensor_model_.gaussian_noise.Z();
+#else
+  magnetic_field_.magnetic_field_covariance[0] = sensor_model_.drift.x*sensor_model_.drift.x + sensor_model_.gaussian_noise.x*sensor_model_.gaussian_noise.x;
+  magnetic_field_.magnetic_field_covariance[4] = sensor_model_.drift.y*sensor_model_.drift.y + sensor_model_.gaussian_noise.y*sensor_model_.gaussian_noise.y;
+  magnetic_field_.magnetic_field_covariance[8] = sensor_model_.drift.z*sensor_model_.drift.z + sensor_model_.gaussian_noise.z*sensor_model_.gaussian_noise.z;
+#endif
+
   // start ros node
   if (!ros::isInitialized())
   {

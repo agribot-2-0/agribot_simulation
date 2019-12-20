@@ -26,8 +26,8 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //=================================================================================================
 
-#ifndef HECTOR_GAZEBO_PLUGINS_GAZEBO_ROS_GPS_H
-#define HECTOR_GAZEBO_PLUGINS_GAZEBO_ROS_GPS_H
+#ifndef AGRIBOT_SENSORS_PLUGINS_GAZEBO_ROS_GPS_H
+#define AGRIBOT_SENSORS_PLUGINS_GAZEBO_ROS_GPS_H
 
 #include <gazebo/common/Plugin.hh>
 
@@ -37,7 +37,6 @@
 #include <hector_gazebo_plugins/sensor_model.h>
 #include <hector_gazebo_plugins/update_timer.h>
 
-#include <dynamic_reconfigure/server.h>
 #include <hector_gazebo_plugins/GNSSConfig.h>
 
 namespace gazebo
@@ -93,4 +92,4 @@ private:
 
 } // namespace gazebo
 
-#endif // HECTOR_GAZEBO_PLUGINS_GAZEBO_ROS_GPS_H
+#endif // AGRIBOT_SENSORS_PLUGINS_GAZEBO_ROS_GPS_H

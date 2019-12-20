@@ -1,77 +1,78 @@
-#ifndef AGRIBOT_PLUGIN_HH
-#define AGRIBOT_PLUGIN_HH
+//=================================================================================================
+// Copyright (c) 2012, Johannes Meyer, TU Darmstadt
+// All rights reserved.
 
-#include <map>
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are met:
+//     * Redistributions of source code must retain the above copyright
+//       notice, this list of conditions and the following disclaimer.
+//     * Redistributions in binary form must reproduce the above copyright
+//       notice, this list of conditions and the following disclaimer in the
+//       documentation and/or other materials provided with the distribution.
+//     * Neither the name of the Flight Systems and Automatic Control group,
+//       TU Darmstadt, nor the names of its contributors may be used to
+//       endorse or promote products derived from this software without
+//       specific prior written permission.
 
-// Gazebo
-#include <gazebo/common/common.hh>
-#include <gazebo/physics/physics.hh>
-#include <gazebo_plugins/gazebo_ros_utils.h>
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+// ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+// WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+// DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE FOR ANY
+// DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+// (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+// LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+// ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+// SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+//=================================================================================================
 
-#include <gazebo/common/common.hh>
+#ifndef AGRIBOT_SENSORS_PLUGINS_GAZEBO_ROS_MAGNETIC_H
+#define AGRIBOT_SENSORS_PLUGINS_GAZEBO_ROS_MAGNETIC_H
+
 #include <gazebo/common/Plugin.hh>
-#include <gazebo/gazebo.hh>
 
-// ROS
 #include <ros/ros.h>
 #include <sensor_msgs/Imu.h>
+#include <hector_gazebo_plugins/sensor_model.h>
+#include <hector_gazebo_plugins/update_timer.h>
 
-// Custom Callback Queue
-#include <ros/callback_queue.h>
-#include <ros/advertise_options.h>
+namespace gazebo
+{
 
-// Boost
-#include <boost/thread.hpp>
-#include <boost/bind.hpp>
+class GazeboInclinometer : public ModelPlugin
+{
+public:
+  GazeboInclinometer();
+  virtual ~GazeboInclinometer();
 
-namespace gazebo {
+protected:
+  virtual void Load(physics::ModelPtr _model, sdf::ElementPtr _sdf);
+  virtual void Reset();
+  virtual void Update();
 
-  class Link;
-  class Entity;
+private:
+  /// \brief The parent World
+  physics::WorldPtr world;
 
-  class GazeboInclinometer : public ModelPlugin {
-    public:
-      GazeboInclinometer();
-      ~GazeboInclinometer();
-      void Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf);
-      void onUpdate();
+  /// \brief The link referred to by this plugin
+  physics::LinkPtr link;
 
-    private:
-      void publishInclinometer();
-      void CreatePubsAndSubs();
+  ros::NodeHandle* node_handle_;
+  ros::Publisher publisher_;
 
-      GazeboRosPtr gazebo_ros_;
-      physics::WorldPtr world;
-      physics::ModelPtr model_;
-      event::ConnectionPtr update_connection_;
+  sensor_msgs::Imu inclinometer_;
 
-      physics::LinkPtr link_;
-      std::string link_name;
+  std::string namespace_;
+  std::string topic_;
+  std::string link_name_;
+  std::string frame_id_;
 
-      // ROS STUFF
-      ros::NodeHandle* rosnode_;
-      ros::Publisher inclinometer_publisher_;
-      gazebo::transport::NodePtr node_handle_;
-      sensor_msgs::Imu inclinometer_;
+  SensorModel3 sensor_model_;
 
-      boost::mutex lock;
+  UpdateTimer updateTimer;
+  event::ConnectionPtr updateConnection;
+};
 
-      std::string robot_namespace_;
-      std::string inclinometer_topic_;
-      
-      // Custom Callback Queue
-      ros::CallbackQueue queue_;
-      boost::thread callback_queue_thread_;
-      void QueueThread();
+} // namespace gazebo
 
-      bool alive_;
-      //
-      // // Update Rate
-      double update_rate_;
-      double update_period_;
-      common::Time last_update_time_;
-  };
-
-}
-
-#endif
+#endif // AGRIBOT_SENSORS_PLUGINS_GAZEBO_ROS_MAGNETIC_H
