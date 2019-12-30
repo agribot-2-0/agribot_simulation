@@ -161,7 +161,7 @@ void GazeboHeading::Update()
   double dt = updateTimer.getTimeSinceLastUpdate().Double();
 
   math::Pose pose = link->GetWorldPose();
-  math::Vector3 orientation = sensor_model_(pose.rot.Euler()), dt);
+  math::Vector3 orientation = sensor_model_(pose.rot.GetAsEuler()), dt);
 
   heading_.header.stamp = ros::Time(sim_time.sec, sim_time.nsec);
   heading_.orientation = tf::createQuaternionMsgFromRollPitchYaw(0,0,orientation.z);

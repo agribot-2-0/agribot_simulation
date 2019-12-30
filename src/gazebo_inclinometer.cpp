@@ -158,7 +158,7 @@ void GazeboInclinometer::Update()
   double dt = updateTimer.getTimeSinceLastUpdate().Double();
 
   math::Pose pose = link->GetWorldPose();
-  math::Vector3 orientation = sensor_model_(pose.rot.Euler()), dt);
+  math::Vector3 orientation = sensor_model_(pose.rot.GetAsEuler()), dt);
 
   inclinometer_.header.stamp = ros::Time(sim_time.sec, sim_time.nsec);
   inclinometer_.orientation = tf::createQuaternionMsgFromRollPitchYaw(orientation.x,orientation.y,0);  
