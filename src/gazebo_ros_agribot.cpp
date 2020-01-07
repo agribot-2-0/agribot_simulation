@@ -9,9 +9,10 @@
 #include <sdf/sdf.hh>
 #include <ros/ros.h>
 
+#define RAD_TO_DEG (180/M_PI)
+#define DEG_TO_RAD (M_PI/180)
 //#define DEBUG_VEL
 //#define DEBUG_TF
-#define PI 3.14159265359
 
 namespace gazebo
 {
@@ -284,9 +285,9 @@ void GazeboRosAgribot::cmdVelCallback(const agribot_msgs::AgribotCaterpillar::Co
 {
   boost::mutex::scoped_lock scoped_lock(lock);
   cart_speed_[FRONT_LINEAR] = cmd_msg->front_linear;
-  cart_speed_[FRONT_ANGULAR] = cmd_msg->front_angular*PI/180;
+  cart_speed_[FRONT_ANGULAR] = cmd_msg->front_angular*DEG_TO_RAD;
   cart_speed_[BACK_LINEAR] = cmd_msg->back_linear;
-  cart_speed_[BACK_ANGULAR] = cmd_msg->back_angular*PI/180;
+  cart_speed_[BACK_ANGULAR] = cmd_msg->back_angular*DEG_TO_RAD;
 }
 
 void GazeboRosAgribot::QueueThread()
@@ -374,8 +375,8 @@ void GazeboRosAgribot::publishEncoder()
 
 void GazeboRosAgribot::publishCarts()
 {
-  FrontAngleMsg_.data = joints_[FRONT_CART]->Position(0)*180/PI;
-  BackAngleMsg_.data = joints_[BACK_CART]->Position(0)*180/PI;
+  FrontAngleMsg_.data = joints_[FRONT_CART]->Position(0)*RAD_TO_DEG;
+  BackAngleMsg_.data = joints_[BACK_CART]->Position(0)*RAD_TO_DEG;
   front_cart_publisher_.publish(FrontAngleMsg_);
   back_cart_publisher_.publish(BackAngleMsg_);
 }
