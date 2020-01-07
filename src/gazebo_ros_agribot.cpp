@@ -313,14 +313,14 @@ void GazeboRosAgribot::publishOdometry(double step_time)
   if (this->broadcast_tf_)
   {
     transform_broadcaster_->sendTransform(tf::StampedTransform(base_footprint_to_odom, current_time, odom_frame, base_footprint_frame));
-    publishJointTF();
+    /*TODO Remove it when robot_localization package will transmit map->odom tf */
+    tf::Quaternion qt_map(0, 0, 0, 1);
+    tf::Vector3 vt_map(0, 0, 0);
+    tf::Transform map_to_odom(qt_map, vt_map);
+    transform_broadcaster_->sendTransform(tf::StampedTransform(map_to_odom, current_time, "map", odom_frame));
+    // publishJointTF();
   }
 
-  /*TODO Remove it when robot_localization package will transmit map->odom tf */
-  tf::Quaternion qt_map(0, 0, 0, 1);
-  tf::Vector3 vt_map(0, 0, 0);
-  tf::Transform map_to_odom(qt_map, vt_map);
-  transform_broadcaster_->sendTransform(tf::StampedTransform(map_to_odom, current_time, "map", odom_frame));
 
   // publish odom topic
   odom_.pose.pose.position.x = pose.Pos().X();
@@ -355,39 +355,39 @@ void GazeboRosAgribot::publishOdometry(double step_time)
   odometry_publisher_.publish(odom_);
 }
 
-void GazeboRosAgribot::publishJointTF()
-{
-  ros::Time current_time = ros::Time::now();
-  for (auto joint : joints_)
-  {
-    std::string joint_frame = joint->GetChild()->GetName();
-    std::string joint_parent_frame = joint->GetParent()->GetName();
-#if GAZEBO_MAJOR_VERSION >= 8
-    ignition::math::Pose3d poseJoint = joint->GetChild()->RelativePose();
-    ignition::math::Pose3d initialPoseJoint = joint->GetChild()->InitialRelativePose();
-    ignition::math::Pose3d parentInitialPoseJoint = joint->GetParent()->InitialRelativePose();
-#else
-    ignition::math::Pose3d poseJoint = joint->GetChild()->GetInitialRelativePose().Ign();
-#endif
-    tf::Quaternion qt(poseJoint.Rot().X(), poseJoint.Rot().Y(), poseJoint.Rot().Z(), poseJoint.Rot().W());
-    tf::Vector3 vt(initialPoseJoint.Pos().X(), initialPoseJoint.Pos().Y(), initialPoseJoint.Pos().Z());
-    tf::Vector3 vpt(parentInitialPoseJoint.Pos().X(), parentInitialPoseJoint.Pos().Y(), parentInitialPoseJoint.Pos().Z());
-    tf::Transform tfJoint(qt, vt - vpt);
-#ifdef DEBUG_TF
-    ROS_INFO_STREAM_NAMED("agribot_drive", "TF parent = " << joint_parent_frame);
-    ROS_INFO_STREAM_NAMED("agribot_drive", "TF child  = " << joint_frame);
-    ROS_INFO_NAMED("agribot_drive", "TF pose  x = %lf, y = %lf, z = %lf",
-                   tfJoint.getOrigin().getX(), tfJoint.getOrigin().getY(), tfJoint.getOrigin().getZ());
-    ROS_INFO_NAMED("agribot_drive", "TF twist angle = %lf",
-                   tfJoint.getRotation().getAngle());
-#endif
-    // transform_broadcaster_->sendTransform(
-    //     tf::StampedTransform(tfJoint, current_time, joint_parent_frame, joint_frame));
-  }
-#ifdef DEBUG_TF
-  ROS_INFO_NAMED("agribot_drive", ".......................................................");
-#endif
-}
+// void GazeboRosAgribot::publishJointTF()
+// {
+//   ros::Time current_time = ros::Time::now();
+//   for (auto joint : joints_)
+//   {
+//     std::string joint_frame = joint->GetChild()->GetName();
+//     std::string joint_parent_frame = joint->GetParent()->GetName();
+// #if GAZEBO_MAJOR_VERSION >= 8
+//     ignition::math::Pose3d poseJoint = joint->GetChild()->RelativePose();
+//     ignition::math::Pose3d initialPoseJoint = joint->GetChild()->InitialRelativePose();
+//     ignition::math::Pose3d parentInitialPoseJoint = joint->GetParent()->InitialRelativePose();
+// #else
+//     ignition::math::Pose3d poseJoint = joint->GetChild()->GetInitialRelativePose().Ign();
+// #endif
+//     tf::Quaternion qt(poseJoint.Rot().X(), poseJoint.Rot().Y(), poseJoint.Rot().Z(), poseJoint.Rot().W());
+//     tf::Vector3 vt(initialPoseJoint.Pos().X(), initialPoseJoint.Pos().Y(), initialPoseJoint.Pos().Z());
+//     tf::Vector3 vpt(parentInitialPoseJoint.Pos().X(), parentInitialPoseJoint.Pos().Y(), parentInitialPoseJoint.Pos().Z());
+//     tf::Transform tfJoint(qt, vt - vpt);
+// #ifdef DEBUG_TF
+//     ROS_INFO_STREAM_NAMED("agribot_drive", "TF parent = " << joint_parent_frame);
+//     ROS_INFO_STREAM_NAMED("agribot_drive", "TF child  = " << joint_frame);
+//     ROS_INFO_NAMED("agribot_drive", "TF pose  x = %lf, y = %lf, z = %lf",
+//                    tfJoint.getOrigin().getX(), tfJoint.getOrigin().getY(), tfJoint.getOrigin().getZ());
+//     ROS_INFO_NAMED("agribot_drive", "TF twist angle = %lf",
+//                    tfJoint.getRotation().getAngle());
+// #endif
+//     transform_broadcaster_->sendTransform(
+//         tf::StampedTransform(tfJoint, current_time, joint_parent_frame, joint_frame));
+//   }
+// #ifdef DEBUG_TF
+//   ROS_INFO_NAMED("agribot_drive", ".......................................................");
+// #endif
+// }
 
 void GazeboRosAgribot::publishEncoder()
 {

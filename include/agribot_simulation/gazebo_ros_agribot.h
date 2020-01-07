@@ -53,10 +53,6 @@ namespace gazebo {
       void publishOdometry(double step_time);
       void publishEncoder();
       void publishCarts();
-      // void getWheelVelocities();
-      void publishJointTF(); /// publishes the wheel tf's
-      // void publishWheelJointState();
-    //   void UpdateOdometryEncoder();
       void CreatePubsAndSubs();
       void UpdateVelocities();
 
