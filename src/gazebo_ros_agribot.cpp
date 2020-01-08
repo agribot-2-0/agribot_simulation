@@ -9,6 +9,8 @@
 #include <sdf/sdf.hh>
 #include <ros/ros.h>
 
+#define RAD_TO_DEG (180/M_PI)
+#define DEG_TO_RAD (M_PI/180)
 //#define DEBUG_VEL
 //#define DEBUG_TF
 
@@ -115,7 +117,7 @@ void GazeboRosAgribot::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
     this->robot_base_frame_ = _sdf->GetElement("robotBaseFrame")->Get<std::string>();
   }
 
-  this->update_rate_ = 10000.0;
+  this->update_rate_ = 10.0;
   if (!_sdf->HasElement("updateRate"))
   {
     ROS_WARN_NAMED("agribot_drive", "AgribotDrive Plugin (ns = %s) missing <updateRate>, defaults to %f",
@@ -220,7 +222,7 @@ void GazeboRosAgribot::CreatePubsAndSubs()
 {
   ros::SubscribeOptions so =
       ros::SubscribeOptions::create<agribot_msgs::AgribotCaterpillar>
-      (command_sub_topic_, 1, boost::bind(&GazeboRosAgribot::cmdVelCallback, 
+      (command_sub_topic_, 1, boost::bind(&GazeboRosAgribot::cmdVelCallback,
       this, _1), ros::VoidPtr(), &queue_);
   rosnode_ = new ros::NodeHandle(this->robot_namespace_);
   cmd_vel_subscriber_ = rosnode_->subscribe(so);
@@ -241,9 +243,9 @@ void GazeboRosAgribot::onUpdate()
     publishOdometry(seconds_since_last_update);
     publishEncoder();
     publishCarts();
+    last_update_time_ = current_time;
   }
   UpdateVelocities();
-  last_update_time_ += common::Time(update_period_);
 }
 
 void GazeboRosAgribot::UpdateVelocities()
@@ -264,7 +266,7 @@ void GazeboRosAgribot::UpdateVelocities()
   wheel_speed_[FRONT_LEFT] = cart_speed_[FRONT_LINEAR] - wheel_separation_ / 2.0 * cart_speed_[FRONT_ANGULAR];
   wheel_speed_[BACK_RIGHT] = cart_speed_[BACK_LINEAR] + wheel_separation_ / 2.0 * cart_speed_[BACK_ANGULAR];
   wheel_speed_[BACK_LEFT] = cart_speed_[BACK_LINEAR] - wheel_separation_ / 2.0 * cart_speed_[BACK_ANGULAR];
-  
+
   joints_[FRONT_LEFT]->SetVelocity(0, wheel_speed_[FRONT_LEFT] / wheel_radius_);
   joints_[FRONT_RIGHT]->SetVelocity(0, wheel_speed_[FRONT_RIGHT] / wheel_radius_);
   joints_[BACK_LEFT]->SetVelocity(0, wheel_speed_[BACK_LEFT] / wheel_radius_);
@@ -284,7 +286,7 @@ void GazeboRosAgribot::cmdVelCallback(const agribot_msgs::AgribotCaterpillar::Co
   boost::mutex::scoped_lock scoped_lock(lock);
   cart_speed_[FRONT_LINEAR] = cmd_msg->front_linear;
   cart_speed_[FRONT_ANGULAR] = cmd_msg->front_angular;
-  cart_speed_[BACK_LINEAR] = cmd_msg->back_linear; 
+  cart_speed_[BACK_LINEAR] = cmd_msg->back_linear;
   cart_speed_[BACK_ANGULAR] = cmd_msg->back_angular;
 }
 
@@ -308,11 +310,17 @@ void GazeboRosAgribot::publishOdometry(double step_time)
   tf::Quaternion qt(pose.Rot().X(), pose.Rot().Y(), pose.Rot().Z(), pose.Rot().W());
   tf::Vector3 vt(pose.Pos().X(), pose.Pos().Y(), pose.Pos().Z());
   tf::Transform base_footprint_to_odom(qt, vt);
+
   if (this->broadcast_tf_)
   {
     transform_broadcaster_->sendTransform(tf::StampedTransform(base_footprint_to_odom, current_time, odom_frame, base_footprint_frame));
-    publishJointTF();
+    /*TODO Remove it when robot_localization package will transmit map->odom tf */
+    tf::Quaternion qt_map(0, 0, 0, 1);
+    tf::Vector3 vt_map(0, 0, 0);
+    tf::Transform map_to_odom(qt_map, vt_map);
+    transform_broadcaster_->sendTransform(tf::StampedTransform(map_to_odom, current_time, "map", odom_frame));
   }
+
 
   // publish odom topic
   odom_.pose.pose.position.x = pose.Pos().X();
@@ -347,40 +355,6 @@ void GazeboRosAgribot::publishOdometry(double step_time)
   odometry_publisher_.publish(odom_);
 }
 
-void GazeboRosAgribot::publishJointTF()
-{
-  ros::Time current_time = ros::Time::now();
-  for (auto joint : joints_)
-  {
-    std::string joint_frame = joint->GetChild()->GetName();
-    std::string joint_parent_frame = joint->GetParent()->GetName();
-#if GAZEBO_MAJOR_VERSION >= 8
-    ignition::math::Pose3d poseJoint = joint->GetChild()->RelativePose();
-    ignition::math::Pose3d initialPoseJoint = joint->GetChild()->InitialRelativePose();
-    ignition::math::Pose3d parentInitialPoseJoint = joint->GetParent()->InitialRelativePose();
-#else
-    ignition::math::Pose3d poseJoint = joint->GetChild()->GetInitialRelativePose().Ign();
-#endif
-    tf::Quaternion qt(poseJoint.Rot().X(), poseJoint.Rot().Y(), poseJoint.Rot().Z(), poseJoint.Rot().W());
-    tf::Vector3 vt(initialPoseJoint.Pos().X(), initialPoseJoint.Pos().Y(), initialPoseJoint.Pos().Z());
-    tf::Vector3 vpt(parentInitialPoseJoint.Pos().X(), parentInitialPoseJoint.Pos().Y(), parentInitialPoseJoint.Pos().Z());
-    tf::Transform tfJoint(qt, vt - vpt);
-#ifdef DEBUG_TF
-    ROS_INFO_STREAM_NAMED("agribot_drive", "TF parent = " << joint_parent_frame);
-    ROS_INFO_STREAM_NAMED("agribot_drive", "TF child  = " << joint_frame);
-    ROS_INFO_NAMED("agribot_drive", "TF pose  x = %lf, y = %lf, z = %lf",
-                   tfJoint.getOrigin().getX(), tfJoint.getOrigin().getY(), tfJoint.getOrigin().getZ());
-    ROS_INFO_NAMED("agribot_drive", "TF twist angle = %lf",
-                   tfJoint.getRotation().getAngle());
-#endif
-    transform_broadcaster_->sendTransform(
-        tf::StampedTransform(tfJoint, current_time, joint_parent_frame, joint_frame));
-  }
-#ifdef DEBUG_TF
-  ROS_INFO_NAMED("agribot_drive", ".......................................................");
-#endif
-}
-
 void GazeboRosAgribot::publishEncoder()
 {
   double current_speed[4];
@@ -390,10 +364,11 @@ void GazeboRosAgribot::publishEncoder()
   current_speed[BACK_RIGHT] = joints_[BACK_RIGHT]->GetVelocity(0);
   //w=(VR-VL)/d
   //v=(VR+VL)/2
+  encoder_.header.stamp = ros::Time::now();
   encoder_.front_linear = (current_speed[FRONT_LEFT] * wheel_radius_ + current_speed[FRONT_RIGHT] * wheel_radius_) / 2;
-  encoder_.front_angular = (current_speed[FRONT_LEFT] * wheel_radius_ - current_speed[FRONT_RIGHT] * wheel_radius_) / wheel_separation_;
+  encoder_.front_angular = (current_speed[FRONT_RIGHT] * wheel_radius_ - current_speed[FRONT_LEFT] * wheel_radius_) / wheel_separation_;
   encoder_.back_linear = (current_speed[BACK_LEFT] * wheel_radius_ + current_speed[BACK_RIGHT] * wheel_radius_) / 2;
-  encoder_.back_angular = (current_speed[BACK_LEFT] * wheel_radius_ - current_speed[BACK_RIGHT] * wheel_radius_) / wheel_separation_;
+  encoder_.back_angular = (current_speed[BACK_RIGHT] * wheel_radius_ - current_speed[BACK_LEFT] * wheel_radius_) / wheel_separation_;
   encoder_publisher_.publish(encoder_);
 }
 
@@ -406,4 +381,4 @@ void GazeboRosAgribot::publishCarts()
 }
 
 GZ_REGISTER_MODEL_PLUGIN(GazeboRosAgribot)
-} // namespace gazebo
+} 

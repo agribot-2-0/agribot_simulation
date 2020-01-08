@@ -17,6 +17,7 @@
 #include <tf/transform_broadcaster.h>
 #include <tf/transform_listener.h>
 #include <agribot_msgs/AgribotCaterpillar.h>
+#include <sensor_msgs/Imu.h>
 #include <geometry_msgs/Pose2D.h>
 #include <nav_msgs/Odometry.h>
 #include <std_msgs/Float32.h>
@@ -52,10 +53,6 @@ namespace gazebo {
       void publishOdometry(double step_time);
       void publishEncoder();
       void publishCarts();
-      // void getWheelVelocities();
-      void publishJointTF(); /// publishes the wheel tf's
-      // void publishWheelJointState();
-    //   void UpdateOdometryEncoder();
       void CreatePubsAndSubs();
       void UpdateVelocities();
 
