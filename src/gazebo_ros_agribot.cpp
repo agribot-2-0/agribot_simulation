@@ -285,9 +285,9 @@ void GazeboRosAgribot::cmdVelCallback(const agribot_msgs::AgribotCaterpillar::Co
 {
   boost::mutex::scoped_lock scoped_lock(lock);
   cart_speed_[FRONT_LINEAR] = cmd_msg->front_linear;
-  cart_speed_[FRONT_ANGULAR] = cmd_msg->front_angular*DEG_TO_RAD;
+  cart_speed_[FRONT_ANGULAR] = cmd_msg->front_angular;
   cart_speed_[BACK_LINEAR] = cmd_msg->back_linear;
-  cart_speed_[BACK_ANGULAR] = cmd_msg->back_angular*DEG_TO_RAD;
+  cart_speed_[BACK_ANGULAR] = cmd_msg->back_angular;
 }
 
 void GazeboRosAgribot::QueueThread()
@@ -366,16 +366,16 @@ void GazeboRosAgribot::publishEncoder()
   //v=(VR+VL)/2
   encoder_.header.stamp = ros::Time::now();
   encoder_.front_linear = (current_speed[FRONT_LEFT] * wheel_radius_ + current_speed[FRONT_RIGHT] * wheel_radius_) / 2;
-  encoder_.front_angular = (current_speed[FRONT_LEFT] * wheel_radius_ - current_speed[FRONT_RIGHT] * wheel_radius_) / wheel_separation_;
+  encoder_.front_angular = (current_speed[FRONT_RIGHT] * wheel_radius_ - current_speed[FRONT_LEFT] * wheel_radius_) / wheel_separation_;
   encoder_.back_linear = (current_speed[BACK_LEFT] * wheel_radius_ + current_speed[BACK_RIGHT] * wheel_radius_) / 2;
-  encoder_.back_angular = (current_speed[BACK_LEFT] * wheel_radius_ - current_speed[BACK_RIGHT] * wheel_radius_) / wheel_separation_;
+  encoder_.back_angular = (current_speed[BACK_RIGHT] * wheel_radius_ - current_speed[BACK_LEFT] * wheel_radius_) / wheel_separation_;
   encoder_publisher_.publish(encoder_);
 }
 
 void GazeboRosAgribot::publishCarts()
 {
-  FrontAngleMsg_.data = joints_[FRONT_CART]->Position(0)*RAD_TO_DEG;
-  BackAngleMsg_.data = joints_[BACK_CART]->Position(0)*RAD_TO_DEG;
+  FrontAngleMsg_.data = joints_[FRONT_CART]->Position(0);
+  BackAngleMsg_.data = joints_[BACK_CART]->Position(0);
   front_cart_publisher_.publish(FrontAngleMsg_);
   back_cart_publisher_.publish(BackAngleMsg_);
 }
