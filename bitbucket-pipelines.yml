@@ -8,7 +8,7 @@ pipelines:
          script:
            - apk add --update bash coreutils tar
            - git clone --quiet --depth 1 https://github.com/ros-industrial/industrial_ci .industrial_ci
-           - .industrial_ci/bitbucket.sh UPSTREAM_WORKSPACE="bitbucket:agribotteam/agribot_msgs#master" ROS_DISTRO="melodic"
+           - .industrial_ci/bitbucket.sh UPSTREAM_WORKSPACE="git:git@bitbucket:agribotteam/agribot_msgs.git#master" ROS_DISTRO="melodic" DEBUG_BASH="true"
 
 definitions:
   services:
