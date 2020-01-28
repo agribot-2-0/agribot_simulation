@@ -3,14 +3,16 @@ image: docker:git
 pipelines:
   default:
      - step:
+         size: 2x
          services:
            - docker
          script:
            - apk add --update bash coreutils tar
            - git clone --quiet --depth 1 https://github.com/ros-industrial/industrial_ci .industrial_ci -b master
-           - .industrial_ci/bitbucket.sh UPSTREAM_WORKSPACE="git:git@bitbucket:agribotteam/agribot_msgs.git#master" ROS_DISTRO="melodic" DEBUG_BASH="true"
+           - git clone https://github.com/panpawelchmiel/agribot_msgs.git
+           - .industrial_ci/bitbucket.sh  ROS_DISTRO="melodic" UPSTREAM_WORKSPACE="agribot_msgs"
 
 definitions:
   services:
     docker:
-      memory: 2048
+      memory: 7128
