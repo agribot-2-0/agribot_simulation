@@ -1,42 +1,34 @@
 <?xml version="1.0" ?>
-<sdf version="1.5">
+<sdf version="1.6">
   <world name="default">
 
     <gui fullscreen='0'>
-        <camera name='user_camera'>
-          <pose frame=''>-10 -5 4 0 0.20 0.5</pose>
-          <view_controller>orbit</view_controller>
-          <projection_type>perspective</projection_type>
-        </camera>
+      <camera name='user_camera'>
+        <pose frame=''>-30 -20 30 0 0.6 0.3</pose>
+        <view_controller>orbit</view_controller>
+        <projection_type>perspective</projection_type>
+      </camera>
     </gui>
 
-    <!-- <scene>
-      <sky>
-        <clouds>
-          <speed>12</speed>
-        </clouds>
-      </sky>
-    </scene> -->
-
     <!-- A grass plane -->
-    <!-- <population name="grass_plane1">
-      <model name="grass1"> -->
+    <population name="grass_plane">
+      <model name="grass">
         <include>
           <uri>model://grass_plane</uri>
         </include>
-      <!-- </model>
-      <pose>0 0 0 0 0 0</pose>
+      </model>
+      <pose>15 -8 0 0 0 0</pose>
       <distribution>
         <type>grid</type>
-        <rows>5</rows>
-        <cols>5</cols>
+        <rows>4</rows>
+        <cols>4</cols>
         <step>10 10 0</step>
       </distribution>
-    </population> -->
+    </population>
 
     <!-- Trees -->
-    <population name="tree_population1">
-      <model name="tree1">
+    <population name="tree_population">
+      <model name="tree">
         <include>
           <uri>model://tree</uri>
         </include>

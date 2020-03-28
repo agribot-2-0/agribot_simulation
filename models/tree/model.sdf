@@ -11,11 +11,11 @@
         </geometry>
       </visual>
       <collision name="collision">
-          <geometry>
-              <mesh>
-                <uri>model://tree/meshes/tree.dae</uri>
-              </mesh>
-          </geometry>
+        <geometry>
+          <mesh>
+            <uri>model://tree/meshes/tree.dae</uri>
+          </mesh>
+        </geometry>
       </collision>
     </link>
   </model>
