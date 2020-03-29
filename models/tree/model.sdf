@@ -3,12 +3,39 @@
   <model name="tree">
     <static>true</static>
     <link name="body">
-      <visual name="visual">
+      <visual name="Bark">
         <geometry>
           <mesh>
             <uri>model://tree/meshes/tree.dae</uri>
+            <submesh>
+              <name>Bark</name>
+            </submesh>
           </mesh>
         </geometry>
+        <material>
+          <script>
+            <uri>model://tree/materials/scripts/</uri>
+            <uri>model://tree/materials/textures/</uri>
+            <name>Tree/Bark</name>
+          </script>
+        </material>
+      </visual>
+      <visual name="Leafs">
+        <geometry>
+          <mesh>
+            <uri>model://tree/meshes/tree.dae</uri>
+            <submesh>
+              <name>Leafs</name>
+            </submesh>
+          </mesh>
+        </geometry>
+        <material>
+          <script>
+            <uri>model://tree/materials/scripts/</uri>
+            <uri>model://tree/materials/textures/</uri>
+            <name>Tree/Branch</name>
+          </script>
+        </material>
       </visual>
       <collision name="collision">
         <geometry>
