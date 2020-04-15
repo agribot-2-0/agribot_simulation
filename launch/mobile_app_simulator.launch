@@ -1,0 +1,5 @@
+<launch>
+  <node name="mobile_app_simulator"
+        pkg="agribot_simulation"
+        type="mobile_app_simulator.py" />
+</launch>
