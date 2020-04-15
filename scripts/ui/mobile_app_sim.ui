@@ -86,11 +86,22 @@
      </layout>
     </item>
     <item>
-     <widget class="QPushButton" name="button_obstacle">
-      <property name="text">
-       <string>Obstacle</string>
-      </property>
-     </widget>
+     <layout class="QHBoxLayout" name="horizontalLayout_2">
+      <item>
+       <widget class="QPushButton" name="button_obstacle">
+        <property name="text">
+         <string>Obstacle</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="button_no_obstacle">
+        <property name="text">
+         <string>NO Obstacle</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
     </item>
    </layout>
   </widget>

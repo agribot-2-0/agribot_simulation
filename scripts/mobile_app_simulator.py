@@ -8,6 +8,7 @@ from python_qt_binding import loadUi
 from python_qt_binding.QtWidgets import QWidget, QApplication
 
 from industrial_msgs.msg import RobotMode
+from std_msgs.msg import Int32
 
 import rospy
 import rospkg
@@ -31,11 +32,16 @@ class MobileAppSim(QWidget):
                                     RobotMode,
                                     queue_size=1)
 
+        self.obstacle = rospy.Publisher('/agribot/obstacle_detected',
+                                        Int32,
+                                        queue_size=1)
+
         self.button_autonomous.clicked.connect(self.autonomous_mode)
         self.button_manual.clicked.connect(self.manual_mode)
         self.button_error_frame.clicked.connect(self.send_error_frame)
         self.button_error_manual.clicked.connect(self.send_manual_error)
         self.button_obstacle.clicked.connect(self.obstacle_detected)
+        self.button_no_obstacle.clicked.connect(self.no_obstacle_detected)
 
     def autonomous_mode(self):
         msg = RobotMode()
@@ -54,7 +60,14 @@ class MobileAppSim(QWidget):
         pass
 
     def obstacle_detected(self):
-        pass
+        msg = Int32()
+        msg.data = 1
+        self.obstacle.publish(msg)
+
+    def no_obstacle_detected(self):
+        msg = Int32()
+        msg.data = 0
+        self.obstacle.publish(msg)
 
 def main():
     app = QApplication(sys.argv)
