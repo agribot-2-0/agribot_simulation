@@ -33,6 +33,10 @@ class MobileAppSim(QWidget):
                                     RobotMode,
                                     queue_size=1)
 
+        self.error = rospy.Publisher('/agribot/state_machine/error',
+                                     Int32,
+                                     queue_size=1)
+
         self.obstacle = rospy.Publisher('/agribot/obstacle_detected',
                                         Int32,
                                         queue_size=1)
@@ -45,6 +49,7 @@ class MobileAppSim(QWidget):
         self.button_manual.clicked.connect(self.manual_mode)
         self.button_error_frame.clicked.connect(self.send_error_frame)
         self.button_error_manual.clicked.connect(self.send_manual_error)
+        self.button_no_error.clicked.connect(self.send_no_error)
         self.button_obstacle.clicked.connect(self.obstacle_detected)
         self.button_no_obstacle.clicked.connect(self.no_obstacle_detected)
         self.slider_linear.valueChanged.connect(self.send_velocity_linear)
@@ -61,10 +66,19 @@ class MobileAppSim(QWidget):
         self.mode.publish(msg)
 
     def send_error_frame(self):
-        pass
+        msg = Int32()
+        msg.data = 1
+        self.error.publish(msg)
 
     def send_manual_error(self):
-        pass
+        msg = Int32()
+        msg.data = 2
+        self.error.publish(msg)
+
+    def send_no_error(self):
+        msg = Int32()
+        msg.data = 0
+        self.error.publish(msg)
 
     def obstacle_detected(self):
         msg = Int32()

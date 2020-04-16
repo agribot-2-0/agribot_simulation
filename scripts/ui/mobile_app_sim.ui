@@ -83,6 +83,13 @@
         </property>
        </widget>
       </item>
+      <item>
+       <widget class="QPushButton" name="button_no_error">
+        <property name="text">
+         <string>NO Error</string>
+        </property>
+       </widget>
+      </item>
      </layout>
     </item>
     <item>
