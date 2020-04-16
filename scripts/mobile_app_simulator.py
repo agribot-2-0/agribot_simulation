@@ -9,6 +9,7 @@ from python_qt_binding.QtWidgets import QWidget, QApplication
 
 from industrial_msgs.msg import RobotMode
 from std_msgs.msg import Int32
+from geometry_msgs.msg import Twist
 
 import rospy
 import rospkg
@@ -36,12 +37,18 @@ class MobileAppSim(QWidget):
                                         Int32,
                                         queue_size=1)
 
+        self.manual_control = rospy.Publisher('/agribot/cmd_vel_manual',
+                                              Twist,
+                                              queue_size=10)
+
         self.button_autonomous.clicked.connect(self.autonomous_mode)
         self.button_manual.clicked.connect(self.manual_mode)
         self.button_error_frame.clicked.connect(self.send_error_frame)
         self.button_error_manual.clicked.connect(self.send_manual_error)
         self.button_obstacle.clicked.connect(self.obstacle_detected)
         self.button_no_obstacle.clicked.connect(self.no_obstacle_detected)
+        self.slider_linear.valueChanged.connect(self.send_velocity_linear)
+        self.slider_angular.valueChanged.connect(self.send_velocity_angular)
 
     def autonomous_mode(self):
         msg = RobotMode()
@@ -68,6 +75,18 @@ class MobileAppSim(QWidget):
         msg = Int32()
         msg.data = 0
         self.obstacle.publish(msg)
+
+    def send_velocity_linear(self):
+        msg = Twist()
+        msg.linear.x = self.slider_linear.value()/10.0
+        msg.angular.z = self.slider_angular.value()/10.0
+        self.manual_control.publish(msg)
+
+    def send_velocity_angular(self):
+        msg = Twist()
+        msg.linear.x = self.slider_linear.value()/10.0
+        msg.angular.z = self.slider_angular.value()/10.0
+        self.manual_control.publish(msg)
 
 def main():
     app = QApplication(sys.argv)
