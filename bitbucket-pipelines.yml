@@ -3,6 +3,13 @@ image: docker:git
 pipelines:
   default:
      - step:
+         name: "Check pylint"
+         script:
+           - apk add --update bash coreutils tar python py-pip
+           - pip install pylint
+           - git clone https://github.com/panpawelchmiel/agribot_common.git
+           - pylint --rcfile=agribot_common/pylint_conf/.pylintrc scripts/*.py
+     - step:
          size: 2x
          services:
            - docker
