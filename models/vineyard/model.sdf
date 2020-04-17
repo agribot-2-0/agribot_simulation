@@ -1,0 +1,25 @@
+<?xml version='1.0'?>
+<sdf version='1.6'>
+  <model name="vineyard">
+    <pose>0 0 0 0 0 1.52</pose>
+    <static>true</static>
+    <link name="body">
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://vineyard/meshes/vineyard.dae</uri>
+            <scale>0.1 0.1 0.1</scale>
+          </mesh>
+        </geometry>
+      </visual>
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://vineyard/meshes/vineyard.dae</uri>
+            <scale>0.1 0.1 0.1</scale>
+          </mesh>
+        </geometry>
+      </collision>
+    </link>
+  </model>
+</sdf>

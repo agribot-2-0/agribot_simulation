@@ -1,0 +1,51 @@
+<?xml version="1.0" ?>
+<sdf version="1.6">
+  <world name="default">
+    <physics name='default_physics' default='0' type='ode'>
+      <max_step_size>0.01</max_step_size>
+      <real_time_factor>1</real_time_factor>
+      <real_time_update_rate>100</real_time_update_rate>
+    </physics>
+    <gui fullscreen='0'>
+      <camera name='user_camera'>
+        <pose frame=''>-2.4 -66 90 0 0.96 0.74</pose>
+        <view_controller>orbit</view_controller>
+        <projection_type>perspective</projection_type>
+      </camera>
+    </gui>
+
+    <!-- A grass plane -->
+    <population name="grass_plane">
+      <model name="grass">
+        <include>
+          <uri>model://grass_plane</uri>
+        </include>
+      </model>
+      <pose>55 -8 0 0 0 0</pose>
+      <distribution>
+        <type>grid</type>
+        <rows>4</rows>
+        <cols>13</cols>
+        <step>10 10 0</step>
+      </distribution>
+    </population>
+
+
+    <!-- Vineyard -->
+    <population name="vineyard_population">
+      <model name="vineyard">
+        <include>
+          <uri>model://vineyard</uri>
+        </include>
+      </model>
+      <pose>53 -2 0 0 0 -0.068</pose>
+      <distribution>
+        <type>grid</type>
+        <rows>3</rows>
+        <cols>10</cols>
+        <step>10 3 0</step>
+      </distribution>
+    </population>
+
+  </world>
+</sdf>
