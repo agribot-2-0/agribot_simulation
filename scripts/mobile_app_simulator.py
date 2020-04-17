@@ -9,7 +9,7 @@ from python_qt_binding.QtWidgets import QWidget, QApplication
 
 from industrial_msgs.msg import RobotMode
 from std_msgs.msg import Int32
-from geometry_msgs.msg import Twist
+from agribot_msgs.msg import AgribotManualControl
 
 import rospy
 import rospkg
@@ -41,8 +41,8 @@ class MobileAppSim(QWidget):
                                         Int32,
                                         queue_size=1)
 
-        self.manual_control = rospy.Publisher('/agribot/cmd_vel_manual',
-                                              Twist,
+        self.manual_control = rospy.Publisher('cmd_vel_manual',
+                                              AgribotManualControl,
                                               queue_size=10)
 
         self.button_autonomous.clicked.connect(self.autonomous_mode)
@@ -91,15 +91,15 @@ class MobileAppSim(QWidget):
         self.obstacle.publish(msg)
 
     def send_velocity_linear(self):
-        msg = Twist()
-        msg.linear.x = self.slider_linear.value()/10.0
-        msg.angular.z = self.slider_angular.value()/10.0
+        msg = AgribotManualControl()
+        msg.linear_velocity = self.slider_linear.value()/10.0
+        msg.circle_radius = self.slider_angular.value()/10.0
         self.manual_control.publish(msg)
 
     def send_velocity_angular(self):
-        msg = Twist()
-        msg.linear.x = self.slider_linear.value()/10.0
-        msg.angular.z = self.slider_angular.value()/10.0
+        msg = AgribotManualControl()
+        msg.linear_velocity = self.slider_linear.value()/10.0
+        msg.circle_radius = self.slider_angular.value()/10.0
         self.manual_control.publish(msg)
 
 def main():
