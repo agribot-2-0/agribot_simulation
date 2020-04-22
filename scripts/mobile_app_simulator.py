@@ -8,7 +8,7 @@ from python_qt_binding import loadUi
 from python_qt_binding.QtWidgets import QWidget, QApplication
 
 from industrial_msgs.msg import RobotMode
-from std_msgs.msg import Int32
+from std_msgs.msg import Int32, String
 from agribot_msgs.msg import AgribotManualControl
 
 import rospy
@@ -36,6 +36,9 @@ class MobileAppSim(QWidget):
         self.error = rospy.Publisher('/agribot/state_machine/error',
                                      Int32,
                                      queue_size=1)
+        self.task = rospy.Publisher('/agribot/state_machine/task',
+                                    String,
+                                    queue_size=1)
 
         self.obstacle = rospy.Publisher('/agribot/obstacle_detected',
                                         Int32,
@@ -45,6 +48,7 @@ class MobileAppSim(QWidget):
                                               AgribotManualControl,
                                               queue_size=10)
 
+        self.button_send_task.clicked.connect(self.send_task)
         self.button_autonomous.clicked.connect(self.autonomous_mode)
         self.button_manual.clicked.connect(self.manual_mode)
         self.button_error_frame.clicked.connect(self.send_error_frame)
@@ -54,6 +58,11 @@ class MobileAppSim(QWidget):
         self.button_no_obstacle.clicked.connect(self.no_obstacle_detected)
         self.slider_linear.valueChanged.connect(self.send_velocity_linear)
         self.slider_angular.valueChanged.connect(self.send_velocity_angular)
+
+    def send_task(self):
+        msg = String()
+        msg.data = self.text_task_name.text()
+        self.task.publish(msg)
 
     def autonomous_mode(self):
         msg = RobotMode()
