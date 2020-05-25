@@ -233,20 +233,14 @@ install(TARGETS
 #   FILES_MATCHING PATTERN "*.h"
 #   PATTERN ".svn" EXCLUDE
 # )
-install(DIRECTORY models
+install(DIRECTORY models worlds launch scripts
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
 )
 
-install(DIRECTORY worlds
-  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
+catkin_install_python(PROGRAMS
+   scripts/mobile_app_simulator.py
+   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
-
-## Mark other files for installation (e.g. launch and bag files, etc.)
-# install(FILES
-#   # myfile1
-#   # myfile2
-#   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
-# )
 
 #############
 ## Testing ##
