@@ -10,6 +10,7 @@ pipelines:
            - git clone https://github.com/panpawelchmiel/agribot_common.git
            - pylint --rcfile=agribot_common/pylint_conf/.pylintrc scripts/*.py
      - step:
+         name: "ROS build"
          size: 2x
          services:
            - docker
@@ -17,7 +18,7 @@ pipelines:
            - apk add --update bash coreutils tar
            - git clone --quiet --depth 1 https://github.com/ros-industrial/industrial_ci .industrial_ci -b master
            - git clone https://github.com/panpawelchmiel/agribot_msgs.git
-           - .industrial_ci/bitbucket.sh  ROS_DISTRO="melodic" UPSTREAM_WORKSPACE="agribot_msgs"
+           - .industrial_ci/bitbucket.sh  ROS_DISTRO="melodic" UPSTREAM_WORKSPACE="agribot_msgs" BUILDER="colcon"
 
 definitions:
   services:
