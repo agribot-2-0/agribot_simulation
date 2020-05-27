@@ -1,8 +1,4 @@
 - git:
-    local-name: agribot_simulation
-    uri: https://github.com/panpawelchmiel/agribot_simulation.git
-    version: develop
-- git:
     local-name: agribot_description
     uri: https://github.com/panpawelchmiel/agribot_description.git
     version: develop
