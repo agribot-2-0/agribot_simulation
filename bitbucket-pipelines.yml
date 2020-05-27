@@ -1,4 +1,4 @@
-image: docker:git
+image: docker:18-git
 
 pipelines:
   default:
