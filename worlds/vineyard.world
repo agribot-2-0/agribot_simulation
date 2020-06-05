@@ -38,12 +38,12 @@
           <uri>model://vineyard</uri>
         </include>
       </model>
-      <pose>53 -2 0 0 0 -0.068</pose>
+      <pose>50 -6.5 0 0 0 -0.068</pose>
       <distribution>
         <type>grid</type>
-        <rows>3</rows>
-        <cols>10</cols>
-        <step>10 3 0</step>
+        <rows>5</rows>
+        <cols>8</cols>
+        <step>10 4 0</step>
       </distribution>
     </population>
 
