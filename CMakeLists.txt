@@ -136,23 +136,23 @@ add_library(gazebo_ros_agribot
 )
 
 add_library(gazebo_inclinometer
-  src/gazebo_inclinometer.cpp
+  src/external/gazebo_inclinometer.cpp
 )
 
 add_library(gazebo_heading
-  src/gazebo_heading.cpp
+  src/external/gazebo_heading.cpp
 )
 
 add_library(gazebo_imu
-  src/gazebo_imu.cpp
+  src/external/gazebo_imu.cpp
 )
 
 add_library(gazebo_gps
-  src/gazebo_gps.cpp
+  src/external/gazebo_gps.cpp
 )
 
 add_library(gazebo_magnetic
-  src/gazebo_magnetic.cpp
+  src/external/gazebo_magnetic.cpp
 )
 
 target_link_libraries(gazebo_ros_agribot

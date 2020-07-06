@@ -26,7 +26,7 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //=================================================================================================
 
-#include <agribot_simulation/gazebo_gps.h>
+#include <agribot_simulation/external/gazebo_gps.h>
 #include <gazebo/physics/physics.hh>
 
 // WGS84 constants
