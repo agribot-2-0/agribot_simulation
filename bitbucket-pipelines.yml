@@ -10,6 +10,17 @@ pipelines:
            - git clone https://github.com/panpawelchmiel/agribot_common.git
            - pylint --rcfile=agribot_common/pylint_conf/.pylintrc scripts/*.py
      - step:
+         name: "Check cppcheck"
+         script:
+           - apk add --update bash coreutils tar cppcheck
+           - cppcheck src/*
+     - step:
+         name: "Check cpplint"
+         script:
+           - apk add --update bash coreutils tar python3 py3-pip
+           - pip3 install cpplint==1.4.6
+           - cpplint --recursive .
+     - step:
          name: "ROS build"
          size: 2x
          services:

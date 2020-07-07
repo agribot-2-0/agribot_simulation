@@ -26,7 +26,7 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //=================================================================================================
 
-#include <agribot_simulation/gazebo_imu.h>
+#include <agribot_simulation/external/gazebo_imu.h>
 #include <gazebo/common/Events.hh>
 #include <gazebo/physics/physics.hh>
 
