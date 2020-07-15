@@ -2,14 +2,13 @@
 * Copyright (C) 2020 Agribot. All rights reserved.
 */
 
-#ifndef AGRIBOT_SENSORS_PLUGINS_GAZEBO_ROS_RFID_H
-#define AGRIBOT_SENSORS_PLUGINS_GAZEBO_ROS_RFID_H
+#pragma once
 
 #include <gazebo/common/Plugin.hh>
 
-#include <ros/ros.h>
 #include <agribot_msgs/Tags.h>
 #include <hector_gazebo_plugins/sensor_model.h>
+#include <ros/ros.h>
 
 namespace gazebo
 {
@@ -18,18 +17,20 @@ namespace gazebo
   public:
     GazeboRfid();
     virtual ~GazeboRfid();
+
   protected:
     virtual void Load(physics::ModelPtr _model, sdf::ElementPtr _sdf);
     virtual void Reset();
     virtual void Update();
+
   private:
     physics::WorldPtr world;
-    ros::NodeHandle* node_handle_;
+    ros::NodeHandle *node_handle_;
     std::string namespace_;
     std::string service_;
+    ros::ServiceServer rfidService;
 
-    static bool bScanForTags(std::vector<std::uint16_t>& vDiscoveredTags);
-    static bool bScan(agribot_msgs::Tags::Request &req, agribot_msgs::Tags::Response &res);
+    bool bScanForTags(std::vector<std::uint16_t> &vDiscoveredTags);
+    bool bScan(agribot_msgs::Tags::Request &req, agribot_msgs::Tags::Response &res);
   };
-}
-#endif // AGRIBOT_SENSORS_PLUGINS_GAZEBO_ROS_RFID_H
+} // namespace gazebo

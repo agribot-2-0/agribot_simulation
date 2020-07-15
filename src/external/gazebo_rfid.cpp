@@ -5,7 +5,6 @@
 #include <agribot_simulation/external/gazebo_rfid.h>
 #include <gazebo/common/Events.hh>
 
-
 namespace gazebo
 {
   GazeboRfid::GazeboRfid()
@@ -18,14 +17,14 @@ namespace gazebo
     delete node_handle_;
   }
 
-  bool GazeboRfid::bScanForTags(std::vector<std::uint16_t>& vDiscoveredTags)
+  bool GazeboRfid::bScanForTags(std::vector<std::uint16_t> &vDiscoveredTags)
   {
     vDiscoveredTags.push_back(2211);
     return true;
   }
 
   bool GazeboRfid::bScan(agribot_msgs::Tags::Request &req,  // NOLINT(runtime/references)
-                         agribot_msgs::Tags::Response &res)  // NOLINT(runtime/references)
+                         agribot_msgs::Tags::Response &res) // NOLINT(runtime/references)
   {
     return bScanForTags(res.ids);
   }
@@ -47,11 +46,11 @@ namespace gazebo
     if (!ros::isInitialized())
     {
       int argc = 0;
-      char** argv = NULL;
-      ros::init(argc,argv,"gazebo",ros::init_options::NoSigintHandler|ros::init_options::AnonymousName);
+      char **argv = NULL;
+      ros::init(argc, argv, "gazebo", ros::init_options::NoSigintHandler | ros::init_options::AnonymousName);
     }
     node_handle_ = new ros::NodeHandle("hal_rfid");
-    node_handle_->advertiseService(service_, GazeboRfid::bScan);
+    rfidService = node_handle_->advertiseService(service_, &GazeboRfid::bScan, this);
     ROS_ERROR("HELLO FROM RFID");
   }
 
@@ -63,4 +62,4 @@ namespace gazebo
   {
   }
   GZ_REGISTER_MODEL_PLUGIN(GazeboRfid)
-}
+} // namespace gazebo
