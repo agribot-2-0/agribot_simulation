@@ -43,8 +43,15 @@ namespace gazebo
     else
       service_ = _sdf->GetElement("serviceName")->Get<std::string>();
 
+    // start ros node
+    if (!ros::isInitialized())
+    {
+      int argc = 0;
+      char** argv = NULL;
+      ros::init(argc,argv,"gazebo",ros::init_options::NoSigintHandler|ros::init_options::AnonymousName);
+    }
     node_handle_ = new ros::NodeHandle("hal_rfid");
-    node_handle_->advertiseService("hal_rfid/tags", GazeboRfid::bScan);
+    node_handle_->advertiseService(service_, GazeboRfid::bScan);
     ROS_ERROR("HELLO FROM RFID");
   }
 

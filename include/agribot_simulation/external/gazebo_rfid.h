@@ -23,6 +23,7 @@ namespace gazebo
     virtual void Reset();
     virtual void Update();
   private:
+    physics::WorldPtr world;
     ros::NodeHandle* node_handle_;
     std::string namespace_;
     std::string service_;
