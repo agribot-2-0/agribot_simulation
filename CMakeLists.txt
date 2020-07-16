@@ -156,7 +156,7 @@ add_library(gazebo_magnetic
 )
 
 add_library(gazebo_rfid
-  src/external/gazebo_rfid.cpp
+  src/gazebo_rfid.cpp
 )
 
 target_link_libraries(gazebo_ros_agribot

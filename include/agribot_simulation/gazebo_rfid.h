@@ -28,7 +28,6 @@ private:
   std::string service_;
   ros::ServiceServer rfid_service_;
 
-  bool bScanForTags(std::vector<std::uint16_t> &vDiscoveredTags);
   bool bScan(agribot_msgs::Tags::Request &req,
              agribot_msgs::Tags::Response &res);
 };
