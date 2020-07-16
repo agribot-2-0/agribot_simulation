@@ -2,19 +2,16 @@
  * Copyright (C) 2020 Agribot. All rights reserved.
  */
 
-
 #include <agribot_simulation/gazebo_rfid.h>
 #include <gazebo/common/Events.hh>
 #include <cstdlib>
 #include <ctime>
 
-#define VEC_SIZE 10
-
 namespace gazebo
 {
 GazeboRfid::GazeboRfid()
 {
-  for (int i = 0; i < VEC_SIZE; i++)
+  for (uint16_t i = 0; i < GazeboRfid::vec_size; i++)
   {
     tags_.push_back(i);
   }
@@ -35,8 +32,8 @@ int GazeboRfid::gen_random_int(int min, int max)
 bool GazeboRfid::scan(agribot_msgs::Tags::Request& req,   // NOLINT(runtime/references)
                       agribot_msgs::Tags::Response& res)  // NOLINT(runtime/references)
 {
-  int rand_ind = gen_random_int(0, VEC_SIZE);
-  if (rand_ind == VEC_SIZE)
+  int rand_ind = gen_random_int(0, GazeboRfid::vec_size);
+  if (rand_ind == GazeboRfid::vec_size)
   {
     return true;
   }
@@ -72,7 +69,6 @@ void GazeboRfid::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
   }
   node_handle_ = new ros::NodeHandle("hal_rfid");
   rfid_service_ = node_handle_->advertiseService(service_, &GazeboRfid::scan, this);
-  ROS_ERROR("HELLO FROM RFID");
 }
 
 void GazeboRfid::Reset()

@@ -26,6 +26,7 @@ protected:
   virtual void Update();
 
 private:
+  static constexpr uint8_t vec_size = 10;
   physics::WorldPtr world;
   ros::NodeHandle* node_handle_;
   std::string namespace_;
