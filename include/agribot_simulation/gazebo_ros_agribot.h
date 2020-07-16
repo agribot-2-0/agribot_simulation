@@ -1,6 +1,6 @@
 /*
-* Copyright (C) 2020 Agribot. All rights reserved.
-*/
+ * Copyright (C) 2020 Agribot. All rights reserved.
+ */
 
 #pragma once
 
@@ -35,31 +35,31 @@
 #include <boost/thread.hpp>
 #include <boost/bind.hpp>
 
-namespace gazebo {
-
+namespace gazebo
+{
 class Joint;
 class Entity;
 
-class GazeboRosAgribot : public ModelPlugin {
-enum OdomSource
+class GazeboRosAgribot : public ModelPlugin
 {
+  enum OdomSource
+  {
     ENCODER = 0,
     WORLD = 1,
-};
+  };
 
- public:
+public:
   GazeboRosAgribot();
   ~GazeboRosAgribot();
   void Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf);
   void onUpdate();
 
- private:
+private:
   void publishOdometry(double step_time);
   void publishEncoder();
   void publishCarts();
   void CreatePubsAndSubs();
   void UpdateVelocities();
-
 
   GazeboRosPtr gazebo_ros_;
   physics::WorldPtr world;
@@ -87,7 +87,7 @@ enum OdomSource
   ros::Publisher front_cart_publisher_;
   ros::Publisher back_cart_publisher_;
   gazebo::transport::NodePtr node_handle_;
-  tf::TransformBroadcaster *transform_broadcaster_;
+  tf::TransformBroadcaster* transform_broadcaster_;
   agribot_msgs::AgribotCaterpillar encoder_;
   std_msgs::Float32 FrontAngleMsg_;
   std_msgs::Float32 BackAngleMsg_;
@@ -103,7 +103,6 @@ enum OdomSource
   std::string encoder_topic_;
   std::string odometry_frame_;
   std::string robot_base_frame_;
-
 
   // Custom Callback Queue
   ros::CallbackQueue queue_;
@@ -128,10 +127,10 @@ enum OdomSource
   double covariance_y_;
   double covariance_yaw_;
 
-// Flags
-bool publishJointTF_;
-bool publishOdomTF_;
-bool publishWheelJointState_;
+  // Flags
+  bool publishJointTF_;
+  bool publishOdomTF_;
+  bool publishWheelJointState_;
 };
 
 }  // namespace gazebo

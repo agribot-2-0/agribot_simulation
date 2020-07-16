@@ -155,12 +155,17 @@ add_library(gazebo_magnetic
   src/external/gazebo_magnetic.cpp
 )
 
+add_library(gazebo_rfid
+  src/gazebo_rfid.cpp
+)
+
 target_link_libraries(gazebo_ros_agribot
   gazebo_inclinometer
   gazebo_heading
   gazebo_imu
   gazebo_gps
   gazebo_magnetic
+  gazebo_rfid
   ${GAZEBO_LIBRARIES}
   ${catkin_LIBRARIES}
   ${Boost_LIBRARIES}
@@ -209,6 +214,7 @@ install(TARGETS
   gazebo_imu
   gazebo_gps
   gazebo_magnetic
+  gazebo_rfid
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
 )

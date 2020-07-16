@@ -26,8 +26,8 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //=================================================================================================
 
-#ifndef AGRIBOT_SENSORS_PLUGINS_GAZEBO_ROS_MAGNETIC_H
-#define AGRIBOT_SENSORS_PLUGINS_GAZEBO_ROS_MAGNETIC_H
+#ifndef AGRIBOT_SENSORS_PLUGINS_GAZEBO_ROS_HEADING_H
+#define AGRIBOT_SENSORS_PLUGINS_GAZEBO_ROS_HEADING_H
 
 #include <gazebo/common/Plugin.hh>
 
@@ -75,4 +75,4 @@ private:
 
 } // namespace gazebo
 
-#endif // AGRIBOT_SENSORS_PLUGINS_GAZEBO_ROS_MAGNETIC_H
+#endif // AGRIBOT_SENSORS_PLUGINS_GAZEBO_ROS_HEADING_H
