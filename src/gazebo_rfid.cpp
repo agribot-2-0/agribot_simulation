@@ -8,55 +8,69 @@
 #define TAG_FRONT 0xaa
 #define TAG_BACK 0xbb
 
-namespace gazebo {
-GazeboRfid::GazeboRfid() {}
+namespace gazebo
+{
+GazeboRfid::GazeboRfid()
+{
+}
 
-GazeboRfid::~GazeboRfid() {
+GazeboRfid::~GazeboRfid()
+{
   node_handle_->shutdown();
   delete node_handle_;
 }
 
-bool GazeboRfid::bScan(
-    agribot_msgs::Tags::Request &req,  // NOLINT(runtime/references)
-    agribot_msgs::Tags::Response &res) // NOLINT(runtime/references)
+bool GazeboRfid::bScan(agribot_msgs::Tags::Request& req,   // NOLINT(runtime/references)
+                       agribot_msgs::Tags::Response& res)  // NOLINT(runtime/references)
 {
-  if (req.selected_antenna == req.FRONT) {
+  if (req.selected_antenna == req.FRONT)
+  {
     res.ids.push_back(TAG_FRONT);
   }
-  if (req.selected_antenna == req.BACK) {
+  if (req.selected_antenna == req.BACK)
+  {
     res.ids.push_back(TAG_BACK);
   }
   return true;
 }
 
-void GazeboRfid::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
+void GazeboRfid::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
+{
   // load parameters
-  if (_sdf->HasElement("robotNamespace")) {
+  if (_sdf->HasElement("robotNamespace"))
+  {
     namespace_ = _sdf->GetElement("robotNamespace")->GetValue()->GetAsString();
-  } else {
+  }
+  else
+  {
     namespace_.clear();
   }
-  if (!_sdf->HasElement("serviceName")) {
+  if (!_sdf->HasElement("serviceName"))
+  {
     service_ = "tags";
-  } else {
+  }
+  else
+  {
     service_ = _sdf->GetElement("serviceName")->Get<std::string>();
   }
   // start ros node
-  if (!ros::isInitialized()) {
+  if (!ros::isInitialized())
+  {
     int argc = 0;
-    char **argv = NULL;
-    ros::init(argc, argv, "gazebo",
-              ros::init_options::NoSigintHandler |
-                  ros::init_options::AnonymousName);
+    char** argv = NULL;
+    ros::init(argc, argv, "gazebo", ros::init_options::NoSigintHandler | ros::init_options::AnonymousName);
   }
   node_handle_ = new ros::NodeHandle("hal_rfid");
-  rfid_service_ =
-      node_handle_->advertiseService(service_, &GazeboRfid::bScan, this);
+  rfid_service_ = node_handle_->advertiseService(service_, &GazeboRfid::bScan, this);
   ROS_ERROR("HELLO FROM RFID");
 }
 
-void GazeboRfid::Reset() {}
+void GazeboRfid::Reset()
+{
+}
 
-void GazeboRfid::Update() {}
+void GazeboRfid::Update()
+{
+}
 GZ_REGISTER_MODEL_PLUGIN(GazeboRfid)
-} // namespace gazebo
+}  // namespace gazebo

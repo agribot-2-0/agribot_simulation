@@ -9,9 +9,12 @@
 #include <agribot_msgs/Tags.h>
 #include <hector_gazebo_plugins/sensor_model.h>
 #include <ros/ros.h>
+#include <string>
 
-namespace gazebo {
-class GazeboRfid : public ModelPlugin {
+namespace gazebo
+{
+class GazeboRfid : public ModelPlugin
+{
 public:
   GazeboRfid();
   virtual ~GazeboRfid();
@@ -23,12 +26,11 @@ protected:
 
 private:
   physics::WorldPtr world;
-  ros::NodeHandle *node_handle_;
+  ros::NodeHandle* node_handle_;
   std::string namespace_;
   std::string service_;
   ros::ServiceServer rfid_service_;
 
-  bool bScan(agribot_msgs::Tags::Request &req,
-             agribot_msgs::Tags::Response &res);
+  bool bScan(agribot_msgs::Tags::Request& req, agribot_msgs::Tags::Response& res);  // NOLINT(runtime/references)
 };
-} // namespace gazebo
+}  // namespace gazebo
