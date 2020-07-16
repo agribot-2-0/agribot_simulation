@@ -32,8 +32,8 @@ int GazeboRfid::gen_random_int(int min, int max)
 bool GazeboRfid::scan(agribot_msgs::Tags::Request& req,   // NOLINT(runtime/references)
                       agribot_msgs::Tags::Response& res)  // NOLINT(runtime/references)
 {
-  int rand_ind = gen_random_int(0, GazeboRfid::vec_size);
-  if (rand_ind == GazeboRfid::vec_size)
+  int rand_ind = gen_random_int(0, tags_.size());
+  if (rand_ind == tags_.size())
   {
     return true;
   }
