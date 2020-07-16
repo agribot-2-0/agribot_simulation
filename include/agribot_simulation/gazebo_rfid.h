@@ -10,6 +10,7 @@
 #include <hector_gazebo_plugins/sensor_model.h>
 #include <ros/ros.h>
 #include <string>
+#include <vector>
 
 namespace gazebo
 {
@@ -30,7 +31,9 @@ private:
   std::string namespace_;
   std::string service_;
   ros::ServiceServer rfid_service_;
+  std::vector<uint16_t> tags_;
 
-  bool bScan(agribot_msgs::Tags::Request& req, agribot_msgs::Tags::Response& res);  // NOLINT(runtime/references)
+  int gen_random_int(int min, int max);
+  bool scan(agribot_msgs::Tags::Request& req, agribot_msgs::Tags::Response& res);  // NOLINT(runtime/references)
 };
 }  // namespace gazebo
