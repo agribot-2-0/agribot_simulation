@@ -11,7 +11,7 @@ namespace gazebo
 {
 GazeboRfid::GazeboRfid()
 {
-  for (uint16_t i = 0; i < GazeboRfid::vec_size; i++)
+  for (uint16_t i = 0; i < vec_size_; i++)
   {
     tags_.push_back(i);
   }
