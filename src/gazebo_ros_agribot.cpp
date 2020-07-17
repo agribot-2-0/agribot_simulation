@@ -251,12 +251,23 @@ void GazeboRosAgribot::CreatePubsAndSubs()
 {
   ros::SubscribeOptions so = ros::SubscribeOptions::create<agribot_msgs::AgribotCaterpillar>(
       command_sub_topic_, 1, boost::bind(&GazeboRosAgribot::cmdVelCallback, this, _1), ros::VoidPtr(), &queue_);
+  ros::SubscribeOptions sub_cmd_tool_front = ros::SubscribeOptions::create<agribot_msgs::AgribotTool>(
+      "agribot/control/tool/front", 1, boost::bind(&GazeboRosAgribot::cmdToolsFrontCallback, this, _1), ros::VoidPtr(),
+      &queue_);
+  ros::SubscribeOptions sub_cmd_tool_back = ros::SubscribeOptions::create<agribot_msgs::AgribotTool>(
+      "agribot/control/tool/back", 1, boost::bind(&GazeboRosAgribot::cmdToolsBackCallback, this, _1), ros::VoidPtr(),
+      &queue_);
+
   rosnode_ = new ros::NodeHandle(this->robot_namespace_);
   cmd_vel_subscriber_ = rosnode_->subscribe(so);
+  cmd_front_tool_subscriber_ = rosnode_->subscribe(sub_cmd_tool_front);
+  cmd_back_tool_subscriber_ = rosnode_->subscribe(sub_cmd_tool_back);
   odometry_publisher_ = rosnode_->advertise<nav_msgs::Odometry>(odometry_topic_, 1);
   encoder_publisher_ = rosnode_->advertise<agribot_msgs::AgribotCaterpillar>(encoder_topic_, 1);
   front_cart_publisher_ = rosnode_->advertise<std_msgs::Float32>("agribot/encoder/cart/front", 1);
   back_cart_publisher_ = rosnode_->advertise<std_msgs::Float32>("agribot/encoder/cart/back", 1);
+  front_tool_publisher_ = rosnode_->advertise<agribot_msgs::AgribotTool>("agribot/encoder/tool/front", 1);
+  back_tool_publisher_ = rosnode_->advertise<agribot_msgs::AgribotTool>("agribot/encoder/tool/back", 1);
   tf_prefix_ = tf::getPrefixParam(*rosnode_);
   transform_broadcaster_ = new tf::TransformBroadcaster();
 }
@@ -270,6 +281,7 @@ void GazeboRosAgribot::onUpdate()
     publishOdometry(seconds_since_last_update);
     publishEncoder();
     publishCarts();
+    publishTools();
     last_update_time_ = current_time;
   }
   UpdateVelocities();
@@ -319,6 +331,20 @@ void GazeboRosAgribot::cmdVelCallback(const agribot_msgs::AgribotCaterpillar::Co
   cart_speed_[FRONT_ANGULAR] = cmd_msg->front_angular;
   cart_speed_[BACK_LINEAR] = cmd_msg->back_linear;
   cart_speed_[BACK_ANGULAR] = cmd_msg->back_angular;
+}
+
+void GazeboRosAgribot::cmdToolsFrontCallback(const agribot_msgs::AgribotTool::ConstPtr& tool_msg)
+{
+  front_cart_tool_encoder_.tpl_height = tool_msg->tpl_height;
+  front_cart_tool_encoder_.tpl_angle = tool_msg->tpl_angle;
+  front_cart_tool_encoder_.pto_rpm = tool_msg->pto_rpm;
+}
+
+void GazeboRosAgribot::cmdToolsBackCallback(const agribot_msgs::AgribotTool::ConstPtr& tool_msg)
+{
+  back_cart_tool_encoder_.tpl_height = tool_msg->tpl_height;
+  back_cart_tool_encoder_.tpl_angle = tool_msg->tpl_angle;
+  back_cart_tool_encoder_.pto_rpm = tool_msg->pto_rpm;
 }
 
 void GazeboRosAgribot::QueueThread()
@@ -411,6 +437,12 @@ void GazeboRosAgribot::publishCarts()
   BackAngleMsg_.data = joints_[BACK_CART]->Position(0);
   front_cart_publisher_.publish(FrontAngleMsg_);
   back_cart_publisher_.publish(BackAngleMsg_);
+}
+
+void GazeboRosAgribot::publishTools()
+{
+  front_tool_publisher_.publish(front_cart_tool_encoder_);
+  back_tool_publisher_.publish(back_cart_tool_encoder_);
 }
 
 GZ_REGISTER_MODEL_PLUGIN(GazeboRosAgribot)
