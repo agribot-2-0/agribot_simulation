@@ -17,6 +17,7 @@
 #include <tf/transform_broadcaster.h>
 #include <tf/transform_listener.h>
 #include <agribot_msgs/AgribotCaterpillar.h>
+#include <agribot_msgs/AgribotTool.h>
 #include <sensor_msgs/Imu.h>
 #include <geometry_msgs/Pose2D.h>
 #include <nav_msgs/Odometry.h>
@@ -58,6 +59,7 @@ private:
   void publishOdometry(double step_time);
   void publishEncoder();
   void publishCarts();
+  void publishTools();
   void CreatePubsAndSubs();
   void UpdateVelocities();
 
@@ -82,10 +84,14 @@ private:
   // ROS STUFF
   ros::NodeHandle* rosnode_;
   ros::Subscriber cmd_vel_subscriber_;
+  ros::Subscriber cmd_front_tool_subscriber_;
+  ros::Subscriber cmd_back_tool_subscriber_;
   ros::Publisher odometry_publisher_;
   ros::Publisher encoder_publisher_;
   ros::Publisher front_cart_publisher_;
   ros::Publisher back_cart_publisher_;
+  ros::Publisher front_tool_publisher_;
+  ros::Publisher back_tool_publisher_;
   gazebo::transport::NodePtr node_handle_;
   tf::TransformBroadcaster* transform_broadcaster_;
   agribot_msgs::AgribotCaterpillar encoder_;
@@ -111,6 +117,9 @@ private:
 
   // DiffDrive stuff
   void cmdVelCallback(const agribot_msgs::AgribotCaterpillar::ConstPtr& cmd_msg);
+  // Tools callbacks
+  void cmdToolsFrontCallback(const agribot_msgs::AgribotTool::ConstPtr& tool_msg);
+  void cmdToolsBackCallback(const agribot_msgs::AgribotTool::ConstPtr& tool_msg);
 
   bool alive_;
   //
@@ -122,6 +131,9 @@ private:
   OdomSource odom_source_;
   geometry_msgs::Pose2D pose_encoder_;
   common::Time last_odom_update_;
+  // Tools msgs:
+  agribot_msgs::AgribotTool front_cart_tool_encoder_;
+  agribot_msgs::AgribotTool back_cart_tool_encoder_;
 
   double covariance_x_;
   double covariance_y_;
