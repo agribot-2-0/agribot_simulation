@@ -1,65 +1,46 @@
-<sdf version="1.5">
+<?xml version="1.0" ?>
+<sdf version="1.6">
   <world name="default">
 
     <gui fullscreen='0'>
-        <camera name='user_camera'>
-          <pose frame=''>-10.1575 -4.15943 3.76474 0 0.203643 0.548194</pose>
-          <view_controller>orbit</view_controller>
-          <projection_type>perspective</projection_type>
-        </camera>
+      <camera name='user_camera'>
+        <pose frame=''>-30 -20 30 0 0.6 0.3</pose>
+        <view_controller>orbit</view_controller>
+        <projection_type>perspective</projection_type>
+      </camera>
     </gui>
 
-    <include>
-      <uri>model://ground_plane</uri>
-    </include>
+    <!-- A grass plane -->
+    <population name="grass_plane">
+      <model name="grass">
+        <include>
+          <uri>model://grass_plane</uri>
+        </include>
+      </model>
+      <pose>15 -8 0 0 0 0</pose>
+      <distribution>
+        <type>grid</type>
+        <rows>4</rows>
+        <cols>4</cols>
+        <step>10 10 0</step>
+      </distribution>
+    </population>
 
-    <include>
-          <uri>/home/lukas/Projects/Agribot/catkin_ws/src/agribot_simulation/worlds/tree</uri>
-          <name>tree1</name>
-          <pose>0 0.5 0 0 0 0</pose>
-    </include>
-
-    <include>
-          <uri>/home/lukas/Projects/Agribot/catkin_ws/src/agribot_simulation/worlds/tree</uri>
-          <name>tree2</name>
-          <pose>1 0.5 0 0 0 0</pose>
-    </include>
-
-    <include>
-          <uri>/home/lukas/Projects/Agribot/catkin_ws/src/agribot_simulation/worlds/tree</uri>
-          <name>tree3</name>
-          <pose>2 0.5 0 0 0 0</pose>
-    </include>
-
-    <include>
-          <uri>/home/lukas/Projects/Agribot/catkin_ws/src/agribot_simulation/worlds/tree</uri>
-          <name>tree4</name>
-          <pose>3 0.5 0 0 0 0</pose>
-    </include>
-
-    <include>
-          <uri>/home/lukas/Projects/Agribot/catkin_ws/src/agribot_simulation/worlds/tree</uri>
-          <name>tree5</name>
-          <pose>0 1.5 0 0 0 0</pose>
-    </include>
-
-    <include>
-          <uri>/home/lukas/Projects/Agribot/catkin_ws/src/agribot_simulation/worlds/tree</uri>
-          <name>tree6</name>
-          <pose>1 1.5 0 0 0 0</pose>
-    </include>
-
-    <include>
-          <uri>/home/lukas/Projects/Agribot/catkin_ws/src/agribot_simulation/worlds/tree</uri>
-          <name>tree7</name>
-          <pose>2 1.5 0 0 0 0</pose>
-    </include>
-
-    <include>
-          <uri>/home/lukas/Projects/Agribot/catkin_ws/src/agribot_simulation/worlds/tree</uri>
-          <name>tree8</name>
-          <pose>3 1.5 0 0 0 0</pose>
-    </include>
+    <!-- Trees -->
+    <population name="tree_population">
+      <model name="tree">
+        <include>
+          <uri>model://tree</uri>
+        </include>
+      </model>
+      <pose>14 -8 0 0 0 0</pose>
+      <distribution>
+        <type>grid</type>
+        <rows>6</rows>
+        <cols>20</cols>
+        <step>1 4 0</step>
+      </distribution>
+    </population>
 
   </world>
 </sdf>

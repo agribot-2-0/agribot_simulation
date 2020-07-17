@@ -1,0 +1,8 @@
+- git:
+    local-name: agribot_description
+    uri: https://github.com/panpawelchmiel/agribot_description.git
+    version: develop
+- git:
+    local-name: agribot_msgs
+    uri: https://github.com/panpawelchmiel/agribot_msgs.git
+    version: develop

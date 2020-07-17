@@ -26,20 +26,20 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //=================================================================================================
 
-#include <agribot_simulation/gazebo_inclinometer.h>
+#include <agribot_simulation/external/gazebo_heading.h>
 #include <gazebo/common/Events.hh>
 #include <gazebo/physics/physics.hh>
 #include <tf/tf.h>
 
 namespace gazebo {
 
-GazeboInclinometer::GazeboInclinometer()
+GazeboHeading::GazeboHeading()
 {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 // Destructor
-GazeboInclinometer::~GazeboInclinometer()
+GazeboHeading::~GazeboHeading()
 {
   updateTimer.Disconnect(updateConnection);
 
@@ -49,7 +49,7 @@ GazeboInclinometer::~GazeboInclinometer()
 
 ////////////////////////////////////////////////////////////////////////////////
 // Load the controller
-void GazeboInclinometer::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
+void GazeboHeading::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
 {
   world = _model->GetWorld();
 
@@ -60,7 +60,7 @@ void GazeboInclinometer::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
     namespace_.clear();
 
   if (!_sdf->HasElement("topicName"))
-    topic_ = "inclinometer";
+    topic_ = "heading";
   else
     topic_ = _sdf->GetElement("topicName")->Get<std::string>();
 
@@ -78,7 +78,7 @@ void GazeboInclinometer::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
 
   if (!link)
   {
-    ROS_FATAL("GazeboInclinometer plugin error: bodyName: %s does not exist\n", link_name_.c_str());
+    ROS_FATAL("GazeboHeading plugin error: bodyName: %s does not exist\n", link_name_.c_str());
     return;
   }
 
@@ -88,7 +88,7 @@ void GazeboInclinometer::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
   if (_sdf->HasElement("frameId"))
     frame_id_ = _sdf->GetElement("frameId")->GetValue()->GetAsString();
 
-  inclinometer_.header.frame_id = frame_id_;
+  heading_.header.frame_id = frame_id_;
 
   sensor_model_.Load(_sdf);
 
@@ -107,13 +107,13 @@ void GazeboInclinometer::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
   }
 
 #if (GAZEBO_MAJOR_VERSION >= 8)
-  inclinometer_.orientation_covariance[0] = sensor_model_.drift.X()*sensor_model_.drift.X() + sensor_model_.gaussian_noise.X()*sensor_model_.gaussian_noise.X();
-  inclinometer_.orientation_covariance[4] = sensor_model_.drift.Y()*sensor_model_.drift.Y() + sensor_model_.gaussian_noise.Y()*sensor_model_.gaussian_noise.Y();
-  inclinometer_.orientation_covariance[8] = sensor_model_.drift.Z()*sensor_model_.drift.Z() + sensor_model_.gaussian_noise.Z()*sensor_model_.gaussian_noise.Z();
+  heading_.orientation_covariance[0] = sensor_model_.drift.X()*sensor_model_.drift.X() + sensor_model_.gaussian_noise.X()*sensor_model_.gaussian_noise.X();
+  heading_.orientation_covariance[4] = sensor_model_.drift.Y()*sensor_model_.drift.Y() + sensor_model_.gaussian_noise.Y()*sensor_model_.gaussian_noise.Y();
+  heading_.orientation_covariance[8] = sensor_model_.drift.Z()*sensor_model_.drift.Z() + sensor_model_.gaussian_noise.Z()*sensor_model_.gaussian_noise.Z();
 #else
-  inclinometer_.orientation_covariance[0] = sensor_model_.drift.x*sensor_model_.drift.x + sensor_model_.gaussian_noise.x*sensor_model_.gaussian_noise.x;
-  inclinometer_.orientation_covariance[4] = sensor_model_.drift.y*sensor_model_.drift.y + sensor_model_.gaussian_noise.y*sensor_model_.gaussian_noise.y;
-  inclinometer_.orientation_covariance[8] = sensor_model_.drift.z*sensor_model_.drift.z + sensor_model_.gaussian_noise.z*sensor_model_.gaussian_noise.z;
+  heading_.orientation_covariance[0] = sensor_model_.drift.x*sensor_model_.drift.x + sensor_model_.gaussian_noise.x*sensor_model_.gaussian_noise.x;
+  heading_.orientation_covariance[4] = sensor_model_.drift.y*sensor_model_.drift.y + sensor_model_.gaussian_noise.y*sensor_model_.gaussian_noise.y;
+  heading_.orientation_covariance[8] = sensor_model_.drift.z*sensor_model_.drift.z + sensor_model_.gaussian_noise.z*sensor_model_.gaussian_noise.z;
 #endif
 
   // start ros node
@@ -131,10 +131,10 @@ void GazeboInclinometer::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
 
   // connect Update function
   updateTimer.Load(world, _sdf);
-  updateConnection = updateTimer.Connect(boost::bind(&GazeboInclinometer::Update, this));
+  updateConnection = updateTimer.Connect(boost::bind(&GazeboHeading::Update, this));
 }
 
-void GazeboInclinometer::Reset()
+void GazeboHeading::Reset()
 {
   updateTimer.Reset();
   sensor_model_.reset();
@@ -142,7 +142,7 @@ void GazeboInclinometer::Reset()
 
 ////////////////////////////////////////////////////////////////////////////////
 // Update the controller
-void GazeboInclinometer::Update()
+void GazeboHeading::Update()
 {
 #if (GAZEBO_MAJOR_VERSION >= 8)
   common::Time sim_time = world->SimTime();
@@ -151,8 +151,11 @@ void GazeboInclinometer::Update()
   ignition::math::Pose3d pose = link->WorldPose();
   ignition::math::Vector3d orientation = sensor_model_(pose.Rot().Euler(), dt);
 
-  inclinometer_.header.stamp = ros::Time(sim_time.sec, sim_time.nsec);
-  inclinometer_.orientation = tf::createQuaternionMsgFromRollPitchYaw(orientation.X(),orientation.Y(),0);
+  heading_.header.stamp = ros::Time(sim_time.sec, sim_time.nsec);
+  heading_.orientation = tf::createQuaternionMsgFromRollPitchYaw(0,0,orientation.Z());
+  heading_.orientation_covariance[0] = sensor_model_.drift.X()*sensor_model_.drift.X() + sensor_model_.gaussian_noise.X()*sensor_model_.gaussian_noise.X();
+  heading_.orientation_covariance[4] = sensor_model_.drift.Y()*sensor_model_.drift.Y() + sensor_model_.gaussian_noise.Y()*sensor_model_.gaussian_noise.Y();
+  heading_.orientation_covariance[8] = sensor_model_.drift.Z()*sensor_model_.drift.Z() + sensor_model_.gaussian_noise.Z()*sensor_model_.gaussian_noise.Z();
 #else
   common::Time sim_time = world->GetSimTime();
   double dt = updateTimer.getTimeSinceLastUpdate().Double();
@@ -160,14 +163,17 @@ void GazeboInclinometer::Update()
   math::Pose pose = link->GetWorldPose();
   math::Vector3 orientation = sensor_model_(pose.rot.GetAsEuler()), dt);
 
-  inclinometer_.header.stamp = ros::Time(sim_time.sec, sim_time.nsec);
-  inclinometer_.orientation = tf::createQuaternionMsgFromRollPitchYaw(orientation.x,orientation.y,0);  
+  heading_.header.stamp = ros::Time(sim_time.sec, sim_time.nsec);
+  heading_.orientation = tf::createQuaternionMsgFromRollPitchYaw(0,0,orientation.z);
+  heading_.orientation_covariance[0] = sensor_model_.drift.x*sensor_model_.drift.x + sensor_model_.gaussian_noise.x*sensor_model_.gaussian_noise.x;
+  heading_.orientation_covariance[4] = sensor_model_.drift.y*sensor_model_.drift.y + sensor_model_.gaussian_noise.y*sensor_model_.gaussian_noise.y;
+  heading_.orientation_covariance[8] = sensor_model_.drift.z*sensor_model_.drift.z + sensor_model_.gaussian_noise.z*sensor_model_.gaussian_noise.z;
 #endif
-  
-  publisher_.publish(inclinometer_);
+
+  publisher_.publish(heading_);
 }
 
 // Register this plugin with the simulator
-GZ_REGISTER_MODEL_PLUGIN(GazeboInclinometer)
+GZ_REGISTER_MODEL_PLUGIN(GazeboHeading)
 
 } // namespace gazebo

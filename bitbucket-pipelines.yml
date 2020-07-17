@@ -1,8 +1,27 @@
-image: docker:git
+image: docker:18-git
 
 pipelines:
   default:
      - step:
+         name: "Check pylint"
+         script:
+           - apk add --update bash coreutils tar python py-pip
+           - pip install pylint==1.9.5
+           - git clone https://github.com/panpawelchmiel/agribot_common.git
+           - pylint --rcfile=agribot_common/pylint_conf/.pylintrc scripts/*.py
+     - step:
+         name: "Check cppcheck"
+         script:
+           - apk add --update bash coreutils tar cppcheck
+           - cppcheck src/*
+     - step:
+         name: "Check cpplint"
+         script:
+           - apk add --update bash coreutils tar python3 py3-pip
+           - pip3 install cpplint==1.4.6
+           - cpplint --recursive .
+     - step:
+         name: "ROS build"
          size: 2x
          services:
            - docker
@@ -10,7 +29,7 @@ pipelines:
            - apk add --update bash coreutils tar
            - git clone --quiet --depth 1 https://github.com/ros-industrial/industrial_ci .industrial_ci -b master
            - git clone https://github.com/panpawelchmiel/agribot_msgs.git
-           - .industrial_ci/bitbucket.sh  ROS_DISTRO="melodic" UPSTREAM_WORKSPACE="agribot_msgs"
+           - .industrial_ci/bitbucket.sh BUILDER="colcon" ROS_DISTRO="melodic" UPSTREAM_WORKSPACE="agribot_msgs"
 
 definitions:
   services:

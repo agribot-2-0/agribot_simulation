@@ -26,8 +26,8 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //=================================================================================================
 
-#ifndef AGRIBOT_SENSORS_PLUGINS_GAZEBO_ROS_MAGNETIC_H
-#define AGRIBOT_SENSORS_PLUGINS_GAZEBO_ROS_MAGNETIC_H
+#ifndef AGRIBOT_SENSORS_PLUGINS_GAZEBO_ROS_HEADING_H
+#define AGRIBOT_SENSORS_PLUGINS_GAZEBO_ROS_HEADING_H
 
 #include <gazebo/common/Plugin.hh>
 
@@ -39,11 +39,11 @@
 namespace gazebo
 {
 
-class GazeboInclinometer : public ModelPlugin
+class GazeboHeading : public ModelPlugin
 {
 public:
-  GazeboInclinometer();
-  virtual ~GazeboInclinometer();
+  GazeboHeading();
+  virtual ~GazeboHeading();
 
 protected:
   virtual void Load(physics::ModelPtr _model, sdf::ElementPtr _sdf);
@@ -60,7 +60,7 @@ private:
   ros::NodeHandle* node_handle_;
   ros::Publisher publisher_;
 
-  sensor_msgs::Imu inclinometer_;
+  sensor_msgs::Imu heading_;
 
   std::string namespace_;
   std::string topic_;
@@ -75,4 +75,4 @@ private:
 
 } // namespace gazebo
 
-#endif // AGRIBOT_SENSORS_PLUGINS_GAZEBO_ROS_MAGNETIC_H
+#endif // AGRIBOT_SENSORS_PLUGINS_GAZEBO_ROS_HEADING_H
