@@ -77,17 +77,17 @@ class MobileAppSim(QWidget):
 
     def send_error_frame(self):
         msg = AgribotAppErrorFlag()
-        msg.data = AgribotAppErrorFlag.APP_MANUAL_ERROR
+        msg.error_flag = AgribotAppErrorFlag.APP_PROTOCOL_ERROR
         self.error.publish(msg)
 
     def send_manual_error(self):
         msg = AgribotAppErrorFlag()
-        msg.data = AgribotAppErrorFlag.OBSTACLE_DETECTED
+        msg.error_flag = AgribotAppErrorFlag.APP_MANUAL_ERROR
         self.error.publish(msg)
 
     def send_no_error(self):
         msg = AgribotAppErrorFlag()
-        msg.data = AgribotAppErrorFlag.NO_APP_ERRORS
+        msg.error_flag = AgribotAppErrorFlag.NO_APP_ERRORS
         self.error.publish(msg)
 
     def obstacle_detected(self):
