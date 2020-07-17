@@ -5,10 +5,10 @@ import signal
 import sys
 
 from python_qt_binding import loadUi
-from python_qt_binding.QtWidgets import QWidget, QApplication
+from python_qt_binding.QtWidgets import QWidget, QApplication  # pylint: disable=no-name-in-module
 
 from industrial_msgs.msg import RobotMode
-from std_msgs.msg import Int32, String
+from std_msgs.msg import String
 from agribot_msgs.msg import AgribotAppErrorFlag
 from agribot_msgs.msg import AgribotManualControl
 from agribot_msgs.msg import AgribotObstacleDetection
