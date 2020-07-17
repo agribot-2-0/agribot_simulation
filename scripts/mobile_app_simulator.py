@@ -9,11 +9,12 @@ from python_qt_binding.QtWidgets import QWidget, QApplication
 
 from industrial_msgs.msg import RobotMode
 from std_msgs.msg import Int32, String
+from agribot_msgs.msg import AgribotAppErrorFlag
 from agribot_msgs.msg import AgribotManualControl
+from agribot_msgs.msg import AgribotObstacleDetection
 
 import rospy
 import rospkg
-
 
 class MobileAppSim(QWidget):
     def __init__(self, parent=None):
@@ -34,14 +35,14 @@ class MobileAppSim(QWidget):
                                     queue_size=1)
 
         self.error = rospy.Publisher('/agribot/state_machine/error',
-                                     Int32,
+                                     AgribotAppErrorFlag,
                                      queue_size=1)
         self.task = rospy.Publisher('/agribot/state_machine/task',
                                     String,
                                     queue_size=1)
 
         self.obstacle = rospy.Publisher('/agribot/obstacle_detected',
-                                        Int32,
+                                        AgribotObstacleDetection,
                                         queue_size=1)
 
         self.manual_control = rospy.Publisher('cmd_vel_manual',
@@ -75,28 +76,28 @@ class MobileAppSim(QWidget):
         self.mode.publish(msg)
 
     def send_error_frame(self):
-        msg = Int32()
-        msg.data = 1
+        msg = AgribotAppErrorFlag()
+        msg.data = AgribotAppErrorFlag.APP_MANUAL_ERROR
         self.error.publish(msg)
 
     def send_manual_error(self):
-        msg = Int32()
-        msg.data = 2
+        msg = AgribotAppErrorFlag()
+        msg.data = AgribotAppErrorFlag.OBSTACLE_DETECTED
         self.error.publish(msg)
 
     def send_no_error(self):
-        msg = Int32()
-        msg.data = 0
+        msg = AgribotAppErrorFlag()
+        msg.data = AgribotAppErrorFlag.NO_APP_ERRORS
         self.error.publish(msg)
 
     def obstacle_detected(self):
-        msg = Int32()
-        msg.data = 1
+        msg = AgribotObstacleDetection()
+        msg.status = AgribotObstacleDetection.OBSTACLE_DETECTED
         self.obstacle.publish(msg)
 
     def no_obstacle_detected(self):
-        msg = Int32()
-        msg.data = 0
+        msg = AgribotObstacleDetection()
+        msg.status = AgribotObstacleDetection.NO_OBSTACLE
         self.obstacle.publish(msg)
 
     def send_velocity_linear(self):
