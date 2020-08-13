@@ -14,8 +14,8 @@
 
   <include file="$(find gazebo_ros)/launch/empty_world.launch">
     <arg name="world_name" value="$(find agribot_simulation)/worlds/$(arg world).world" />
-    <arg name="gui" value="false" />
-    <arg name="debug" value="false" />
+    <arg name="gui" value="$(arg gazebo_gui)" />
+    <arg name="debug" value="$(arg gazebo_debug)" />
   </include>
 
   <include file="$(find agribot_description)/launch/spawn_agribot.launch">
