@@ -1,0 +1,30 @@
+<launch>
+  <param name="/use_sim_time" value="true" />
+
+  <arg name="x_pos" default="0.0" />
+  <arg name="y_pos" default="0.0" />
+  <arg name="z_pos" default="0.0" />
+  <arg name="roll" default="0.0" />
+  <arg name="pitch" default="0.0" />
+  <arg name="yaw" default="0.0" />
+
+  <arg name="world" default="empty" />
+  <arg name="gazebo_gui" default="false" />
+  <arg name="gazebo_debug" default="false" />
+
+  <include file="$(find gazebo_ros)/launch/empty_world.launch">
+    <arg name="world_name" value="$(find agribot_simulation)/worlds/$(arg world).world" />
+    <arg name="gui" value="false" />
+    <arg name="debug" value="false" />
+  </include>
+
+  <include file="$(find agribot_description)/launch/spawn_agribot.launch">
+    <arg name="x_pos" value="$(arg x_pos)" />
+    <arg name="y_pos" value="$(arg y_pos)" />
+    <arg name="z_pos" value="$(arg z_pos)" />
+    <arg name="roll" value="$(arg roll)" />
+    <arg name="pitch" value="$(arg pitch)" />
+    <arg name="yaw" value="$(arg yaw)" />
+  </include>
+
+</launch>
