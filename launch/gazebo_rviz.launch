@@ -1,8 +1,0 @@
-<launch>
-
-  <include file="$(find agribot_description)/launch/robot_model.launch" />
-  <include file="$(find agribot_simulation)/launch/gazebo.launch" />
-
-  <node name="rviz" pkg="rviz" type="rviz" args="-d $(find agribot_simulation)/rviz/agribot_gazebo_model.rviz" />
-
-</launch>

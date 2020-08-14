@@ -11,6 +11,7 @@
   <arg name="world" default="empty" />
   <arg name="gazebo_gui" default="false" />
   <arg name="gazebo_debug" default="false" />
+  <arg name="perception_sensors" default="false" />
 
   <include file="$(find gazebo_ros)/launch/empty_world.launch">
     <arg name="world_name" value="$(find agribot_simulation)/worlds/$(arg world).world" />
@@ -25,6 +26,9 @@
     <arg name="roll" value="$(arg roll)" />
     <arg name="pitch" value="$(arg pitch)" />
     <arg name="yaw" value="$(arg yaw)" />
+    <arg name="perception_sensors" value="$(arg perception_sensors)" />
   </include>
+
+  <include file="$(find agribot_simulation)/launch/mobile_app_simulator.launch" />
 
 </launch>
