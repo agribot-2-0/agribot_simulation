@@ -19,6 +19,9 @@ import rospkg
 
 
 class MobileAppSim(QWidget):
+    max_linear_velocity = 2.0
+    max_circle_radius = 11.0
+
     def __init__(self, parent=None):
         super(MobileAppSim, self).__init__(parent)
         rospy.init_node('mobile_app_simulator')
@@ -105,8 +108,12 @@ class MobileAppSim(QWidget):
     def rosloop(self):
         rate = rospy.Rate(10)
         while not rospy.is_shutdown():
-            self.manual_msg.linear_velocity = self.slider_linear.value() / 25.0
-            self.manual_msg.circle_radius = self.slider_angular.value() / 5.0
+            self.manual_msg.linear_velocity = (
+                self.slider_linear.value() *
+                self.max_linear_velocity) / self.slider_linear.maximum()
+            self.manual_msg.circle_radius = (
+                self.slider_angular.value() *
+                self.max_circle_radius) / self.slider_angular.maximum()
             self.manual_control.publish(self.manual_msg)
 
             rate.sleep()
