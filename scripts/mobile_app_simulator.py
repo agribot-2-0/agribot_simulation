@@ -3,6 +3,7 @@
 import os
 import signal
 import sys
+import threading
 
 from python_qt_binding import loadUi
 from python_qt_binding.QtWidgets import QWidget, QApplication  # pylint: disable=no-name-in-module
@@ -15,7 +16,6 @@ from agribot_msgs.msg import AgribotObstacleDetection
 
 import rospy
 import rospkg
-import threading
 
 
 class MobileAppSim(QWidget):
