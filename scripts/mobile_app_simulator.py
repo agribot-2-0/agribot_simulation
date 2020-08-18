@@ -15,6 +15,8 @@ from agribot_msgs.msg import AgribotObstacleDetection
 
 import rospy
 import rospkg
+import threading
+
 
 class MobileAppSim(QWidget):
     def __init__(self, parent=None):
@@ -23,10 +25,7 @@ class MobileAppSim(QWidget):
 
         rospack = rospkg.RosPack()
         pkg_path = rospack.get_path('agribot_simulation')
-        ui_file = os.path.join(pkg_path,
-                               'scripts',
-                               'ui',
-                               'mobile_app_sim.ui')
+        ui_file = os.path.join(pkg_path, 'scripts', 'ui', 'mobile_app_sim.ui')
         loadUi(ui_file, self)
         self.setWindowTitle("Mobile App Simulator")
 
@@ -57,8 +56,11 @@ class MobileAppSim(QWidget):
         self.button_no_error.clicked.connect(self.send_no_error)
         self.button_obstacle.clicked.connect(self.obstacle_detected)
         self.button_no_obstacle.clicked.connect(self.no_obstacle_detected)
-        self.slider_linear.valueChanged.connect(self.send_velocity_linear)
-        self.slider_angular.valueChanged.connect(self.send_velocity_angular)
+        self.manual_msg = AgribotManualControl()
+
+        timestamp_thread = threading.Thread(target=self.rosloop)
+        timestamp_thread.setDaemon(True)
+        timestamp_thread.start()
 
     def send_task(self):
         msg = String()
@@ -100,23 +102,22 @@ class MobileAppSim(QWidget):
         msg.status = AgribotObstacleDetection.NO_OBSTACLE
         self.obstacle.publish(msg)
 
-    def send_velocity_linear(self):
-        msg = AgribotManualControl()
-        msg.linear_velocity = self.slider_linear.value()/10.0
-        msg.circle_radius = self.slider_angular.value()/10.0
-        self.manual_control.publish(msg)
+    def rosloop(self):
+        rate = rospy.Rate(10)
+        while not rospy.is_shutdown():
+            self.manual_msg.linear_velocity = self.slider_linear.value() / 25.0
+            self.manual_msg.circle_radius = self.slider_angular.value() / 5.0
+            self.manual_control.publish(self.manual_msg)
 
-    def send_velocity_angular(self):
-        msg = AgribotManualControl()
-        msg.linear_velocity = self.slider_linear.value()/10.0
-        msg.circle_radius = self.slider_angular.value()/10.0
-        self.manual_control.publish(msg)
+            rate.sleep()
+
 
 def main():
     app = QApplication(sys.argv)
     ex = MobileAppSim()
     ex.show()
     sys.exit(app.exec_())
+
 
 if __name__ == '__main__':
     signal.signal(signal.SIGINT, signal.SIG_DFL)
