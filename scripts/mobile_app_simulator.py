@@ -10,6 +10,7 @@ from python_qt_binding.QtWidgets import QWidget, QApplication  # pylint: disable
 
 from industrial_msgs.msg import RobotMode
 from std_msgs.msg import String
+from std_srvs.srv import Empty
 from agribot_msgs.msg import AgribotAppErrorFlag
 from agribot_msgs.msg import AgribotManualControl
 from agribot_msgs.msg import AgribotObstacleDetection
@@ -59,7 +60,11 @@ class MobileAppSim(QWidget):
         self.button_no_error.clicked.connect(self.send_no_error)
         self.button_obstacle.clicked.connect(self.obstacle_detected)
         self.button_no_obstacle.clicked.connect(self.no_obstacle_detected)
+        self.button_reset_gazebo.clicked.connect(self.gazebo_reset_world)
         self.manual_msg = AgribotManualControl()
+
+        rospy.wait_for_service('/gazebo/reset_world')
+        self.reset_world = rospy.ServiceProxy('/gazebo/reset_world', Empty)
 
         timestamp_thread = threading.Thread(target=self.rosloop)
         timestamp_thread.setDaemon(True)
@@ -104,6 +109,9 @@ class MobileAppSim(QWidget):
         msg = AgribotObstacleDetection()
         msg.status = AgribotObstacleDetection.NO_OBSTACLE
         self.obstacle.publish(msg)
+
+    def gazebo_reset_world(self):
+        self.reset_world()
 
     def rosloop(self):
         rate = rospy.Rate(10)
