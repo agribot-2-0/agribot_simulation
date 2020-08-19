@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>573</width>
-    <height>242</height>
+    <width>613</width>
+    <height>255</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -142,6 +142,24 @@
           <widget class="QPushButton" name="button_no_obstacle">
            <property name="text">
             <string>NO Obstacle</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <widget class="Line" name="line_5">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_7">
+         <item>
+          <widget class="QPushButton" name="button_reset_gazebo">
+           <property name="text">
+            <string>Reset Gazebo</string>
            </property>
           </widget>
          </item>
