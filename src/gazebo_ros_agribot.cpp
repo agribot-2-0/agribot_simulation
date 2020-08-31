@@ -2,14 +2,9 @@
  * Copyright (C) 2020 Agribot. All rights reserved.
  */
 
-#include <assert.h>
 #include <agribot_simulation/gazebo_ros_agribot.h>
-#include <ignition/math/Angle.hh>
-#include <ignition/math/Pose3.hh>
-#include <ignition/math/Quaternion.hh>
-#include <ignition/math/Vector3.hh>
+#include <assert.h>
 #include <math.h>
-#include <sdf/sdf.hh>
 #include <ros/ros.h>
 
 #include <algorithm>
@@ -266,6 +261,8 @@ void GazeboRosAgribot::CreatePubsAndSubs()
   encoder_publisher_ = rosnode_->advertise<agribot_msgs::AgribotCaterpillar>(encoder_topic_, 1);
   front_cart_publisher_ = rosnode_->advertise<std_msgs::Float32>("agribot/encoder/cart/front", 1);
   back_cart_publisher_ = rosnode_->advertise<std_msgs::Float32>("agribot/encoder/cart/back", 1);
+  catterpilar_wheels_publisher_ =
+      rosnode_->advertise<agribot_msgs::AgribotCaterpillarWheels>("agribot/encoder/caterpillar/wheels", 1);
   front_tool_publisher_ = rosnode_->advertise<agribot_msgs::AgribotTool>("agribot/encoder/tool/front", 1);
   back_tool_publisher_ = rosnode_->advertise<agribot_msgs::AgribotTool>("agribot/encoder/tool/back", 1);
   tf_prefix_ = tf::getPrefixParam(*rosnode_);
@@ -429,6 +426,16 @@ void GazeboRosAgribot::publishEncoder()
   encoder_.back_angular =
       (current_speed[BACK_RIGHT] * wheel_radius_ - current_speed[BACK_LEFT] * wheel_radius_) / wheel_separation_;
   encoder_publisher_.publish(encoder_);
+
+  CaterpillarEncoderMsg_.back_left =
+      static_cast<int32_t>(joints_[BACK_LEFT]->Position(0) * (impulses_per_wheel / (2 * M_PI)));
+  CaterpillarEncoderMsg_.back_right =
+      static_cast<int32_t>(joints_[BACK_RIGHT]->Position(0) * (impulses_per_wheel / (2 * M_PI)));
+  CaterpillarEncoderMsg_.front_left =
+      static_cast<int32_t>(joints_[FRONT_LEFT]->Position(0) * (impulses_per_wheel / (2 * M_PI)));
+  CaterpillarEncoderMsg_.front_right =
+      static_cast<int32_t>(joints_[FRONT_RIGHT]->Position(0) * (impulses_per_wheel / (2 * M_PI)));
+  catterpilar_wheels_publisher_.publish(CaterpillarEncoderMsg_);
 }
 
 void GazeboRosAgribot::publishCarts()
