@@ -8,11 +8,6 @@
 #include <ros/ros.h>
 
 #include <algorithm>
-#include <ignition/math/Angle.hh>
-#include <ignition/math/Pose3.hh>
-#include <ignition/math/Quaternion.hh>
-#include <ignition/math/Vector3.hh>
-#include <sdf/sdf.hh>
 
 #define RAD_TO_DEG (180 / M_PI)
 #define DEG_TO_RAD (M_PI / 180)
