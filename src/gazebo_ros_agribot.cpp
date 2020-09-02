@@ -427,14 +427,11 @@ void GazeboRosAgribot::publishEncoder()
       (current_speed[BACK_RIGHT] * wheel_radius_ - current_speed[BACK_LEFT] * wheel_radius_) / wheel_separation_;
   encoder_publisher_.publish(encoder_);
 
-  CaterpillarEncoderMsg_.back_left =
-      static_cast<int32_t>(joints_[BACK_LEFT]->Position(0) * (impulses_per_wheel / (2 * M_PI)));
-  CaterpillarEncoderMsg_.back_right =
-      static_cast<int32_t>(joints_[BACK_RIGHT]->Position(0) * (impulses_per_wheel / (2 * M_PI)));
-  CaterpillarEncoderMsg_.front_left =
-      static_cast<int32_t>(joints_[FRONT_LEFT]->Position(0) * (impulses_per_wheel / (2 * M_PI)));
-  CaterpillarEncoderMsg_.front_right =
-      static_cast<int32_t>(joints_[FRONT_RIGHT]->Position(0) * (impulses_per_wheel / (2 * M_PI)));
+  CaterpillarEncoderMsg_.header.stamp = ros::Time::now();
+  CaterpillarEncoderMsg_.back_left = joints_[BACK_LEFT]->Position(0);
+  CaterpillarEncoderMsg_.back_right = joints_[BACK_RIGHT]->Position(0);
+  CaterpillarEncoderMsg_.front_left = joints_[FRONT_LEFT]->Position(0);
+  CaterpillarEncoderMsg_.front_right = joints_[FRONT_RIGHT]->Position(0);
   catterpilar_wheels_publisher_.publish(CaterpillarEncoderMsg_);
 }
 
