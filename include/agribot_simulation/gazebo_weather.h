@@ -27,7 +27,7 @@ public:
   GazeboWeather();
   virtual ~GazeboWeather();
 
-  virtual void Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf);
+  virtual void Load(physics::ModelPtr parent, sdf::ElementPtr sdf);
 
   void onUpdate();
 
@@ -39,19 +39,21 @@ private:
   ros::Publisher wind_publisher_;
 
   // messages
-  sensor_msgs::Temperature msg_temp;
-  sensor_msgs::RelativeHumidity msg_humi;
-  sensor_msgs::FluidPressure msg_pressure;
-  agribot_msgs::AgribotWind msg_wind;
+  sensor_msgs::Temperature msg_temp_;
+  sensor_msgs::RelativeHumidity msg_humi_;
+  sensor_msgs::FluidPressure msg_pressure_;
+  agribot_msgs::AgribotWind msg_wind_;
 
   // gazebo
-  physics::ModelPtr model;
-  physics::WorldPtr world;
+  physics::ModelPtr model_;
+  physics::WorldPtr world_;
   gazebo::transport::NodePtr node_handle_;
   std::unique_ptr<ros::NodeHandle> rosnode_;
   event::ConnectionPtr update_connection_;
   common::Time last_update_time_;
 
   double update_period_;
+
+  double kelvinToCelsius(double temp_in_kelvin);
 };
 }  // namespace gazebo
