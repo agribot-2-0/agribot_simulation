@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 2.8.3)
 project(agribot_simulation)
 
 ## Compile as C++11, supported in ROS Kinetic and newer
-add_compile_options(-std=c++11)
+add_compile_options(-std=c++17)
 
 cmake_policy(SET CMP0054 OLD)
 
@@ -159,6 +159,11 @@ add_library(gazebo_rfid
   src/gazebo_rfid.cpp
 )
 
+add_library(gazebo_weather
+  src/gazebo_weather.cpp
+)
+
+
 target_link_libraries(gazebo_ros_agribot
   gazebo_inclinometer
   gazebo_heading
@@ -166,6 +171,7 @@ target_link_libraries(gazebo_ros_agribot
   gazebo_gps
   gazebo_magnetic
   gazebo_rfid
+  gazebo_weather
   ${GAZEBO_LIBRARIES}
   ${catkin_LIBRARIES}
   ${Boost_LIBRARIES}
@@ -215,6 +221,7 @@ install(TARGETS
   gazebo_gps
   gazebo_magnetic
   gazebo_rfid
+  gazebo_weather
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
 )
