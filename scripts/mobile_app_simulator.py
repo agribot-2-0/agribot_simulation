@@ -14,7 +14,7 @@ from std_srvs.srv import Empty
 from agribot_msgs.msg import AgribotAppErrorFlag
 from agribot_msgs.msg import AgribotManualControl
 from agribot_msgs.msg import AgribotObstacleDetection
-from agribot_msgs.msg import ToolState
+from agribot_msgs.srv import ToolState
 
 import rospy
 import rospkg
