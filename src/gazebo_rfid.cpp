@@ -67,7 +67,7 @@ void GazeboRfid::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
     char** argv = NULL;
     ros::init(argc, argv, "gazebo", ros::init_options::NoSigintHandler | ros::init_options::AnonymousName);
   }
-  node_handle_ = new ros::NodeHandle("hal_rfid");
+  node_handle_ = new ros::NodeHandle("agribot/rfid/");
   rfid_service_ = node_handle_->advertiseService(service_, &GazeboRfid::scan, this);
 }
 
