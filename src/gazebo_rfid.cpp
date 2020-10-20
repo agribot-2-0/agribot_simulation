@@ -7,14 +7,16 @@
 #include <cstdlib>
 #include <ctime>
 
+constexpr uint8_t min_power_dbm = 17;
+constexpr uint8_t max_power_dbm = 33;
+constexpr uint8_t front_ant = 1;
+constexpr uint8_t back_ant = 2;
+
 namespace gazebo
 {
 GazeboRfid::GazeboRfid()
 {
-  for (uint16_t i = 0; i < vec_size_; ++i)
-  {
-    tags_.push_back(i);
-  }
+
 }
 
 GazeboRfid::~GazeboRfid()
@@ -23,21 +25,66 @@ GazeboRfid::~GazeboRfid()
   delete node_handle_;
 }
 
-int GazeboRfid::gen_random_int(int min, int max)
+auto GazeboRfid::calculateDrawingConditions(uint8_t power)
 {
+  struct conditions {
+    float lower_condition, upper_condition = 0;
+  };
   unsigned int seed = time(NULL);
-  return (rand_r(&seed) % (max + 1)) + min;
+  uint8_t rand_num = rand_r(&seed) % 101;
+  return conditions{33, 66};
+}
+
+uint8_t GazeboRfid::drawNumberOfTags(uint8_t selected_antenna)
+{
+  uint8_t ant_pwr = 0;
+  switch(selected_antenna)
+  {
+    case front_ant:
+      ant_pwr = front_ant_pwr_;
+      break;
+    case back_ant:
+      ant_pwr = back_ant_pwr_;
+      break;
+    default:
+      break;
+  }
+  auto [cond1, cond2] = calculateDrawingConditions(ant_pwr);
+
 }
 
 bool GazeboRfid::scan(agribot_msgs::Tags::Request& req,   // NOLINT(runtime/references)
                       agribot_msgs::Tags::Response& res)  // NOLINT(runtime/references)
 {
-  int rand_ind = gen_random_int(0, tags_.size());
-  if (rand_ind == tags_.size())
+  int detected_tags = drawNumberOfTags(req.selected_antenna);
+
+  //res.ids.push_back(i);
+  return true;
+}
+
+bool GazeboRfid::setPower(agribot_msgs::RfidPower::Request& req,   // NOLINT(runtime/references)
+                           agribot_msgs::RfidPower::Response& res)  // NOLINT(runtime/references)
+{
+  res.result = res.SUCCESS;
+  if ((req.power_value > max_power_dbm) || (req.power_value < min_power_dbm))
   {
+    ROS_INFO("Wrong PW value %d dB", req.power_value);
+    res.result = res.FAIL;
     return true;
   }
-  res.ids.push_back(tags_[rand_ind]);
+  switch (req.selected_antenna)
+  {
+    case req.FRONT:
+      front_ant_pwr_ = req.power_value;
+      ROS_INFO("Front ant pw: %d dB", front_ant_pwr_);
+      break;
+    case req.BACK:
+      back_ant_pwr_ = req.power_value;
+      ROS_INFO("Back ant pw: %d dB", back_ant_pwr_);
+      break;
+    default:
+      res.result = res.FAIL;
+  }
   return true;
 }
 
@@ -68,7 +115,8 @@ void GazeboRfid::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
     ros::init(argc, argv, "gazebo", ros::init_options::NoSigintHandler | ros::init_options::AnonymousName);
   }
   node_handle_ = new ros::NodeHandle("agribot/rfid/");
-  rfid_service_ = node_handle_->advertiseService(service_, &GazeboRfid::scan, this);
+  rfid_scanner_service_ = node_handle_->advertiseService(service_, &GazeboRfid::scan, this);
+  rfid_antenna_pw_service_ = node_handle_->advertiseService("antennas/power", &GazeboRfid::setPower, this);
 }
 
 void GazeboRfid::Reset()
