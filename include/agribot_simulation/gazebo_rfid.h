@@ -42,7 +42,7 @@ private:
   auto calculateConditionsToDrawFrom(float power);
   uint8_t drawNumberOfTags(uint8_t selected_antenna);
   bool scan(agribot_msgs::Tags::Request& req, agribot_msgs::Tags::Response& res);  // NOLINT(runtime/references)
-  bool setPower(agribot_msgs::RfidPower::Request& req,
+  bool setPower(agribot_msgs::RfidPower::Request& req,  // NOLINT(runtime/references)
                 agribot_msgs::RfidPower::Response& res);  // NOLINT(runtime/references)
 };
 }  // namespace gazebo
