@@ -35,12 +35,14 @@ private:
   ros::ServiceServer rfid_scanner_service_;
   ros::ServiceServer rfid_antenna_pw_service_;
   std::vector<uint16_t> tags_;
-  uint8_t front_ant_pwr_;
-  uint8_t back_ant_pwr_;
+  float front_ant_pwr_;
+  float back_ant_pwr_;
 
-  auto calculateDrawingConditions(uint8_t power);
+  float calculateSecondDegreePolynomial(float a, float b, float c, float x);
+  auto calculateConditionsToDrawFrom(float power);
   uint8_t drawNumberOfTags(uint8_t selected_antenna);
-  bool scan(agribot_msgs::Tags::Request& req, agribot_msgs::Tags::Response& res);                 // NOLINT(runtime/references)
-  bool setPower(agribot_msgs::RfidPower::Request& req, agribot_msgs::RfidPower::Response& res);  // NOLINT(runtime/references)
+  bool scan(agribot_msgs::Tags::Request& req, agribot_msgs::Tags::Response& res);  // NOLINT(runtime/references)
+  bool setPower(agribot_msgs::RfidPower::Request& req,
+                agribot_msgs::RfidPower::Response& res);  // NOLINT(runtime/references)
 };
 }  // namespace gazebo

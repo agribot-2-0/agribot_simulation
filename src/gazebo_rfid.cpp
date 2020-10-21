@@ -7,16 +7,43 @@
 #include <cstdlib>
 #include <ctime>
 
-constexpr uint8_t min_power_dbm = 17;
-constexpr uint8_t max_power_dbm = 33;
+constexpr float min_power_dbm = 17.0;
+constexpr float max_power_dbm = 33.0;
 constexpr uint8_t front_ant = 1;
 constexpr uint8_t back_ant = 2;
+
+constexpr uint8_t tags_ids[] = { 0xaa, 0xbb };
+
+// The boundaries below was selected in order to ensure
+// specified chances of detecting tags, depending on
+// antenna power:
+// 1. ant_pw = 17db: * the probability for 1 or 2 tag is equal to 5%
+//                     the probability for 0 tags is equal to 90%
+// 2. ant_pw = 25db: * the probability for 0, 1 or 2 tags is equal to 33%
+// 3. ant_pw = 33db: * the probability for 0 or 1 tag is equal to 5%
+//                     the probability for 2 tags is equal to 90%
+// The probabilities between specified points are calculated
+// from quadrature function.
+const struct
+{
+  float a;
+  float b;
+  float c;
+} param_low = { 0.226, -16.64, 307.41 };
+
+const struct
+{
+  float a;
+  float b;
+  float c;
+} param_upper = { -0.21, 5.23, 66.97 };
 
 namespace gazebo
 {
 GazeboRfid::GazeboRfid()
 {
-
+  front_ant_pwr_ = min_power_dbm;
+  back_ant_pwr_ = max_power_dbm;
 }
 
 GazeboRfid::~GazeboRfid()
@@ -25,20 +52,26 @@ GazeboRfid::~GazeboRfid()
   delete node_handle_;
 }
 
-auto GazeboRfid::calculateDrawingConditions(uint8_t power)
+float GazeboRfid::calculateSecondDegreePolynomial(float a, float b, float c, float x)
 {
-  struct conditions {
-    float lower_condition, upper_condition = 0;
+  return a * pow(x, 2) + b * x + c;
+}
+
+auto GazeboRfid::calculateConditionsToDrawFrom(float power)
+{
+  struct conditions
+  {
+    float l_cond = 0, u_cond = 0;
   };
-  unsigned int seed = time(NULL);
-  uint8_t rand_num = rand_r(&seed) % 101;
-  return conditions{33, 66};
+  return conditions{ calculateSecondDegreePolynomial(param_low.a, param_low.b, param_low.c, power),
+                     calculateSecondDegreePolynomial(param_upper.a, param_upper.b, param_upper.c, power) };
 }
 
 uint8_t GazeboRfid::drawNumberOfTags(uint8_t selected_antenna)
 {
   uint8_t ant_pwr = 0;
-  switch(selected_antenna)
+  uint8_t detected_tags_cnt = 0;
+  switch (selected_antenna)
   {
     case front_ant:
       ant_pwr = front_ant_pwr_;
@@ -49,21 +82,41 @@ uint8_t GazeboRfid::drawNumberOfTags(uint8_t selected_antenna)
     default:
       break;
   }
-  auto [cond1, cond2] = calculateDrawingConditions(ant_pwr);
+  auto [lower_cond, upper_cond] = calculateConditionsToDrawFrom(ant_pwr);
+  ROS_INFO("lower_cond = %f, upper_cond = %f", lower_cond, upper_cond);
 
+  unsigned int seed = time(NULL);
+  uint8_t drawed_num = rand_r(&seed) % 101;
+  ROS_INFO("Drawed number = %d", drawed_num);
+  if (drawed_num < lower_cond)
+  {
+    detected_tags_cnt = 0;
+  }
+  if (drawed_num >= lower_cond && drawed_num <= upper_cond)
+  {
+    detected_tags_cnt = 1;
+  }
+  if (drawed_num > upper_cond)
+  {
+    detected_tags_cnt = 2;
+  }
+  return detected_tags_cnt;
 }
 
 bool GazeboRfid::scan(agribot_msgs::Tags::Request& req,   // NOLINT(runtime/references)
                       agribot_msgs::Tags::Response& res)  // NOLINT(runtime/references)
 {
   int detected_tags = drawNumberOfTags(req.selected_antenna);
-
-  //res.ids.push_back(i);
+  ROS_INFO("Tags detected = %d", detected_tags);
+  for (int i = 0; i < detected_tags; i++)
+  {
+    res.ids.push_back(tags_ids[i]);
+  }
   return true;
 }
 
 bool GazeboRfid::setPower(agribot_msgs::RfidPower::Request& req,   // NOLINT(runtime/references)
-                           agribot_msgs::RfidPower::Response& res)  // NOLINT(runtime/references)
+                          agribot_msgs::RfidPower::Response& res)  // NOLINT(runtime/references)
 {
   res.result = res.SUCCESS;
   if ((req.power_value > max_power_dbm) || (req.power_value < min_power_dbm))
@@ -75,12 +128,12 @@ bool GazeboRfid::setPower(agribot_msgs::RfidPower::Request& req,   // NOLINT(run
   switch (req.selected_antenna)
   {
     case req.FRONT:
-      front_ant_pwr_ = req.power_value;
-      ROS_INFO("Front ant pw: %d dB", front_ant_pwr_);
+      front_ant_pwr_ = static_cast<float>(req.power_value);
+      ROS_INFO("Setting front ant pw to %f dB", front_ant_pwr_);
       break;
     case req.BACK:
-      back_ant_pwr_ = req.power_value;
-      ROS_INFO("Back ant pw: %d dB", back_ant_pwr_);
+      back_ant_pwr_ = static_cast<float>(req.power_value);
+      ROS_INFO("Setting back ant pw to %f dB ", back_ant_pwr_);
       break;
     default:
       res.result = res.FAIL;
