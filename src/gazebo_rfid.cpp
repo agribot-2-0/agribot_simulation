@@ -11,8 +11,8 @@ constexpr float min_power_dbm = 17.0;
 constexpr float max_power_dbm = 33.0;
 constexpr uint8_t front_ant = 1;
 constexpr uint8_t back_ant = 2;
-
 constexpr uint8_t tags_ids[] = { 0xaa, 0xbb };
+constexpr int max_possible_number = 101;
 
 // The boundaries below was selected in order to ensure
 // specified chances of detecting tags, depending on
@@ -86,7 +86,7 @@ uint8_t GazeboRfid::drawNumberOfTags(uint8_t selected_antenna)
   ROS_INFO("lower_cond = %f, upper_cond = %f", lower_cond, upper_cond);
 
   unsigned int seed = time(NULL);
-  uint8_t drawed_num = rand_r(&seed) % 101;
+  uint8_t drawed_num = rand_r(&seed) % max_possible_number;
   ROS_INFO("Drawed number = %d", drawed_num);
   if (drawed_num < lower_cond)
   {
