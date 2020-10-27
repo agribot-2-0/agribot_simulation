@@ -39,10 +39,10 @@ private:
   double back_ant_pwr_;
 
   double calculateSecondDegreePolynomial(double a, double b, double c, double x);
-  auto calculateConditionsToDrawFrom(double ant_pwr);
+  std::pair<double, double> calculateConditionsToDrawFrom(double ant_pwr);
   std::size_t draw(auto lower_cond, auto upper_cond);
   std::size_t drawNumberOfTags(double ant_pwr);
-  double getPower(agribot_msgs::Tags::Request& req);                               // NOLINT(runtime/references)
+  double getPower(const agribot_msgs::Tags::Request& req);                         // NOLINT(runtime/references)
   bool scan(agribot_msgs::Tags::Request& req, agribot_msgs::Tags::Response& res);  // NOLINT(runtime/references)
   bool setPower(agribot_msgs::RfidPower::Request& req,                             // NOLINT(runtime/references)
                 agribot_msgs::RfidPower::Response& res);                           // NOLINT(runtime/references)

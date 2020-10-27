@@ -56,14 +56,10 @@ double GazeboRfid::calculateSecondDegreePolynomial(double a, double b, double c,
   return a * pow(x, 2) + b * x + c;
 }
 
-auto GazeboRfid::calculateConditionsToDrawFrom(double ant_pwr)
+std::pair<double, double> GazeboRfid::calculateConditionsToDrawFrom(double ant_pwr)
 {
-  struct conditions
-  {
-    double l_cond = 0, u_cond = 0;
-  };
-  return conditions{ calculateSecondDegreePolynomial(low.a, low.b, low.c, ant_pwr),
-                     calculateSecondDegreePolynomial(upper.a, upper.b, upper.c, ant_pwr) };
+  return std::make_pair(calculateSecondDegreePolynomial(low.a, low.b, low.c, ant_pwr),
+                        calculateSecondDegreePolynomial(upper.a, upper.b, upper.c, ant_pwr));
 }
 
 std::size_t GazeboRfid::draw(auto lower_cond, auto upper_cond)
@@ -96,7 +92,7 @@ std::size_t GazeboRfid::drawNumberOfTags(double ant_pwr)
   return draw(lower_cond, upper_cond);
 }
 
-double GazeboRfid::getPower(agribot_msgs::Tags::Request& req)  // NOLINT(runtime/references)
+double GazeboRfid::getPower(const agribot_msgs::Tags::Request& req)  // NOLINT(runtime/references)
 {
   double pwr = 0;
   switch (req.selected_antenna)
