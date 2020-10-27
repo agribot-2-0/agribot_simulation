@@ -22,6 +22,7 @@ import rospkg
 class MobileAppSim(QWidget):
     max_linear_velocity = 2.0
     max_circle_radius = 11.0
+    no_tags = "0"
 
     def __init__(self, parent=None):
         super(MobileAppSim, self).__init__(parent)
@@ -62,6 +63,10 @@ class MobileAppSim(QWidget):
         self.button_no_obstacle.clicked.connect(self.no_obstacle_detected)
         self.button_reset_gazebo.clicked.connect(self.gazebo_reset_world)
         self.manual_msg = AgribotManualControl()
+        self.back_tags.addItem(self.no_tags)
+        self.back_tags.addItem(self.no_tags)
+        self.front_tags.addItem(self.no_tags)
+        self.front_tags.addItem(self.no_tags)
 
         rospy.wait_for_service('/gazebo/reset_world')
         self.reset_world = rospy.ServiceProxy('/gazebo/reset_world', Empty)
