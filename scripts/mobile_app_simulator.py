@@ -15,6 +15,7 @@ from agribot_msgs.msg import AgribotAppErrorFlag
 from agribot_msgs.msg import AgribotManualControl
 from agribot_msgs.msg import AgribotObstacleDetection
 from agribot_msgs.srv import ToolManagerState
+from agribot_msgs.srv import ToolManagerStateRequest
 
 import rospy
 import rospkg
@@ -26,8 +27,6 @@ class MobileAppSim(QWidget):
     max_linear_velocity = 2.0
     max_circle_radius = 11.0
     no_tags = "0"
-    scan_front = 1
-    scan_back = 2
 
     def __init__(self, parent=None):
         super(MobileAppSim, self).__init__(parent)
@@ -57,9 +56,12 @@ class MobileAppSim(QWidget):
         self.manual_control = rospy.Publisher('cmd_vel_manual',
                                               AgribotManualControl,
                                               queue_size=10)
+        try:
+            self.tags_scan = rospy.ServiceProxy('/agribot/tool_management_state',
+                                                ToolManagerState)
+        except rospy.ServiceException as e:
+            rospy.logerr("Service init failed: %s"%e)
 
-        self.tags_scan = rospy.ServiceProxy('/agribot/tool_management_state',
-                                            ToolManagerState)
 
         self.button_send_task.clicked.connect(self.send_task)
         self.button_autonomous.clicked.connect(self.autonomous_mode)
@@ -127,15 +129,26 @@ class MobileAppSim(QWidget):
     def gazebo_reset_world(self):
         self.reset_world()
 
+    def call_tags_srv(self, req):
+        try:
+            resp = self.tags_scan(req)
+            return resp
+        except rospy.ServiceException as e:
+            rospy.logerr("Service call failed: %s"%e)
+            return None
+
+
     def scan_for_tags(self):
-        resp = self.tags_scan(self.scan_front)
         self.front_tags.clear()
         self.back_tags.clear()
-        for tag in resp.ids:
-            self.front_tags.addItem(str(tag))
-        resp = self.tags_scan(self.scan_back)
-        for tag in resp.ids:
-            self.back_tags.addItem(str(tag))
+        resp = self.call_tags_srv(ToolManagerStateRequest.SCAN_FRONT)
+        if resp is not None:
+            for tag in resp.ids:
+                self.front_tags.addItem(str(tag))
+        resp = self.call_tags_srv(ToolManagerStateRequest.SCAN_BACK)
+        if resp is not None:
+            for tag in resp.ids:
+                self.back_tags.addItem(str(tag))
 
 
 
