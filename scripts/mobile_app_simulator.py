@@ -59,8 +59,8 @@ class MobileAppSim(QWidget):
         try:
             self.tags_scan = rospy.ServiceProxy('/agribot/tool_management_state',
                                                 ToolManagerState)
-        except rospy.ServiceException as e:
-            rospy.logerr("Service init failed: %s"%e)
+        except rospy.ServiceException as exc:
+            rospy.logerr("Service init failed: %s"%exc)
 
 
         self.button_send_task.clicked.connect(self.send_task)
@@ -133,8 +133,8 @@ class MobileAppSim(QWidget):
         try:
             resp = self.tags_scan(req)
             return resp
-        except rospy.ServiceException as e:
-            rospy.logerr("Service call failed: %s"%e)
+        except rospy.ServiceException as exc:
+            rospy.logerr("Service call failed: %s"%exc)
             return None
 
 
