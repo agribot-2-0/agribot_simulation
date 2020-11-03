@@ -14,6 +14,7 @@ from std_srvs.srv import Empty
 from agribot_msgs.msg import AgribotAppErrorFlag
 from agribot_msgs.msg import AgribotManualControl
 from agribot_msgs.msg import AgribotObstacleDetection
+from agribot_msgs.srv import ToolManagerState
 
 import rospy
 import rospkg
@@ -23,6 +24,8 @@ class MobileAppSim(QWidget):
     max_linear_velocity = 2.0
     max_circle_radius = 11.0
     no_tags = "0"
+    scan_front = 1
+    scan_back = 2
 
     def __init__(self, parent=None):
         super(MobileAppSim, self).__init__(parent)
@@ -53,6 +56,9 @@ class MobileAppSim(QWidget):
                                               AgribotManualControl,
                                               queue_size=10)
 
+        self.tags_scan = rospy.ServiceProxy('/agribot/tool_management_state',
+                                            ToolManagerState)
+
         self.button_send_task.clicked.connect(self.send_task)
         self.button_autonomous.clicked.connect(self.autonomous_mode)
         self.button_manual.clicked.connect(self.manual_mode)
@@ -62,6 +68,7 @@ class MobileAppSim(QWidget):
         self.button_obstacle.clicked.connect(self.obstacle_detected)
         self.button_no_obstacle.clicked.connect(self.no_obstacle_detected)
         self.button_reset_gazebo.clicked.connect(self.gazebo_reset_world)
+        self.button_scan_tags.clicked.connect(self.scan_for_tags)
         self.manual_msg = AgribotManualControl()
         self.back_tags.addItem(self.no_tags)
         self.back_tags.addItem(self.no_tags)
@@ -117,6 +124,19 @@ class MobileAppSim(QWidget):
 
     def gazebo_reset_world(self):
         self.reset_world()
+
+    def scan_for_tags(self):
+        msg = ToolManagerState()
+        resp = self.tags_scan(self.scan_front)
+        self.front_tags.clear()
+        self.back_tags.clear()
+        for tag in resp.ids:
+            self.front_tags.addItem(str(tag))
+        resp = self.tags_scan(self.scan_back)
+        for tag in resp.ids:
+            self.back_tags.addItem(str(tag))
+
+
 
     def rosloop(self):
         rate = rospy.Rate(10)

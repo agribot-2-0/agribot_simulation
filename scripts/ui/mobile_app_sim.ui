@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>613</width>
-    <height>282</height>
+    <width>602</width>
+    <height>313</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -169,6 +169,13 @@
         <widget class="Line" name="line_5">
          <property name="orientation">
           <enum>Qt::Horizontal</enum>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="button_scan_tags">
+         <property name="text">
+          <string>Scan for tags</string>
          </property>
         </widget>
        </item>
