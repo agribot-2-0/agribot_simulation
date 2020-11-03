@@ -59,7 +59,7 @@ class MobileAppSim(QWidget):
             self.tags_scan = rospy.ServiceProxy('/agribot/tool_management_state',
                                                 ToolManagerState)
         except rospy.ServiceException as exc:
-            rospy.logerr("Service init failed: %s"%exc)
+            rospy.logerr("Service init failed: " "{}".format(exc))
 
 
         self.button_send_task.clicked.connect(self.send_task)
@@ -128,24 +128,21 @@ class MobileAppSim(QWidget):
     def gazebo_reset_world(self):
         self.reset_world()
 
-    def call_tags_srv(self, req):
-        try:
-            resp = self.tags_scan(req)
-            return resp
-        except rospy.ServiceException as exc:
-            rospy.logerr("Service call failed: %s"%exc)
-            return None
-
-
     def scan_for_tags(self):
         self.front_tags.clear()
         self.back_tags.clear()
-        resp = self.call_tags_srv(ToolManagerStateRequest.SCAN_FRONT)
-        if resp is not None:
+        try:
+            resp = self.tags_scan(ToolManagerStateRequest.SCAN_FRONT)
+        except rospy.ServiceException as exc:
+            rospy.logerr("Service call failed: " "{}".format(exc))
+        else:
             for tag in resp.ids:
                 self.front_tags.addItem(str(tag))
-        resp = self.call_tags_srv(ToolManagerStateRequest.SCAN_BACK)
-        if resp is not None:
+        try:
+            resp = self.tags_scan(ToolManagerStateRequest.SCAN_BACK)
+        except rospy.ServiceException as exc:
+            rospy.logerr("Service call failed: " "{}".format(exc))
+        else:
             for tag in resp.ids:
                 self.back_tags.addItem(str(tag))
 
