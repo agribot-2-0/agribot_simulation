@@ -21,6 +21,8 @@ import rospkg
 
 
 class MobileAppSim(QWidget):
+    # pylint: disable=too-many-instance-attributes
+
     max_linear_velocity = 2.0
     max_circle_radius = 11.0
     no_tags = "0"
@@ -126,7 +128,6 @@ class MobileAppSim(QWidget):
         self.reset_world()
 
     def scan_for_tags(self):
-        msg = ToolManagerState()
         resp = self.tags_scan(self.scan_front)
         self.front_tags.clear()
         self.back_tags.clear()
