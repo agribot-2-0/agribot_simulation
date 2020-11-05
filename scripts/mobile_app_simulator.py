@@ -72,6 +72,7 @@ class MobileAppSim(QWidget):
         self.button_no_obstacle.clicked.connect(self.no_obstacle_detected)
         self.button_reset_gazebo.clicked.connect(self.gazebo_reset_world)
         self.button_scan_tags.clicked.connect(self.scan_for_tags)
+        self.button_send_tpl.clicked.connect(self.set_tpl)
         self.manual_msg = AgribotManualControl()
         self.back_tags.addItem(self.no_tags)
         self.back_tags.addItem(self.no_tags)
@@ -146,7 +147,11 @@ class MobileAppSim(QWidget):
             for tag in resp.ids:
                 self.back_tags.addItem(str(tag))
 
-
+    def set_tpl(self):
+        try:
+            self.tags_scan(ToolManagerStateRequest.SET_TPL)
+        except rospy.ServiceException as exc:
+            rospy.logerr("Service call failed: {}".format(exc))
 
     def rosloop(self):
         rate = rospy.Rate(10)
