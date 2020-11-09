@@ -62,9 +62,9 @@ class MobileAppSim(QWidget):
                                          queue_size=1)
 
         self.back_tpl = rospy.Publisher('/agribot/control/tool/back',
-                                         AgribotTool,
-                                         queue_size=1)
-        
+                                        AgribotTool,
+                                        queue_size=1)
+
         try:
             self.tags_scan = rospy.ServiceProxy('/agribot/tool_management_state',
                                                 ToolManagerState)
@@ -84,7 +84,7 @@ class MobileAppSim(QWidget):
         self.button_scan_tags.clicked.connect(self.scan_for_tags)
         self.button_send_tpl.clicked.connect(self.set_tpl)
         self.manual_msg = AgribotManualControl()
-        
+
         # List init
         self.back_tags.addItem(self.no_tags)
         self.back_tags.addItem(self.no_tags)
