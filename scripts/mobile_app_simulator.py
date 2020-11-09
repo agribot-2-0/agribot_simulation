@@ -14,6 +14,7 @@ from std_srvs.srv import Empty
 from agribot_msgs.msg import AgribotAppErrorFlag
 from agribot_msgs.msg import AgribotManualControl
 from agribot_msgs.msg import AgribotObstacleDetection
+from agribot_msgs.msg import AgribotTool
 from agribot_msgs.srv import ToolManagerState
 from agribot_msgs.srv import ToolManagerStateRequest
 
@@ -55,13 +56,22 @@ class MobileAppSim(QWidget):
         self.manual_control = rospy.Publisher('cmd_vel_manual',
                                               AgribotManualControl,
                                               queue_size=10)
+
+        self.front_tpl = rospy.Publisher('/agribot/control/tool/front',
+                                         AgribotTool,
+                                         queue_size=1)
+
+        self.back_tpl = rospy.Publisher('/agribot/control/tool/back',
+                                         AgribotTool,
+                                         queue_size=1)
+        
         try:
             self.tags_scan = rospy.ServiceProxy('/agribot/tool_management_state',
                                                 ToolManagerState)
         except rospy.ServiceException as exc:
             rospy.logerr("Service init failed: {}".format(exc))
 
-
+        # Buttons init
         self.button_send_task.clicked.connect(self.send_task)
         self.button_autonomous.clicked.connect(self.autonomous_mode)
         self.button_manual.clicked.connect(self.manual_mode)
@@ -74,10 +84,20 @@ class MobileAppSim(QWidget):
         self.button_scan_tags.clicked.connect(self.scan_for_tags)
         self.button_send_tpl.clicked.connect(self.set_tpl)
         self.manual_msg = AgribotManualControl()
+        
+        # List init
         self.back_tags.addItem(self.no_tags)
         self.back_tags.addItem(self.no_tags)
         self.front_tags.addItem(self.no_tags)
         self.front_tags.addItem(self.no_tags)
+
+        # Sliders init
+        self.slider_tpl_angle.valueChanged.connect(self.val_change_tpl_angle)
+        self.slider_tpl_height.valueChanged.connect(self.val_change_tpl_height)
+        self.slider_red_valve_flow.valueChanged.connect(self.val_change_red_valve_flow)
+        self.slider_green_valve_flow.valueChanged.connect(self.val_change_green_valve_flow)
+        self.slider_blue_valve_flow.valueChanged.connect(self.val_change_blue_valve_flow)
+        self.slider_pto_rpm.valueChanged.connect(self.val_change_pto_rpm)
 
         rospy.wait_for_service('/gazebo/reset_world')
         self.reset_world = rospy.ServiceProxy('/gazebo/reset_world', Empty)
@@ -152,6 +172,36 @@ class MobileAppSim(QWidget):
             self.tags_scan(ToolManagerStateRequest.SET_TPL)
         except rospy.ServiceException as exc:
             rospy.logerr("Service call failed: {}".format(exc))
+        else:
+            msg = AgribotTool()
+            msg.tpl_angle = self.slider_tpl_angle.value()
+            msg.tpl_height = self.slider_tpl_height.value()
+            msg.red_valve_flow = self.slider_red_valve_flow.value()
+            msg.green_valve_flow = self.slider_green_valve_flow.value()
+            msg.blue_valve_flow = self.slider_blue_valve_flow.value()
+            msg.pto_rpm = self.slider_pto_rpm.value()
+            if self.front_check.isChecked():
+                self.front_tpl.publish(msg)
+            if self.back_check.isChecked():
+                self.back_tpl.publish(msg)
+
+    def val_change_tpl_angle(self):
+        self.tpl_angle_val.setText(str(self.slider_tpl_angle.value()))
+
+    def val_change_tpl_height(self):
+        self.tpl_height_val.setText(str(self.slider_tpl_height.value()))
+
+    def val_change_red_valve_flow(self):
+        self.red_valve_flow_val.setText(str(self.slider_red_valve_flow.value()))
+
+    def val_change_blue_valve_flow(self):
+        self.blue_valve_flow_val.setText(str(self.slider_blue_valve_flow.value()))
+
+    def val_change_green_valve_flow(self):
+        self.green_valve_flow_val.setText(str(self.slider_green_valve_flow.value()))
+
+    def val_change_pto_rpm(self):
+        self.pto_rpm_val.setText(str(self.slider_pto_rpm.value()))
 
     def rosloop(self):
         rate = rospy.Rate(10)
