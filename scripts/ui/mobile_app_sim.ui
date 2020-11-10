@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>613</width>
-    <height>255</height>
+    <width>602</width>
+    <height>313</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -148,7 +148,7 @@
         </layout>
        </item>
        <item>
-        <widget class="Line" name="line_5">
+        <widget class="Line" name="line_6">
          <property name="orientation">
           <enum>Qt::Horizontal</enum>
          </property>
@@ -160,6 +160,84 @@
           <widget class="QPushButton" name="button_reset_gazebo">
            <property name="text">
             <string>Reset Gazebo</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <widget class="Line" name="line_5">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="button_scan_tags">
+         <property name="text">
+          <string>Scan for tags</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_9">
+         <item>
+          <widget class="Line" name="line_8">
+           <property name="orientation">
+            <enum>Qt::Vertical</enum>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLabel" name="label_5">
+           <property name="text">
+            <string>Front Tags</string>
+           </property>
+          </widget>
+         </item>
+         <item alignment="Qt::AlignHCenter">
+          <widget class="QListWidget" name="front_tags">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Expanding" vsizetype="Minimum">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>16777215</width>
+             <height>34</height>
+            </size>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="Line" name="line_7">
+           <property name="orientation">
+            <enum>Qt::Vertical</enum>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLabel" name="label_3">
+           <property name="text">
+            <string>Back Tags</string>
+           </property>
+          </widget>
+         </item>
+         <item alignment="Qt::AlignHCenter">
+          <widget class="QListWidget" name="back_tags">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Expanding" vsizetype="Minimum">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>16777215</width>
+             <height>34</height>
+            </size>
            </property>
           </widget>
          </item>
