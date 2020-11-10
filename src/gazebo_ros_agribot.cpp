@@ -262,7 +262,7 @@ void GazeboRosAgribot::CreatePubsAndSubs()
   front_cart_publisher_ = rosnode_->advertise<std_msgs::Float32>("agribot/encoder/cart/front", 1);
   back_cart_publisher_ = rosnode_->advertise<std_msgs::Float32>("agribot/encoder/cart/back", 1);
   catterpilar_wheels_publisher_ =
-      rosnode_->advertise<agribot_msgs::AgribotCaterpillarWheels>("agribot/encoder/caterpillar/wheels", 1);
+      rosnode_->advertise<agribot_msgs::AgribotCaterpillarWheelsRotation>("agribot/encoder/caterpillar/wheels", 1);
   front_tool_publisher_ = rosnode_->advertise<agribot_msgs::AgribotTool>("agribot/encoder/tool/front", 1);
   back_tool_publisher_ = rosnode_->advertise<agribot_msgs::AgribotTool>("agribot/encoder/tool/back", 1);
   tf_prefix_ = tf::getPrefixParam(*rosnode_);

@@ -19,7 +19,7 @@
 
 // ROS
 #include <agribot_msgs/AgribotCaterpillar.h>
-#include <agribot_msgs/AgribotCaterpillarWheels.h>
+#include <agribot_msgs/AgribotCaterpillarWheelsRotation.h>
 #include <agribot_msgs/AgribotTool.h>
 #include <geometry_msgs/Pose2D.h>
 #include <nav_msgs/Odometry.h>
@@ -106,7 +106,7 @@ private:
   agribot_msgs::AgribotCaterpillar encoder_;
   std_msgs::Float32 FrontAngleMsg_;
   std_msgs::Float32 BackAngleMsg_;
-  agribot_msgs::AgribotCaterpillarWheels CaterpillarEncoderMsg_;
+  agribot_msgs::AgribotCaterpillarWheelsRotation CaterpillarEncoderMsg_;
   nav_msgs::Odometry odom_;
   std::string tf_prefix_;
   bool broadcast_tf_;
