@@ -23,7 +23,7 @@ import rospkg
 
 
 class MobileAppSim(QWidget):
-    # pylint: disable=too-many-instance-attributes
+    # pylint: disable=too-many-instance-attributes, too-many-statements, too-many-public-methods
     max_linear_velocity = 2.0
     max_circle_radius = 11.0
     no_tags = "0"
