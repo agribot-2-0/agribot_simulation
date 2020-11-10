@@ -467,7 +467,7 @@
            <item>
             <layout class="QHBoxLayout" name="horizontalLayout_20">
              <item>
-              <widget class="QSlider" name="slider_tpl_angle">
+              <widget class="QSlider" name="slider_tpl_angle_fr">
                <property name="sizePolicy">
                 <sizepolicy hsizetype="Expanding" vsizetype="Minimum">
                  <horstretch>0</horstretch>
@@ -491,7 +491,7 @@
            <item>
             <layout class="QHBoxLayout" name="horizontalLayout_19">
              <item>
-              <widget class="QSlider" name="slider_tpl_height">
+              <widget class="QSlider" name="slider_tpl_height_fr">
                <property name="sizePolicy">
                 <sizepolicy hsizetype="Expanding" vsizetype="Minimum">
                  <horstretch>0</horstretch>
@@ -515,7 +515,7 @@
            <item>
             <layout class="QHBoxLayout" name="horizontalLayout_18">
              <item>
-              <widget class="QSlider" name="slider_red_valve_flow">
+              <widget class="QSlider" name="slider_red_valve_flow_fr">
                <property name="sizePolicy">
                 <sizepolicy hsizetype="Expanding" vsizetype="Minimum">
                  <horstretch>0</horstretch>
@@ -539,7 +539,7 @@
            <item>
             <layout class="QHBoxLayout" name="horizontalLayout_17">
              <item>
-              <widget class="QSlider" name="slider_green_valve_flow">
+              <widget class="QSlider" name="slider_green_valve_flow_fr">
                <property name="sizePolicy">
                 <sizepolicy hsizetype="Expanding" vsizetype="Minimum">
                  <horstretch>0</horstretch>
@@ -563,7 +563,7 @@
            <item>
             <layout class="QHBoxLayout" name="horizontalLayout_15">
              <item>
-              <widget class="QSlider" name="slider_blue_valve_flow">
+              <widget class="QSlider" name="slider_blue_valve_flow_fr">
                <property name="sizePolicy">
                 <sizepolicy hsizetype="Expanding" vsizetype="Minimum">
                  <horstretch>0</horstretch>
@@ -587,7 +587,7 @@
            <item>
             <layout class="QHBoxLayout" name="horizontalLayout_16">
              <item>
-              <widget class="QSlider" name="slider_pto_rpm">
+              <widget class="QSlider" name="slider_pto_rpm_fr">
                <property name="sizePolicy">
                 <sizepolicy hsizetype="Expanding" vsizetype="Minimum">
                  <horstretch>0</horstretch>
@@ -613,7 +613,7 @@
          <item>
           <layout class="QVBoxLayout" name="verticalLayout_3">
            <item>
-            <widget class="QLabel" name="tpl_angle_val">
+            <widget class="QLabel" name="tpl_angle_val_fr">
              <property name="text">
               <string>value</string>
              </property>
@@ -627,7 +627,7 @@
             </widget>
            </item>
            <item>
-            <widget class="QLabel" name="tpl_height_val">
+            <widget class="QLabel" name="tpl_height_val_fr">
              <property name="text">
               <string>value</string>
              </property>
@@ -641,7 +641,7 @@
             </widget>
            </item>
            <item>
-            <widget class="QLabel" name="red_valve_flow_val">
+            <widget class="QLabel" name="red_valve_flow_val_fr">
              <property name="text">
               <string>value</string>
              </property>
@@ -655,7 +655,7 @@
             </widget>
            </item>
            <item>
-            <widget class="QLabel" name="green_valve_flow_val">
+            <widget class="QLabel" name="green_valve_flow_val_fr">
              <property name="text">
               <string>value</string>
              </property>
@@ -669,7 +669,7 @@
             </widget>
            </item>
            <item>
-            <widget class="QLabel" name="blue_valve_flow_val">
+            <widget class="QLabel" name="blue_valve_flow_val_fr">
              <property name="text">
               <string>value</string>
              </property>
@@ -683,7 +683,7 @@
             </widget>
            </item>
            <item>
-            <widget class="QLabel" name="pto_rpm_val">
+            <widget class="QLabel" name="pto_rpm_val_fr">
              <property name="text">
               <string>value</string>
              </property>
@@ -825,7 +825,7 @@
            <item>
             <layout class="QHBoxLayout" name="horizontalLayout_28">
              <item>
-              <widget class="QSlider" name="slider_tpl_angle_2">
+              <widget class="QSlider" name="slider_tpl_angle_bk">
                <property name="sizePolicy">
                 <sizepolicy hsizetype="Expanding" vsizetype="Minimum">
                  <horstretch>0</horstretch>
@@ -849,7 +849,7 @@
            <item>
             <layout class="QHBoxLayout" name="horizontalLayout_29">
              <item>
-              <widget class="QSlider" name="slider_tpl_height_2">
+              <widget class="QSlider" name="slider_tpl_height_bk">
                <property name="sizePolicy">
                 <sizepolicy hsizetype="Expanding" vsizetype="Minimum">
                  <horstretch>0</horstretch>
@@ -873,7 +873,7 @@
            <item>
             <layout class="QHBoxLayout" name="horizontalLayout_30">
              <item>
-              <widget class="QSlider" name="slider_red_valve_flow_2">
+              <widget class="QSlider" name="slider_red_valve_flow_bk">
                <property name="sizePolicy">
                 <sizepolicy hsizetype="Expanding" vsizetype="Minimum">
                  <horstretch>0</horstretch>
@@ -897,7 +897,7 @@
            <item>
             <layout class="QHBoxLayout" name="horizontalLayout_31">
              <item>
-              <widget class="QSlider" name="slider_green_valve_flow_2">
+              <widget class="QSlider" name="slider_green_valve_flow_bk">
                <property name="sizePolicy">
                 <sizepolicy hsizetype="Expanding" vsizetype="Minimum">
                  <horstretch>0</horstretch>
@@ -921,7 +921,7 @@
            <item>
             <layout class="QHBoxLayout" name="horizontalLayout_32">
              <item>
-              <widget class="QSlider" name="slider_blue_valve_flow_2">
+              <widget class="QSlider" name="slider_blue_valve_flow_bk">
                <property name="sizePolicy">
                 <sizepolicy hsizetype="Expanding" vsizetype="Minimum">
                  <horstretch>0</horstretch>
@@ -945,7 +945,7 @@
            <item>
             <layout class="QHBoxLayout" name="horizontalLayout_33">
              <item>
-              <widget class="QSlider" name="slider_pto_rpm_2">
+              <widget class="QSlider" name="slider_pto_rpm_bk">
                <property name="sizePolicy">
                 <sizepolicy hsizetype="Expanding" vsizetype="Minimum">
                  <horstretch>0</horstretch>
@@ -971,7 +971,7 @@
          <item>
           <layout class="QVBoxLayout" name="verticalLayout_9">
            <item>
-            <widget class="QLabel" name="tpl_angle_val_2">
+            <widget class="QLabel" name="tpl_angle_val_bk">
              <property name="text">
               <string>value</string>
              </property>
@@ -985,7 +985,7 @@
             </widget>
            </item>
            <item>
-            <widget class="QLabel" name="tpl_height_val_2">
+            <widget class="QLabel" name="tpl_height_val_bk">
              <property name="text">
               <string>value</string>
              </property>
@@ -999,7 +999,7 @@
             </widget>
            </item>
            <item>
-            <widget class="QLabel" name="red_valve_flow_val_2">
+            <widget class="QLabel" name="red_valve_flow_val_bk">
              <property name="text">
               <string>value</string>
              </property>
@@ -1013,7 +1013,7 @@
             </widget>
            </item>
            <item>
-            <widget class="QLabel" name="green_valve_flow_val_2">
+            <widget class="QLabel" name="green_valve_flow_val_bk">
              <property name="text">
               <string>value</string>
              </property>
@@ -1027,7 +1027,7 @@
             </widget>
            </item>
            <item>
-            <widget class="QLabel" name="blue_valve_flow_val_2">
+            <widget class="QLabel" name="blue_valve_flow_val_bk">
              <property name="text">
               <string>value</string>
              </property>
@@ -1041,7 +1041,7 @@
             </widget>
            </item>
            <item>
-            <widget class="QLabel" name="pto_rpm_val_2">
+            <widget class="QLabel" name="pto_rpm_val_bk">
              <property name="text">
               <string>value</string>
              </property>
@@ -1071,98 +1071,92 @@
       <attribute name="title">
        <string>Rfid</string>
       </attribute>
-      <widget class="QPushButton" name="button_scan_tags">
-       <property name="geometry">
-        <rect>
-         <x>10</x>
-         <y>170</y>
-         <width>351</width>
-         <height>25</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>Scan for tags</string>
-       </property>
-      </widget>
-      <widget class="QWidget" name="layoutWidget_4">
-       <property name="geometry">
-        <rect>
-         <x>10</x>
-         <y>10</y>
-         <width>351</width>
-         <height>149</height>
-        </rect>
-       </property>
-       <layout class="QVBoxLayout" name="verticalLayout_4">
-        <item>
-         <widget class="Line" name="line_30">
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QLabel" name="label_3">
-          <property name="text">
-           <string>Back Tags</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QListWidget" name="back_tags">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Expanding" vsizetype="Minimum">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="maximumSize">
-           <size>
-            <width>16777215</width>
-            <height>34</height>
-           </size>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="Line" name="line_7">
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QLabel" name="label_5">
-          <property name="text">
-           <string>Front Tags</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QListWidget" name="front_tags">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Expanding" vsizetype="Minimum">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="maximumSize">
-           <size>
-            <width>16777215</width>
-            <height>34</height>
-           </size>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="Line" name="line_8">
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </widget>
+      <layout class="QGridLayout" name="gridLayout_5">
+       <item row="0" column="0">
+        <layout class="QVBoxLayout" name="verticalLayout_4">
+         <item>
+          <widget class="Line" name="line_30">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLabel" name="label_3">
+           <property name="text">
+            <string>Back Tags</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignCenter</set>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QListWidget" name="back_tags">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Expanding" vsizetype="Minimum">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>16777215</width>
+             <height>34</height>
+            </size>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="Line" name="line_7">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLabel" name="label_5">
+           <property name="text">
+            <string>Front Tags</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignCenter</set>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QListWidget" name="front_tags">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Expanding" vsizetype="Minimum">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>16777215</width>
+             <height>34</height>
+            </size>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="Line" name="line_8">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item row="1" column="0">
+        <widget class="QPushButton" name="button_scan_tags">
+         <property name="text">
+          <string>Scan for tags</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
      </widget>
     </widget>
    </item>
