@@ -84,8 +84,6 @@ private:
   double wheel_accel;
   double wheel_speed_instr_[4];
 
-  static constexpr double impulses_per_wheel = 1024;
-
   std::vector<physics::JointPtr> joints_;
   std::vector<std::string> joints_name_;
 
