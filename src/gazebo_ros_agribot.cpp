@@ -222,7 +222,7 @@ void GazeboRosAgribot::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
   joints_name_[BACK_LOWER_HIT_ANG] = "back_tpl_lower_hitches_revolute_joint";
   joints_name_[BACK_UPPER_HIT_ANG] = "back_tpl_upper_hitch_revolute_joint";
   joints_name_[BACK_UPPER_HIT_HEI] = "back_tpl_upper_hitch_prismatic_joint";
-  
+
   // Initialize joints
   joints_.resize(joints_cnt);
   joints_[FRONT_LEFT] = model_->GetJoint(joints_name_[FRONT_LEFT]);
