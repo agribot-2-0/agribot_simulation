@@ -11,6 +11,8 @@
 
 #define RAD_TO_DEG (180 / M_PI)
 #define DEG_TO_RAD (M_PI / 180)
+constexpr int joints_cnt = 12;
+
 // #define DEBUG_VEL
 // #define DEBUG_TF
 
@@ -23,7 +25,13 @@ enum
   BACK_RIGHT,
   BACK_LEFT,
   FRONT_CART,
-  BACK_CART
+  BACK_CART,
+  FRONT_LOWER_HIT_ANG,
+  FRONT_UPPER_HIT_ANG,
+  FRONT_UPPER_HIT_HEI,
+  BACK_LOWER_HIT_ANG,
+  BACK_UPPER_HIT_ANG,
+  BACK_UPPER_HIT_HEI
 };
 enum
 {
@@ -201,21 +209,35 @@ void GazeboRosAgribot::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
 
   command_sub_topic_ = "/agribot/control/caterpillar";
   wheel_torque = 5.0;
-  joints_name_.resize(6);
+  joints_name_.resize(joints_cnt);
   joints_name_[FRONT_LEFT] = "front_left_wheel_joint";
   joints_name_[FRONT_RIGHT] = "front_right_wheel_joint";
   joints_name_[BACK_LEFT] = "back_left_wheel_joint";
   joints_name_[BACK_RIGHT] = "back_right_wheel_joint";
   joints_name_[FRONT_CART] = "front_cart_joint";
   joints_name_[BACK_CART] = "back_cart_joint";
+  joints_name_[FRONT_LOWER_HIT_ANG] = "front_tpl_lower_hitches_revolute_joint";
+  joints_name_[FRONT_UPPER_HIT_ANG] = "front_tpl_upper_hitch_revolute_joint";
+  joints_name_[FRONT_UPPER_HIT_HEI] = "front_tpl_upper_hitch_prismatic_joint";
+  joints_name_[BACK_LOWER_HIT_ANG] = "back_tpl_lower_hitches_revolute_joint";
+  joints_name_[BACK_UPPER_HIT_ANG] = "back_tpl_upper_hitch_revolute_joint";
+  joints_name_[BACK_UPPER_HIT_HEI] = "back_tpl_upper_hitch_prismatic_joint";
+  
   // Initialize joints
-  joints_.resize(6);
+  joints_.resize(joints_cnt);
   joints_[FRONT_LEFT] = model_->GetJoint(joints_name_[FRONT_LEFT]);
   joints_[FRONT_RIGHT] = model_->GetJoint(joints_name_[FRONT_RIGHT]);
   joints_[FRONT_CART] = model_->GetJoint(joints_name_[FRONT_CART]);
   joints_[BACK_LEFT] = model_->GetJoint(joints_name_[BACK_LEFT]);
   joints_[BACK_RIGHT] = model_->GetJoint(joints_name_[BACK_RIGHT]);
   joints_[BACK_CART] = model_->GetJoint(joints_name_[BACK_CART]);
+  joints_[FRONT_LOWER_HIT_ANG] = model_->GetJoint(joints_name_[FRONT_LOWER_HIT_ANG]);
+  joints_[FRONT_UPPER_HIT_ANG] = model_->GetJoint(joints_name_[FRONT_UPPER_HIT_ANG]);
+  joints_[FRONT_UPPER_HIT_HEI] = model_->GetJoint(joints_name_[FRONT_UPPER_HIT_HEI]);
+  joints_[BACK_LOWER_HIT_ANG] = model_->GetJoint(joints_name_[BACK_LOWER_HIT_ANG]);
+  joints_[BACK_UPPER_HIT_ANG] = model_->GetJoint(joints_name_[BACK_UPPER_HIT_ANG]);
+  joints_[BACK_UPPER_HIT_HEI] = model_->GetJoint(joints_name_[BACK_UPPER_HIT_HEI]);
+
   for (auto joint : joints_)
   {
     if (joint == nullptr)
@@ -334,6 +356,9 @@ void GazeboRosAgribot::cmdToolsFrontCallback(const agribot_msgs::AgribotTool::Co
 {
   front_cart_tool_encoder_.tpl_height = tool_msg->tpl_height;
   front_cart_tool_encoder_.tpl_angle = tool_msg->tpl_angle;
+  front_cart_tool_encoder_.red_valve_flow = tool_msg->red_valve_flow;
+  front_cart_tool_encoder_.green_valve_flow = tool_msg->green_valve_flow;
+  front_cart_tool_encoder_.blue_valve_flow = tool_msg->blue_valve_flow;
   front_cart_tool_encoder_.pto_rpm = tool_msg->pto_rpm;
 }
 
@@ -341,6 +366,9 @@ void GazeboRosAgribot::cmdToolsBackCallback(const agribot_msgs::AgribotTool::Con
 {
   back_cart_tool_encoder_.tpl_height = tool_msg->tpl_height;
   back_cart_tool_encoder_.tpl_angle = tool_msg->tpl_angle;
+  back_cart_tool_encoder_.red_valve_flow = tool_msg->red_valve_flow;
+  back_cart_tool_encoder_.green_valve_flow = tool_msg->green_valve_flow;
+  back_cart_tool_encoder_.blue_valve_flow = tool_msg->blue_valve_flow;
   back_cart_tool_encoder_.pto_rpm = tool_msg->pto_rpm;
 }
 
@@ -445,7 +473,11 @@ void GazeboRosAgribot::publishCarts()
 
 void GazeboRosAgribot::publishTools()
 {
+  front_cart_tool_encoder_.tpl_angle = joints_[FRONT_LOWER_HIT_ANG]->Position(0);
+  front_cart_tool_encoder_.tpl_height = joints_[FRONT_UPPER_HIT_HEI]->Position(0);
   front_tool_publisher_.publish(front_cart_tool_encoder_);
+  front_cart_tool_encoder_.tpl_angle = joints_[BACK_LOWER_HIT_ANG]->Position(0);
+  front_cart_tool_encoder_.tpl_height = joints_[BACK_UPPER_HIT_HEI]->Position(0);
   back_tool_publisher_.publish(back_cart_tool_encoder_);
 }
 
