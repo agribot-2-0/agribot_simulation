@@ -5,36 +5,42 @@
 #pragma once
 
 // Gazebo
-#include <gazebo/common/common.hh>
-#include <gazebo/physics/physics.hh>
 #include <gazebo_plugins/gazebo_ros_utils.h>
 
 #include <gazebo/common/Plugin.hh>
+#include <gazebo/common/common.hh>
 #include <gazebo/gazebo.hh>
+#include <gazebo/physics/physics.hh>
+#include <ignition/math/Angle.hh>
+#include <ignition/math/Pose3.hh>
+#include <ignition/math/Quaternion.hh>
+#include <ignition/math/Vector3.hh>
+#include <sdf/sdf.hh>
 
 // ROS
-#include <ros/ros.h>
-#include <tf/transform_broadcaster.h>
-#include <tf/transform_listener.h>
 #include <agribot_msgs/AgribotCaterpillar.h>
+#include <agribot_msgs/AgribotCaterpillarWheelsRotation.h>
 #include <agribot_msgs/AgribotTool.h>
-#include <sensor_msgs/Imu.h>
 #include <geometry_msgs/Pose2D.h>
 #include <nav_msgs/Odometry.h>
-#include <std_msgs/Float32.h>
+#include <ros/ros.h>
+#include <sensor_msgs/Imu.h>
 #include <sensor_msgs/JointState.h>
+#include <std_msgs/Float32.h>
+#include <tf/transform_broadcaster.h>
+#include <tf/transform_listener.h>
 
 // Custom Callback Queue
-#include <ros/callback_queue.h>
 #include <ros/advertise_options.h>
+#include <ros/callback_queue.h>
 
 #include <map>
-#include <vector>
 #include <string>
+#include <vector>
 
 // Boost
-#include <boost/thread.hpp>
 #include <boost/bind.hpp>
+#include <boost/thread.hpp>
 
 namespace gazebo
 {
@@ -90,6 +96,7 @@ private:
   ros::Publisher encoder_publisher_;
   ros::Publisher front_cart_publisher_;
   ros::Publisher back_cart_publisher_;
+  ros::Publisher catterpilar_wheels_publisher_;
   ros::Publisher front_tool_publisher_;
   ros::Publisher back_tool_publisher_;
   gazebo::transport::NodePtr node_handle_;
@@ -97,6 +104,7 @@ private:
   agribot_msgs::AgribotCaterpillar encoder_;
   std_msgs::Float32 FrontAngleMsg_;
   std_msgs::Float32 BackAngleMsg_;
+  agribot_msgs::AgribotCaterpillarWheelsRotation CaterpillarEncoderMsg_;
   nav_msgs::Odometry odom_;
   std::string tf_prefix_;
   bool broadcast_tf_;
