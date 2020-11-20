@@ -94,13 +94,19 @@ class MobileAppSim(QWidget):
 
         # Sliders init
         self.slider_tpl_angle_fr.valueChanged.connect(self.val_change_tpl_angle_fr)
+        self.slider_tpl_angle_fr.setMinimum(-15)
+        self.slider_tpl_angle_fr.setMaximum(60)
         self.slider_tpl_height_fr.valueChanged.connect(self.val_change_tpl_height_fr)
+        self.slider_tpl_height_fr.setMaximum(45)
         self.slider_red_valve_flow_fr.valueChanged.connect(self.val_change_red_valve_flow_fr)
         self.slider_green_valve_flow_fr.valueChanged.connect(self.val_change_green_valve_flow_fr)
         self.slider_blue_valve_flow_fr.valueChanged.connect(self.val_change_blue_valve_flow_fr)
         self.slider_pto_rpm_fr.valueChanged.connect(self.val_change_pto_rpm_fr)
         self.slider_tpl_angle_bk.valueChanged.connect(self.val_change_tpl_angle_bk)
+        self.slider_tpl_angle_bk.setMinimum(-15)
+        self.slider_tpl_angle_bk.setMaximum(60)
         self.slider_tpl_height_bk.valueChanged.connect(self.val_change_tpl_height_bk)
+        self.slider_tpl_height_bk.setMaximum(45)
         self.slider_red_valve_flow_bk.valueChanged.connect(self.val_change_red_valve_flow_bk)
         self.slider_green_valve_flow_bk.valueChanged.connect(self.val_change_green_valve_flow_bk)
         self.slider_blue_valve_flow_bk.valueChanged.connect(self.val_change_blue_valve_flow_bk)
@@ -219,17 +225,20 @@ class MobileAppSim(QWidget):
     def val_change_pto_rpm_bk(self):
         self.pto_rpm_val_bk.setText(str(self.slider_pto_rpm_bk.value()))
 
+    def slider_to_radians(self, slid):
+        return (-0.0244)*slid-0.10599999999999987
+
     def send_tpl_config(self):
         msg = AgribotTool()
-        msg.tpl_angle = self.slider_tpl_angle_fr.value()
-        msg.tpl_height = self.slider_tpl_height_fr.value()
+        msg.tpl_angle = self.slider_to_radians(self.slider_tpl_angle_fr.value())
+        msg.tpl_height = self.slider_tpl_height_fr.value()*0.01 # from cm to m
         msg.red_valve_flow = self.slider_red_valve_flow_fr.value()
         msg.green_valve_flow = self.slider_green_valve_flow_fr.value()
         msg.blue_valve_flow = self.slider_blue_valve_flow_fr.value()
         msg.pto_rpm = self.slider_pto_rpm_fr.value()
         self.front_tpl.publish(msg)
-        msg.tpl_angle = self.slider_tpl_angle_bk.value()
-        msg.tpl_height = self.slider_tpl_height_bk.value()
+        msg.tpl_angle = self.slider_to_radians(self.slider_tpl_angle_bk.value())
+        msg.tpl_height = self.slider_tpl_height_bk.value()*0.01 # from cm to m
         msg.red_valve_flow = self.slider_red_valve_flow_bk.value()
         msg.green_valve_flow = self.slider_green_valve_flow_bk.value()
         msg.blue_valve_flow = self.slider_blue_valve_flow_bk.value()
