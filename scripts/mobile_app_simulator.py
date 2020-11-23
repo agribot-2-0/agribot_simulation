@@ -232,8 +232,8 @@ class MobileAppSim(QWidget):
         self.pto_rpm_val_bk.setText(str(self.slider_pto_rpm_bk.value()))
 
     def slider_to_radians(self, slid): # pylint: disable=no-self-use
-        return -((((slid - self.min_tpl_angle) * self.max_tpl_angle_rad ) /
-                (self.max_tpl_angle - self.min_tpl_angle)) + self.min_tpl_angle_rad)
+        return -((((slid - self.min_tpl_angle) * self.max_tpl_angle_rad)/
+                  (self.max_tpl_angle - self.min_tpl_angle)) + self.min_tpl_angle_rad)
 
     def to_meters(self, val): # pylint: disable=no-self-use
         return val*0.01 # 1cm = 0.01m
