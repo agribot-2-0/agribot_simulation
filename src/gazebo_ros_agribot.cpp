@@ -329,10 +329,6 @@ void GazeboRosAgribot::UpdateVelocities()
   joints_[FRONT_RIGHT]->SetVelocity(0, wheel_speed_[FRONT_RIGHT] / wheel_radius_);
   joints_[BACK_LEFT]->SetVelocity(0, wheel_speed_[BACK_LEFT] / wheel_radius_);
   joints_[BACK_RIGHT]->SetVelocity(0, wheel_speed_[BACK_RIGHT] / wheel_radius_);
-  joints_[FRONT_LOWER_HIT_ANG]->SetPosition(0, front_cart_tool_encoder_.tpl_angle, false);
-  joints_[FRONT_UPPER_HIT_HEI]->SetPosition(0, front_cart_tool_encoder_.tpl_height, false);
-  joints_[BACK_LOWER_HIT_ANG]->SetPosition(0, back_cart_tool_encoder_.tpl_angle, false);
-  joints_[BACK_UPPER_HIT_HEI]->SetPosition(0, back_cart_tool_encoder_.tpl_height, false);
 
 #ifdef DEBUG_VEL
   ROS_DEBUG_NAMED("agribot_drive",
@@ -365,6 +361,9 @@ void GazeboRosAgribot::cmdToolsFrontCallback(const agribot_msgs::AgribotTool::Co
   front_cart_tool_encoder_.green_valve_flow = tool_msg->green_valve_flow;
   front_cart_tool_encoder_.blue_valve_flow = tool_msg->blue_valve_flow;
   front_cart_tool_encoder_.pto_rpm = tool_msg->pto_rpm;
+  joints_[FRONT_LOWER_HIT_ANG]->SetPosition(0, front_cart_tool_encoder_.tpl_angle);
+  joints_[FRONT_UPPER_HIT_HEI]->SetPosition(0, front_cart_tool_encoder_.tpl_height);
+  joints_[FRONT_UPPER_HIT_ANG]->SetPosition(0, 0);
 }
 
 void GazeboRosAgribot::cmdToolsBackCallback(const agribot_msgs::AgribotTool::ConstPtr& tool_msg)
@@ -375,6 +374,9 @@ void GazeboRosAgribot::cmdToolsBackCallback(const agribot_msgs::AgribotTool::Con
   back_cart_tool_encoder_.green_valve_flow = tool_msg->green_valve_flow;
   back_cart_tool_encoder_.blue_valve_flow = tool_msg->blue_valve_flow;
   back_cart_tool_encoder_.pto_rpm = tool_msg->pto_rpm;
+  joints_[BACK_LOWER_HIT_ANG]->SetPosition(0, back_cart_tool_encoder_.tpl_angle);
+  joints_[BACK_UPPER_HIT_HEI]->SetPosition(0, back_cart_tool_encoder_.tpl_height);
+  joints_[BACK_UPPER_HIT_ANG]->SetPosition(0, 0);
 }
 
 void GazeboRosAgribot::QueueThread()
