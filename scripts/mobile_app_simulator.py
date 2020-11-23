@@ -31,6 +31,9 @@ class MobileAppSim(QWidget):
     min_tpl_angle = -15 # deg
     max_tpl_angle = 60 # deg
     max_tpl_heigth = 45 # cm
+    min_tpl_angle_rad = -0.26
+    max_tpl_angle_rad = 1.57
+
 
     def __init__(self, parent=None):
         super(MobileAppSim, self).__init__(parent)
@@ -229,11 +232,8 @@ class MobileAppSim(QWidget):
         self.pto_rpm_val_bk.setText(str(self.slider_pto_rpm_bk.value()))
 
     def slider_to_radians(self, slid): # pylint: disable=no-self-use
-        # Below values are calculated from min and max
-        # slider value and corresponding TPL angles in simulation:
-        # -15 deg -> 0.26 rad
-        # 60 deg -> -1.57 rad
-        return (-0.0244)*slid-0.106
+        return -((((slid - self.min_tpl_angle) * self.max_tpl_angle_rad ) /
+                (self.max_tpl_angle - self.min_tpl_angle)) + self.min_tpl_angle_rad)
 
     def to_meters(self, val): # pylint: disable=no-self-use
         return val*0.01 # 1cm = 0.01m
