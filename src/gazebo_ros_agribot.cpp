@@ -329,6 +329,11 @@ void GazeboRosAgribot::UpdateVelocities()
   joints_[FRONT_RIGHT]->SetVelocity(0, wheel_speed_[FRONT_RIGHT] / wheel_radius_);
   joints_[BACK_LEFT]->SetVelocity(0, wheel_speed_[BACK_LEFT] / wheel_radius_);
   joints_[BACK_RIGHT]->SetVelocity(0, wheel_speed_[BACK_RIGHT] / wheel_radius_);
+  joints_[FRONT_LOWER_HIT_ANG]->SetPosition(0, front_cart_tool_encoder_.tpl_angle, false);
+  joints_[FRONT_UPPER_HIT_HEI]->SetPosition(0, front_cart_tool_encoder_.tpl_height, false);
+  joints_[BACK_LOWER_HIT_ANG]->SetPosition(0, back_cart_tool_encoder_.tpl_angle, false);
+  joints_[BACK_UPPER_HIT_HEI]->SetPosition(0, back_cart_tool_encoder_.tpl_height, false);
+
 #ifdef DEBUG_VEL
   ROS_DEBUG_NAMED("agribot_drive",
                   "Set  FL  speed = %lf, FR speed= %lf,"
@@ -354,7 +359,7 @@ void GazeboRosAgribot::cmdVelCallback(const agribot_msgs::AgribotCaterpillar::Co
 
 void GazeboRosAgribot::cmdToolsFrontCallback(const agribot_msgs::AgribotTool::ConstPtr& tool_msg)
 {
-  front_cart_tool_encoder_.tpl_height = tool_msg->tpl_height;
+  front_cart_tool_encoder_.tpl_height = -tool_msg->tpl_height;
   front_cart_tool_encoder_.tpl_angle = tool_msg->tpl_angle;
   front_cart_tool_encoder_.red_valve_flow = tool_msg->red_valve_flow;
   front_cart_tool_encoder_.green_valve_flow = tool_msg->green_valve_flow;
@@ -364,7 +369,7 @@ void GazeboRosAgribot::cmdToolsFrontCallback(const agribot_msgs::AgribotTool::Co
 
 void GazeboRosAgribot::cmdToolsBackCallback(const agribot_msgs::AgribotTool::ConstPtr& tool_msg)
 {
-  back_cart_tool_encoder_.tpl_height = tool_msg->tpl_height;
+  back_cart_tool_encoder_.tpl_height = -tool_msg->tpl_height;
   back_cart_tool_encoder_.tpl_angle = tool_msg->tpl_angle;
   back_cart_tool_encoder_.red_valve_flow = tool_msg->red_valve_flow;
   back_cart_tool_encoder_.green_valve_flow = tool_msg->green_valve_flow;
@@ -473,11 +478,11 @@ void GazeboRosAgribot::publishCarts()
 
 void GazeboRosAgribot::publishTools()
 {
-  front_cart_tool_encoder_.tpl_angle = joints_[FRONT_LOWER_HIT_ANG]->Position(0);
-  front_cart_tool_encoder_.tpl_height = joints_[FRONT_UPPER_HIT_HEI]->Position(0);
+  front_cart_tool_encoder_.tpl_angle = -joints_[FRONT_LOWER_HIT_ANG]->Position(0);
+  front_cart_tool_encoder_.tpl_height = -joints_[FRONT_UPPER_HIT_HEI]->Position(0);
   front_tool_publisher_.publish(front_cart_tool_encoder_);
-  front_cart_tool_encoder_.tpl_angle = joints_[BACK_LOWER_HIT_ANG]->Position(0);
-  front_cart_tool_encoder_.tpl_height = joints_[BACK_UPPER_HIT_HEI]->Position(0);
+  back_cart_tool_encoder_.tpl_angle = -joints_[BACK_LOWER_HIT_ANG]->Position(0);
+  back_cart_tool_encoder_.tpl_height = -joints_[BACK_UPPER_HIT_HEI]->Position(0);
   back_tool_publisher_.publish(back_cart_tool_encoder_);
 }
 
