@@ -21,6 +21,7 @@ from agribot_msgs.srv import ToolManagerStateRequest
 import rospy
 import rospkg
 
+import math
 
 class MobileAppSim(QWidget):
     # pylint: disable=too-many-instance-attributes, too-many-statements, too-many-public-methods
@@ -31,8 +32,8 @@ class MobileAppSim(QWidget):
     min_tpl_angle = -15 # deg
     max_tpl_angle = 60 # deg
     max_tpl_heigth = 45 # cm
-    min_tpl_angle_rad = -0.26
-    max_tpl_angle_rad = 1.57
+    min_tpl_angle_rad =  math.radians(min_tpl_angle)
+    max_tpl_angle_rad = math.radians(max_tpl_angle)
 
 
     def __init__(self, parent=None):
@@ -235,20 +236,20 @@ class MobileAppSim(QWidget):
         return -((((slid - self.min_tpl_angle) * self.max_tpl_angle_rad)/
                   (self.max_tpl_angle - self.min_tpl_angle)) + self.min_tpl_angle_rad)
 
-    def to_meters(self, val): # pylint: disable=no-self-use
-        return val*0.01 # 1cm = 0.01m
+    def cm_to_m(self, val): # pylint: disable=no-self-use
+        return val*0.01
 
     def send_tpl_config(self):
         msg = AgribotTool()
         msg.tpl_angle = self.slider_to_radians(self.slider_tpl_angle_fr.value())
-        msg.tpl_height = self.to_meters(self.slider_tpl_height_fr.value())
+        msg.tpl_height = self.cm_to_m(self.slider_tpl_height_fr.value())
         msg.red_valve_flow = self.slider_red_valve_flow_fr.value()
         msg.green_valve_flow = self.slider_green_valve_flow_fr.value()
         msg.blue_valve_flow = self.slider_blue_valve_flow_fr.value()
         msg.pto_rpm = self.slider_pto_rpm_fr.value()
         self.front_tpl.publish(msg)
         msg.tpl_angle = self.slider_to_radians(self.slider_tpl_angle_bk.value())
-        msg.tpl_height = self.to_meters(self.slider_tpl_height_bk.value())
+        msg.tpl_height = self.cm_to_m(self.slider_tpl_height_bk.value())
         msg.red_valve_flow = self.slider_red_valve_flow_bk.value()
         msg.green_valve_flow = self.slider_green_valve_flow_bk.value()
         msg.blue_valve_flow = self.slider_blue_valve_flow_bk.value()
