@@ -5,6 +5,8 @@ import signal
 import sys
 import threading
 
+import math
+
 from python_qt_binding import loadUi
 from python_qt_binding.QtWidgets import QWidget, QApplication  # pylint: disable=no-name-in-module
 
@@ -21,7 +23,6 @@ from agribot_msgs.srv import ToolManagerStateRequest
 import rospy
 import rospkg
 
-import math
 
 class MobileAppSim(QWidget):
     # pylint: disable=too-many-instance-attributes, too-many-statements, too-many-public-methods
@@ -32,7 +33,7 @@ class MobileAppSim(QWidget):
     min_tpl_angle = -15 # deg
     max_tpl_angle = 60 # deg
     max_tpl_heigth = 45 # cm
-    min_tpl_angle_rad =  math.radians(min_tpl_angle)
+    min_tpl_angle_rad = math.radians(min_tpl_angle)
     max_tpl_angle_rad = math.radians(max_tpl_angle)
 
 
