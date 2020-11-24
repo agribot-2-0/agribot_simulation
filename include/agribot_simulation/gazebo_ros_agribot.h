@@ -68,6 +68,8 @@ private:
   void publishTools();
   void CreatePubsAndSubs();
   void UpdateVelocities();
+  void UpdatePositionsFront();
+  void UpdatePositionsBack();
 
   GazeboRosPtr gazebo_ros_;
   physics::WorldPtr world;
@@ -83,6 +85,7 @@ private:
   double cart_angle_[2];
   double wheel_accel;
   double wheel_speed_instr_[4];
+  double joint_positions_[6];
 
   std::vector<physics::JointPtr> joints_;
   std::vector<std::string> joints_name_;
