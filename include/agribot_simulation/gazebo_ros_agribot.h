@@ -63,20 +63,14 @@ class GazeboRosAgribot : public ModelPlugin
   void onUpdate();
 
  private:
-  struct SpeedType
-  {
-    double linear;
-    double angular;
-    SpeedType() : linear(0.0), angular(0.0) {}
-  };
 
   struct JointHandle
   {
     physics::JointPtr ptr;
     std::string name;
-    SpeedType speed;
+    double speed;
     double position;
-    JointHandle() : name(""), position(0.0) {}
+    JointHandle() : name(""), speed(0.0), position(0.0) {}
   };
 
  private:
@@ -85,6 +79,11 @@ class GazeboRosAgribot : public ModelPlugin
   void publishCarts();
   void publishTools();
   void CreatePubsAndSubs();
+  void updateJointPosition(int joint_index);
+  auto getJointPosition(int joint_index) const;
+  void updateJointVelocity(int joint_index);
+  auto getJointVelocity(int joint_index) const;
+
   void UpdateVelocities();
   void UpdatePositions();
 
