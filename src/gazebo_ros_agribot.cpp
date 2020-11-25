@@ -303,10 +303,14 @@ void GazeboRosAgribot::UpdateVelocities()
   current_speed[BACK_LEFT_WHEEL] = joints_[BACK_LEFT_WHEEL].ptr->GetVelocity(0);
   current_speed[BACK_RIGHT_WHEEL] = joints_[BACK_RIGHT_WHEEL].ptr->GetVelocity(0);
 #endif
-  joints_[FRONT_RIGHT_WHEEL].speed.linear = joints_[FRONT_CART].speed.linear + wheel_separation_ / 2.0 * joints_[FRONT_CART].speed.angular;
-  joints_[FRONT_LEFT_WHEEL].speed.linear = joints_[FRONT_CART].speed.linear - wheel_separation_ / 2.0 * joints_[FRONT_CART].speed.angular;
-  joints_[BACK_RIGHT_WHEEL].speed.linear = joints_[BACK_CART].speed.linear + wheel_separation_ / 2.0 * joints_[BACK_CART].speed.angular;
-  joints_[BACK_LEFT_WHEEL].speed.linear = joints_[BACK_CART].speed.linear - wheel_separation_ / 2.0 * joints_[BACK_CART].speed.angular;
+  joints_[FRONT_RIGHT_WHEEL].speed.linear =
+      joints_[FRONT_CART].speed.linear + wheel_separation_ / 2.0 * joints_[FRONT_CART].speed.angular;
+  joints_[FRONT_LEFT_WHEEL].speed.linear =
+      joints_[FRONT_CART].speed.linear - wheel_separation_ / 2.0 * joints_[FRONT_CART].speed.angular;
+  joints_[BACK_RIGHT_WHEEL].speed.linear =
+      joints_[BACK_CART].speed.linear + wheel_separation_ / 2.0 * joints_[BACK_CART].speed.angular;
+  joints_[BACK_LEFT_WHEEL].speed.linear =
+      joints_[BACK_CART].speed.linear - wheel_separation_ / 2.0 * joints_[BACK_CART].speed.angular;
 
   joints_[FRONT_LEFT_WHEEL].ptr->SetVelocity(0, joints_[FRONT_LEFT_WHEEL].speed.linear / wheel_radius_);
   joints_[FRONT_RIGHT_WHEEL].ptr->SetVelocity(0, joints_[FRONT_RIGHT_WHEEL].speed.linear / wheel_radius_);
@@ -316,8 +320,8 @@ void GazeboRosAgribot::UpdateVelocities()
   ROS_DEBUG_NAMED("agribot_drive",
                   "Set  FL  speed = %lf, FR speed= %lf,"
                   " BL speed = %lf, BR speed= %lf",
-                  joints_[FRONT_LEFT_WHEEL].speed.linear, joints_[FRONT_RIGHT_WHEEL].speed.linear, joints_[BACK_LEFT_WHEEL].speed.linear,
-                  joints_[BACK_RIGHT_WHEEL].speed.linear);
+                  joints_[FRONT_LEFT_WHEEL].speed.linear, joints_[FRONT_RIGHT_WHEEL].speed.linear,
+                  joints_[BACK_LEFT_WHEEL].speed.linear, joints_[BACK_RIGHT_WHEEL].speed.linear);
   ROS_DEBUG_NAMED("agribot_drive",
                   "Current  speed = %lf, FR speed= %lf,"
                   " BL speed = %lf, BR speed= %lf",
@@ -444,12 +448,16 @@ void GazeboRosAgribot::publishEncoder()
   // w=(VR-VL)/d
   // v=(VR+VL)/2
   encoder_.header.stamp = ros::Time::now();
-  encoder_.front_linear = (current_speed[FRONT_LEFT_WHEEL] * wheel_radius_ + current_speed[FRONT_RIGHT_WHEEL] * wheel_radius_) / 2;
+  encoder_.front_linear =
+      (current_speed[FRONT_LEFT_WHEEL] * wheel_radius_ + current_speed[FRONT_RIGHT_WHEEL] * wheel_radius_) / 2;
   encoder_.front_angular =
-      (current_speed[FRONT_RIGHT_WHEEL] * wheel_radius_ - current_speed[FRONT_LEFT_WHEEL] * wheel_radius_) / wheel_separation_;
-  encoder_.back_linear = (current_speed[BACK_LEFT_WHEEL] * wheel_radius_ + current_speed[BACK_RIGHT_WHEEL] * wheel_radius_) / 2;
+      (current_speed[FRONT_RIGHT_WHEEL] * wheel_radius_ - current_speed[FRONT_LEFT_WHEEL] * wheel_radius_) /
+      wheel_separation_;
+  encoder_.back_linear =
+      (current_speed[BACK_LEFT_WHEEL] * wheel_radius_ + current_speed[BACK_RIGHT_WHEEL] * wheel_radius_) / 2;
   encoder_.back_angular =
-      (current_speed[BACK_RIGHT_WHEEL] * wheel_radius_ - current_speed[BACK_LEFT_WHEEL] * wheel_radius_) / wheel_separation_;
+      (current_speed[BACK_RIGHT_WHEEL] * wheel_radius_ - current_speed[BACK_LEFT_WHEEL] * wheel_radius_) /
+      wheel_separation_;
   encoder_publisher_.publish(encoder_);
 
   CaterpillarEncoderMsg_.header.stamp = ros::Time::now();

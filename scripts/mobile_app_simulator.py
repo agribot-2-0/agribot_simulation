@@ -231,22 +231,19 @@ class MobileAppSim(QWidget):
     def val_change_pto_rpm_bk(self):
         self.pto_rpm_val_bk.setText(str(self.slider_pto_rpm_bk.value()))
 
-    def slider_to_radians(self, slid):
-        return math.radians(slid)
-
     def cm_to_m(self, val): # pylint: disable=no-self-use
         return val*0.01
 
     def send_tpl_config(self):
         msg = AgribotTool()
-        msg.tpl_angle = self.slider_to_radians(self.slider_tpl_angle_fr.value())
+        msg.tpl_angle = math.radians(self.slider_tpl_angle_fr.value())
         msg.tpl_height = self.cm_to_m(self.slider_tpl_height_fr.value())
         msg.red_valve_flow = self.slider_red_valve_flow_fr.value()
         msg.green_valve_flow = self.slider_green_valve_flow_fr.value()
         msg.blue_valve_flow = self.slider_blue_valve_flow_fr.value()
         msg.pto_rpm = self.slider_pto_rpm_fr.value()
         self.front_tpl.publish(msg)
-        msg.tpl_angle = self.slider_to_radians(self.slider_tpl_angle_bk.value())
+        msg.tpl_angle = math.radians(self.slider_tpl_angle_bk.value())
         msg.tpl_height = self.cm_to_m(self.slider_tpl_height_bk.value())
         msg.red_valve_flow = self.slider_red_valve_flow_bk.value()
         msg.green_valve_flow = self.slider_green_valve_flow_bk.value()
