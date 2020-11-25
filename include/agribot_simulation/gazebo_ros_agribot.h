@@ -63,7 +63,6 @@ class GazeboRosAgribot : public ModelPlugin
   void onUpdate();
 
  private:
-
   struct JointHandle
   {
     physics::JointPtr ptr;
