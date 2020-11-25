@@ -33,8 +33,6 @@ class MobileAppSim(QWidget):
     min_tpl_angle = -15 # deg
     max_tpl_angle = 60 # deg
     max_tpl_heigth = 45 # cm
-    min_tpl_angle_rad = math.radians(min_tpl_angle)
-    max_tpl_angle_rad = math.radians(max_tpl_angle)
 
 
     def __init__(self, parent=None):

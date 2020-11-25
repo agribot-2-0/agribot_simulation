@@ -371,32 +371,26 @@ void GazeboRosAgribot::cmdVelCallback(const agribot_msgs::AgribotCaterpillar::Co
 
 void GazeboRosAgribot::cmdToolsFrontCallback(const agribot_msgs::AgribotTool::ConstPtr& tool_msg)
 {
-  front_cart_tool_encoder_.tpl_height = -tool_msg->tpl_height;
-  front_cart_tool_encoder_.tpl_angle = -tool_msg->tpl_angle;
   front_cart_tool_encoder_.red_valve_flow = tool_msg->red_valve_flow;
   front_cart_tool_encoder_.green_valve_flow = tool_msg->green_valve_flow;
   front_cart_tool_encoder_.blue_valve_flow = tool_msg->blue_valve_flow;
   front_cart_tool_encoder_.pto_rpm = tool_msg->pto_rpm;
 
-  joint_positions_[FRONT_LOWER_HIT_ANG-index_offset] = front_cart_tool_encoder_.tpl_angle;
-  joint_positions_[FRONT_UPPER_HIT_HEI-index_offset] = front_cart_tool_encoder_.tpl_height;
+  joint_positions_[FRONT_LOWER_HIT_ANG-index_offset] = -tool_msg->tpl_angle;
+  joint_positions_[FRONT_UPPER_HIT_HEI-index_offset] = -tool_msg->tpl_height;
   joint_positions_[FRONT_UPPER_HIT_ANG-index_offset] = 0;
-  UpdatePositionsFront();
 }
 
 void GazeboRosAgribot::cmdToolsBackCallback(const agribot_msgs::AgribotTool::ConstPtr& tool_msg)
 {
-  back_cart_tool_encoder_.tpl_height = -tool_msg->tpl_height;
-  back_cart_tool_encoder_.tpl_angle = -tool_msg->tpl_angle;
   back_cart_tool_encoder_.red_valve_flow = tool_msg->red_valve_flow;
   back_cart_tool_encoder_.green_valve_flow = tool_msg->green_valve_flow;
   back_cart_tool_encoder_.blue_valve_flow = tool_msg->blue_valve_flow;
   back_cart_tool_encoder_.pto_rpm = tool_msg->pto_rpm;
 
-  joint_positions_[BACK_LOWER_HIT_ANG-index_offset] = back_cart_tool_encoder_.tpl_angle;
-  joint_positions_[BACK_UPPER_HIT_HEI-index_offset] = back_cart_tool_encoder_.tpl_height;
+  joint_positions_[BACK_LOWER_HIT_ANG-index_offset] = -tool_msg->tpl_angle;
+  joint_positions_[BACK_UPPER_HIT_HEI-index_offset] = -tool_msg->tpl_height;
   joint_positions_[BACK_UPPER_HIT_ANG-index_offset] = 0;
-  UpdatePositionsBack();
 }
 
 void GazeboRosAgribot::QueueThread()
