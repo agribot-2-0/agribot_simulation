@@ -35,6 +35,7 @@
 #include <ros/callback_queue.h>
 
 #include <map>
+#include <unordered_map>
 #include <string>
 #include <vector>
 
@@ -62,14 +63,30 @@ public:
   void onUpdate();
 
 private:
+  struct SpeedType
+  {
+    double linear;
+    double angular;
+    SpeedType() : linear(0.0), angular(0.0) {}
+  };
+
+  struct JointHandle
+  {
+      physics::JointPtr ptr;
+      std::string name;
+      SpeedType speed;
+      double position;
+      JointHandle() : name(""), position(0.0) {}
+  };
+
+private:
   void publishOdometry(double step_time);
   void publishEncoder();
   void publishCarts();
   void publishTools();
   void CreatePubsAndSubs();
   void UpdateVelocities();
-  void UpdatePositionsFront();
-  void UpdatePositionsBack();
+  void UpdatePositions();
 
   GazeboRosPtr gazebo_ros_;
   physics::WorldPtr world;
@@ -80,15 +97,12 @@ private:
   double wheel_radius_;
   double chasis_length_;
   double wheel_torque;
-  double wheel_speed_[4];
-  double cart_speed_[4];
-  double cart_angle_[2];
   double wheel_accel;
   double wheel_speed_instr_[4];
   double joint_positions_[6];
 
-  std::vector<physics::JointPtr> joints_;
-  std::vector<std::string> joints_name_;
+  std::vector<JointHandle> joints_;
+
 
   // ROS STUFF
   ros::NodeHandle* rosnode_;

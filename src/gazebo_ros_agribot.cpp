@@ -21,10 +21,10 @@ namespace gazebo
 {
 enum
 {
-  FRONT_RIGHT,
-  FRONT_LEFT,
-  BACK_RIGHT,
-  BACK_LEFT,
+  FRONT_RIGHT_WHEEL,
+  FRONT_LEFT_WHEEL,
+  BACK_RIGHT_WHEEL,
+  BACK_LEFT_WHEEL,
   FRONT_CART,
   BACK_CART,
   FRONT_LOWER_HIT_ANG,
@@ -33,13 +33,6 @@ enum
   BACK_LOWER_HIT_ANG,
   BACK_UPPER_HIT_ANG,
   BACK_UPPER_HIT_HEI
-};
-enum
-{
-  FRONT_LINEAR,
-  FRONT_ANGULAR,
-  BACK_LINEAR,
-  BACK_ANGULAR
 };
 
 GazeboRosAgribot::GazeboRosAgribot()
@@ -210,54 +203,42 @@ void GazeboRosAgribot::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
 
   command_sub_topic_ = "/agribot/control/caterpillar";
   wheel_torque = 5.0;
-  joints_name_.resize(joints_cnt);
-  joints_name_[FRONT_LEFT] = "front_left_wheel_joint";
-  joints_name_[FRONT_RIGHT] = "front_right_wheel_joint";
-  joints_name_[BACK_LEFT] = "back_left_wheel_joint";
-  joints_name_[BACK_RIGHT] = "back_right_wheel_joint";
-  joints_name_[FRONT_CART] = "front_cart_joint";
-  joints_name_[BACK_CART] = "back_cart_joint";
-  joints_name_[FRONT_LOWER_HIT_ANG] = "front_tpl_lower_hitches_revolute_joint";
-  joints_name_[FRONT_UPPER_HIT_ANG] = "front_tpl_upper_hitch_revolute_joint";
-  joints_name_[FRONT_UPPER_HIT_HEI] = "front_tpl_upper_hitch_prismatic_joint";
-  joints_name_[BACK_LOWER_HIT_ANG] = "back_tpl_lower_hitches_revolute_joint";
-  joints_name_[BACK_UPPER_HIT_ANG] = "back_tpl_upper_hitch_revolute_joint";
-  joints_name_[BACK_UPPER_HIT_HEI] = "back_tpl_upper_hitch_prismatic_joint";
-
-  // Initialize joints
   joints_.resize(joints_cnt);
-  joints_[FRONT_LEFT] = model_->GetJoint(joints_name_[FRONT_LEFT]);
-  joints_[FRONT_RIGHT] = model_->GetJoint(joints_name_[FRONT_RIGHT]);
-  joints_[FRONT_CART] = model_->GetJoint(joints_name_[FRONT_CART]);
-  joints_[BACK_LEFT] = model_->GetJoint(joints_name_[BACK_LEFT]);
-  joints_[BACK_RIGHT] = model_->GetJoint(joints_name_[BACK_RIGHT]);
-  joints_[BACK_CART] = model_->GetJoint(joints_name_[BACK_CART]);
-  joints_[FRONT_LOWER_HIT_ANG] = model_->GetJoint(joints_name_[FRONT_LOWER_HIT_ANG]);
-  joints_[FRONT_UPPER_HIT_ANG] = model_->GetJoint(joints_name_[FRONT_UPPER_HIT_ANG]);
-  joints_[FRONT_UPPER_HIT_HEI] = model_->GetJoint(joints_name_[FRONT_UPPER_HIT_HEI]);
-  joints_[BACK_LOWER_HIT_ANG] = model_->GetJoint(joints_name_[BACK_LOWER_HIT_ANG]);
-  joints_[BACK_UPPER_HIT_ANG] = model_->GetJoint(joints_name_[BACK_UPPER_HIT_ANG]);
-  joints_[BACK_UPPER_HIT_HEI] = model_->GetJoint(joints_name_[BACK_UPPER_HIT_HEI]);
+  // Setup joint names:
+  joints_[FRONT_LEFT_WHEEL].name = "front_left_wheel_joint";
+  joints_[FRONT_RIGHT_WHEEL].name = "front_right_wheel_joint";
+  joints_[BACK_LEFT_WHEEL].name = "back_left_wheel_joint";
+  joints_[BACK_RIGHT_WHEEL].name = "back_right_wheel_joint";
+  joints_[FRONT_CART].name = "front_cart_joint";
+  joints_[BACK_CART].name = "back_cart_joint";
+  joints_[FRONT_LOWER_HIT_ANG].name = "front_tpl_lower_hitches_revolute_joint";
+  joints_[FRONT_UPPER_HIT_ANG].name = "front_tpl_upper_hitch_revolute_joint";
+  joints_[FRONT_UPPER_HIT_HEI].name = "front_tpl_upper_hitch_prismatic_joint";
+  joints_[BACK_LOWER_HIT_ANG].name = "back_tpl_lower_hitches_revolute_joint";
+  joints_[BACK_UPPER_HIT_ANG].name = "back_tpl_upper_hitch_revolute_joint";
+  joints_[BACK_UPPER_HIT_HEI].name = "back_tpl_upper_hitch_prismatic_joint";
+  // Setup joint pointers:
+  joints_[FRONT_LEFT_WHEEL].ptr = model_->GetJoint(joints_[FRONT_LEFT_WHEEL].name);
+  joints_[FRONT_RIGHT_WHEEL].ptr = model_->GetJoint(joints_[FRONT_RIGHT_WHEEL].name);
+  joints_[FRONT_CART].ptr = model_->GetJoint(joints_[FRONT_CART].name);
+  joints_[BACK_LEFT_WHEEL].ptr = model_->GetJoint(joints_[BACK_LEFT_WHEEL].name);
+  joints_[BACK_RIGHT_WHEEL].ptr = model_->GetJoint(joints_[BACK_RIGHT_WHEEL].name);
+  joints_[BACK_CART].ptr = model_->GetJoint(joints_[BACK_CART].name);
+  joints_[FRONT_LOWER_HIT_ANG].ptr = model_->GetJoint(joints_[FRONT_LOWER_HIT_ANG].name);
+  joints_[FRONT_UPPER_HIT_ANG].ptr = model_->GetJoint(joints_[FRONT_UPPER_HIT_ANG].name);
+  joints_[FRONT_UPPER_HIT_HEI].ptr = model_->GetJoint(joints_[FRONT_UPPER_HIT_HEI].name);
+  joints_[BACK_LOWER_HIT_ANG].ptr = model_->GetJoint(joints_[BACK_LOWER_HIT_ANG].name);
+  joints_[BACK_UPPER_HIT_ANG].ptr = model_->GetJoint(joints_[BACK_UPPER_HIT_ANG].name);
+  joints_[BACK_UPPER_HIT_HEI].ptr = model_->GetJoint(joints_[BACK_UPPER_HIT_HEI].name);
 
   for (auto joint : joints_)
   {
-    if (joint == nullptr)
+    if (joint.ptr == nullptr)
     {
       ROS_WARN_NAMED("agribot_drive", "Couldn't find specified joint");
       gzthrow("[gazebo_ros_agribot] Couldn't find specified joint");
     }
-
-    joint->SetForce(0, wheel_torque);
-  }
-  // Initialize velocity stuff
-  for (auto wheel_speed : wheel_speed_)
-  {
-    wheel_speed = 0.0;
-  }
-
-  for (auto cart_speed : cart_speed_)
-  {
-    cart_speed = 0.0;
+    joint.ptr->SetForce(0, wheel_torque);
   }
   CreatePubsAndSubs();
   this->callback_queue_thread_ = boost::thread(boost::bind(&GazeboRosAgribot::QueueThread, this));
@@ -305,8 +286,7 @@ void GazeboRosAgribot::onUpdate()
     last_update_time_ = current_time;
   }
   UpdateVelocities();
-  UpdatePositionsFront();
-  UpdatePositionsBack();
+  UpdatePositions();
 }
 
 void GazeboRosAgribot::UpdateVelocities()
@@ -318,55 +298,51 @@ void GazeboRosAgribot::UpdateVelocities()
 // v_t=sin(theta_1)/sin(theta_2)*v_p
 #ifdef DEBUG_VEL
   double current_speed[4];
-  current_speed[FRONT_LEFT] = joints_[FRONT_LEFT]->GetVelocity(0);
-  current_speed[FRONT_RIGHT] = joints_[FRONT_RIGHT]->GetVelocity(0);
-  current_speed[BACK_LEFT] = joints_[BACK_LEFT]->GetVelocity(0);
-  current_speed[BACK_RIGHT] = joints_[BACK_RIGHT]->GetVelocity(0);
+  current_speed[FRONT_LEFT_WHEEL] = joints_[FRONT_LEFT_WHEEL].ptr->GetVelocity(0);
+  current_speed[FRONT_RIGHT_WHEEL] = joints_[FRONT_RIGHT_WHEEL].ptr->GetVelocity(0);
+  current_speed[BACK_LEFT_WHEEL] = joints_[BACK_LEFT_WHEEL].ptr->GetVelocity(0);
+  current_speed[BACK_RIGHT_WHEEL] = joints_[BACK_RIGHT_WHEEL].ptr->GetVelocity(0);
 #endif
-  wheel_speed_[FRONT_RIGHT] = cart_speed_[FRONT_LINEAR] + wheel_separation_ / 2.0 * cart_speed_[FRONT_ANGULAR];
-  wheel_speed_[FRONT_LEFT] = cart_speed_[FRONT_LINEAR] - wheel_separation_ / 2.0 * cart_speed_[FRONT_ANGULAR];
-  wheel_speed_[BACK_RIGHT] = cart_speed_[BACK_LINEAR] + wheel_separation_ / 2.0 * cart_speed_[BACK_ANGULAR];
-  wheel_speed_[BACK_LEFT] = cart_speed_[BACK_LINEAR] - wheel_separation_ / 2.0 * cart_speed_[BACK_ANGULAR];
+  joints_[FRONT_RIGHT_WHEEL].speed.linear = joints_[FRONT_CART].speed.linear + wheel_separation_ / 2.0 * joints_[FRONT_CART].speed.angular;
+  joints_[FRONT_LEFT_WHEEL].speed.linear = joints_[FRONT_CART].speed.linear - wheel_separation_ / 2.0 * joints_[FRONT_CART].speed.angular;
+  joints_[BACK_RIGHT_WHEEL].speed.linear = joints_[BACK_CART].speed.linear + wheel_separation_ / 2.0 * joints_[BACK_CART].speed.angular;
+  joints_[BACK_LEFT_WHEEL].speed.linear = joints_[BACK_CART].speed.linear - wheel_separation_ / 2.0 * joints_[BACK_CART].speed.angular;
 
-  joints_[FRONT_LEFT]->SetVelocity(0, wheel_speed_[FRONT_LEFT] / wheel_radius_);
-  joints_[FRONT_RIGHT]->SetVelocity(0, wheel_speed_[FRONT_RIGHT] / wheel_radius_);
-  joints_[BACK_LEFT]->SetVelocity(0, wheel_speed_[BACK_LEFT] / wheel_radius_);
-  joints_[BACK_RIGHT]->SetVelocity(0, wheel_speed_[BACK_RIGHT] / wheel_radius_);
+  joints_[FRONT_LEFT_WHEEL].ptr->SetVelocity(0, joints_[FRONT_LEFT_WHEEL].speed.linear / wheel_radius_);
+  joints_[FRONT_RIGHT_WHEEL].ptr->SetVelocity(0, joints_[FRONT_RIGHT_WHEEL].speed.linear / wheel_radius_);
+  joints_[BACK_LEFT_WHEEL].ptr->SetVelocity(0, joints_[BACK_LEFT_WHEEL].speed.linear / wheel_radius_);
+  joints_[BACK_RIGHT_WHEEL].ptr->SetVelocity(0, joints_[BACK_RIGHT_WHEEL].speed.linear / wheel_radius_);
 #ifdef DEBUG_VEL
   ROS_DEBUG_NAMED("agribot_drive",
                   "Set  FL  speed = %lf, FR speed= %lf,"
                   " BL speed = %lf, BR speed= %lf",
-                  wheel_speed_[FRONT_LEFT], wheel_speed_[FRONT_RIGHT], wheel_speed_[BACK_LEFT],
-                  wheel_speed_[BACK_RIGHT]);
+                  joints_[FRONT_LEFT_WHEEL].speed.linear, joints_[FRONT_RIGHT_WHEEL].speed.linear, joints_[BACK_LEFT_WHEEL].speed.linear,
+                  joints_[BACK_RIGHT_WHEEL].speed.linear);
   ROS_DEBUG_NAMED("agribot_drive",
                   "Current  speed = %lf, FR speed= %lf,"
                   " BL speed = %lf, BR speed= %lf",
-                  current_speed[FRONT_LEFT], current_speed[FRONT_RIGHT], current_speed[BACK_LEFT],
-                  current_speed[BACK_RIGHT]);
+                  current_speed[FRONT_LEFT_WHEEL], current_speed[FRONT_RIGHT_WHEEL], current_speed[BACK_LEFT_WHEEL],
+                  current_speed[BACK_RIGHT_WHEEL]);
 #endif
 }
 
-void GazeboRosAgribot::UpdatePositionsFront()
+void GazeboRosAgribot::UpdatePositions()
 {
-  joints_[FRONT_LOWER_HIT_ANG]->SetPosition(0, joint_positions_[FRONT_LOWER_HIT_ANG-index_offset]);
-  joints_[FRONT_UPPER_HIT_HEI]->SetPosition(0, joint_positions_[FRONT_UPPER_HIT_HEI-index_offset]);
-  joints_[FRONT_UPPER_HIT_ANG]->SetPosition(0, joint_positions_[FRONT_UPPER_HIT_ANG-index_offset]);
-}
-
-void GazeboRosAgribot::UpdatePositionsBack()
-{
-  joints_[BACK_LOWER_HIT_ANG]->SetPosition(0, joint_positions_[BACK_LOWER_HIT_ANG-index_offset]);
-  joints_[BACK_UPPER_HIT_HEI]->SetPosition(0, joint_positions_[BACK_UPPER_HIT_HEI-index_offset]);
-  joints_[BACK_UPPER_HIT_ANG]->SetPosition(0, joint_positions_[BACK_UPPER_HIT_ANG-index_offset]);
+  joints_[FRONT_LOWER_HIT_ANG].ptr->SetPosition(0, joint_positions_[FRONT_LOWER_HIT_ANG - index_offset]);
+  joints_[FRONT_UPPER_HIT_HEI].ptr->SetPosition(0, joint_positions_[FRONT_UPPER_HIT_HEI - index_offset]);
+  joints_[FRONT_UPPER_HIT_ANG].ptr->SetPosition(0, joint_positions_[FRONT_UPPER_HIT_ANG - index_offset]);
+  joints_[BACK_LOWER_HIT_ANG].ptr->SetPosition(0, joint_positions_[BACK_LOWER_HIT_ANG - index_offset]);
+  joints_[BACK_UPPER_HIT_HEI].ptr->SetPosition(0, joint_positions_[BACK_UPPER_HIT_HEI - index_offset]);
+  joints_[BACK_UPPER_HIT_ANG].ptr->SetPosition(0, joint_positions_[BACK_UPPER_HIT_ANG - index_offset]);
 }
 
 void GazeboRosAgribot::cmdVelCallback(const agribot_msgs::AgribotCaterpillar::ConstPtr& cmd_msg)
 {
   boost::mutex::scoped_lock scoped_lock(lock);
-  cart_speed_[FRONT_LINEAR] = cmd_msg->front_linear;
-  cart_speed_[FRONT_ANGULAR] = cmd_msg->front_angular;
-  cart_speed_[BACK_LINEAR] = cmd_msg->back_linear;
-  cart_speed_[BACK_ANGULAR] = cmd_msg->back_angular;
+  joints_[FRONT_CART].speed.linear = cmd_msg->front_linear;
+  joints_[FRONT_CART].speed.angular = cmd_msg->front_angular;
+  joints_[BACK_CART].speed.linear = cmd_msg->back_linear;
+  joints_[BACK_CART].speed.angular = cmd_msg->back_angular;
 }
 
 void GazeboRosAgribot::cmdToolsFrontCallback(const agribot_msgs::AgribotTool::ConstPtr& tool_msg)
@@ -376,9 +352,9 @@ void GazeboRosAgribot::cmdToolsFrontCallback(const agribot_msgs::AgribotTool::Co
   front_cart_tool_encoder_.blue_valve_flow = tool_msg->blue_valve_flow;
   front_cart_tool_encoder_.pto_rpm = tool_msg->pto_rpm;
 
-  joint_positions_[FRONT_LOWER_HIT_ANG-index_offset] = -tool_msg->tpl_angle;
-  joint_positions_[FRONT_UPPER_HIT_HEI-index_offset] = -tool_msg->tpl_height;
-  joint_positions_[FRONT_UPPER_HIT_ANG-index_offset] = 0;
+  joint_positions_[FRONT_LOWER_HIT_ANG - index_offset] = -tool_msg->tpl_angle;
+  joint_positions_[FRONT_UPPER_HIT_HEI - index_offset] = -tool_msg->tpl_height;
+  joint_positions_[FRONT_UPPER_HIT_ANG - index_offset] = 0;
 }
 
 void GazeboRosAgribot::cmdToolsBackCallback(const agribot_msgs::AgribotTool::ConstPtr& tool_msg)
@@ -388,9 +364,9 @@ void GazeboRosAgribot::cmdToolsBackCallback(const agribot_msgs::AgribotTool::Con
   back_cart_tool_encoder_.blue_valve_flow = tool_msg->blue_valve_flow;
   back_cart_tool_encoder_.pto_rpm = tool_msg->pto_rpm;
 
-  joint_positions_[BACK_LOWER_HIT_ANG-index_offset] = -tool_msg->tpl_angle;
-  joint_positions_[BACK_UPPER_HIT_HEI-index_offset] = -tool_msg->tpl_height;
-  joint_positions_[BACK_UPPER_HIT_ANG-index_offset] = 0;
+  joint_positions_[BACK_LOWER_HIT_ANG - index_offset] = -tool_msg->tpl_angle;
+  joint_positions_[BACK_UPPER_HIT_HEI - index_offset] = -tool_msg->tpl_height;
+  joint_positions_[BACK_UPPER_HIT_ANG - index_offset] = 0;
 }
 
 void GazeboRosAgribot::QueueThread()
@@ -461,44 +437,44 @@ void GazeboRosAgribot::publishOdometry(double step_time)
 void GazeboRosAgribot::publishEncoder()
 {
   double current_speed[4];
-  current_speed[FRONT_LEFT] = joints_[FRONT_LEFT]->GetVelocity(0);
-  current_speed[FRONT_RIGHT] = joints_[FRONT_RIGHT]->GetVelocity(0);
-  current_speed[BACK_LEFT] = joints_[BACK_LEFT]->GetVelocity(0);
-  current_speed[BACK_RIGHT] = joints_[BACK_RIGHT]->GetVelocity(0);
+  current_speed[FRONT_LEFT_WHEEL] = joints_[FRONT_LEFT_WHEEL].ptr->GetVelocity(0);
+  current_speed[FRONT_RIGHT_WHEEL] = joints_[FRONT_RIGHT_WHEEL].ptr->GetVelocity(0);
+  current_speed[BACK_LEFT_WHEEL] = joints_[BACK_LEFT_WHEEL].ptr->GetVelocity(0);
+  current_speed[BACK_RIGHT_WHEEL] = joints_[BACK_RIGHT_WHEEL].ptr->GetVelocity(0);
   // w=(VR-VL)/d
   // v=(VR+VL)/2
   encoder_.header.stamp = ros::Time::now();
-  encoder_.front_linear = (current_speed[FRONT_LEFT] * wheel_radius_ + current_speed[FRONT_RIGHT] * wheel_radius_) / 2;
+  encoder_.front_linear = (current_speed[FRONT_LEFT_WHEEL] * wheel_radius_ + current_speed[FRONT_RIGHT_WHEEL] * wheel_radius_) / 2;
   encoder_.front_angular =
-      (current_speed[FRONT_RIGHT] * wheel_radius_ - current_speed[FRONT_LEFT] * wheel_radius_) / wheel_separation_;
-  encoder_.back_linear = (current_speed[BACK_LEFT] * wheel_radius_ + current_speed[BACK_RIGHT] * wheel_radius_) / 2;
+      (current_speed[FRONT_RIGHT_WHEEL] * wheel_radius_ - current_speed[FRONT_LEFT_WHEEL] * wheel_radius_) / wheel_separation_;
+  encoder_.back_linear = (current_speed[BACK_LEFT_WHEEL] * wheel_radius_ + current_speed[BACK_RIGHT_WHEEL] * wheel_radius_) / 2;
   encoder_.back_angular =
-      (current_speed[BACK_RIGHT] * wheel_radius_ - current_speed[BACK_LEFT] * wheel_radius_) / wheel_separation_;
+      (current_speed[BACK_RIGHT_WHEEL] * wheel_radius_ - current_speed[BACK_LEFT_WHEEL] * wheel_radius_) / wheel_separation_;
   encoder_publisher_.publish(encoder_);
 
   CaterpillarEncoderMsg_.header.stamp = ros::Time::now();
-  CaterpillarEncoderMsg_.back_left = joints_[BACK_LEFT]->Position(0);
-  CaterpillarEncoderMsg_.back_right = joints_[BACK_RIGHT]->Position(0);
-  CaterpillarEncoderMsg_.front_left = joints_[FRONT_LEFT]->Position(0);
-  CaterpillarEncoderMsg_.front_right = joints_[FRONT_RIGHT]->Position(0);
+  CaterpillarEncoderMsg_.back_left = joints_[BACK_LEFT_WHEEL].ptr->Position(0);
+  CaterpillarEncoderMsg_.back_right = joints_[BACK_RIGHT_WHEEL].ptr->Position(0);
+  CaterpillarEncoderMsg_.front_left = joints_[FRONT_LEFT_WHEEL].ptr->Position(0);
+  CaterpillarEncoderMsg_.front_right = joints_[FRONT_RIGHT_WHEEL].ptr->Position(0);
   catterpilar_wheels_publisher_.publish(CaterpillarEncoderMsg_);
 }
 
 void GazeboRosAgribot::publishCarts()
 {
-  FrontAngleMsg_.data = joints_[FRONT_CART]->Position(0);
-  BackAngleMsg_.data = joints_[BACK_CART]->Position(0);
+  FrontAngleMsg_.data = joints_[FRONT_CART].ptr->Position(0);
+  BackAngleMsg_.data = joints_[BACK_CART].ptr->Position(0);
   front_cart_publisher_.publish(FrontAngleMsg_);
   back_cart_publisher_.publish(BackAngleMsg_);
 }
 
 void GazeboRosAgribot::publishTools()
 {
-  front_cart_tool_encoder_.tpl_angle = -joints_[FRONT_LOWER_HIT_ANG]->Position(0);
-  front_cart_tool_encoder_.tpl_height = -joints_[FRONT_UPPER_HIT_HEI]->Position(0);
+  front_cart_tool_encoder_.tpl_angle = -joints_[FRONT_LOWER_HIT_ANG].ptr->Position(0);
+  front_cart_tool_encoder_.tpl_height = -joints_[FRONT_UPPER_HIT_HEI].ptr->Position(0);
   front_tool_publisher_.publish(front_cart_tool_encoder_);
-  back_cart_tool_encoder_.tpl_angle = -joints_[BACK_LOWER_HIT_ANG]->Position(0);
-  back_cart_tool_encoder_.tpl_height = -joints_[BACK_UPPER_HIT_HEI]->Position(0);
+  back_cart_tool_encoder_.tpl_angle = -joints_[BACK_LOWER_HIT_ANG].ptr->Position(0);
+  back_cart_tool_encoder_.tpl_height = -joints_[BACK_UPPER_HIT_HEI].ptr->Position(0);
   back_tool_publisher_.publish(back_cart_tool_encoder_);
 }
 
