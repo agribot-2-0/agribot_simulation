@@ -56,13 +56,13 @@ class GazeboRosAgribot : public ModelPlugin
     WORLD = 1,
   };
 
-public:
+ public:
   GazeboRosAgribot();
   ~GazeboRosAgribot();
   void Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf);
   void onUpdate();
 
-private:
+ private:
   struct SpeedType
   {
     double linear;
@@ -72,14 +72,14 @@ private:
 
   struct JointHandle
   {
-      physics::JointPtr ptr;
-      std::string name;
-      SpeedType speed;
-      double position;
-      JointHandle() : name(""), position(0.0) {}
+    physics::JointPtr ptr;
+    std::string name;
+    SpeedType speed;
+    double position;
+    JointHandle() : name(""), position(0.0) {}
   };
 
-private:
+ private:
   void publishOdometry(double step_time);
   void publishEncoder();
   void publishCarts();
@@ -99,10 +99,8 @@ private:
   double wheel_torque;
   double wheel_accel;
   double wheel_speed_instr_[4];
-  double joint_positions_[6];
 
   std::vector<JointHandle> joints_;
-
 
   // ROS STUFF
   ros::NodeHandle* rosnode_;

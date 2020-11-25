@@ -12,7 +12,6 @@
 #define RAD_TO_DEG (180 / M_PI)
 #define DEG_TO_RAD (M_PI / 180)
 constexpr int joints_cnt = 12;
-constexpr int index_offset = 6;
 
 // #define DEBUG_VEL
 // #define DEBUG_TF
@@ -332,12 +331,12 @@ void GazeboRosAgribot::UpdateVelocities()
 
 void GazeboRosAgribot::UpdatePositions()
 {
-  joints_[FRONT_LOWER_HIT_ANG].ptr->SetPosition(0, joint_positions_[FRONT_LOWER_HIT_ANG - index_offset]);
-  joints_[FRONT_UPPER_HIT_HEI].ptr->SetPosition(0, joint_positions_[FRONT_UPPER_HIT_HEI - index_offset]);
-  joints_[FRONT_UPPER_HIT_ANG].ptr->SetPosition(0, joint_positions_[FRONT_UPPER_HIT_ANG - index_offset]);
-  joints_[BACK_LOWER_HIT_ANG].ptr->SetPosition(0, joint_positions_[BACK_LOWER_HIT_ANG - index_offset]);
-  joints_[BACK_UPPER_HIT_HEI].ptr->SetPosition(0, joint_positions_[BACK_UPPER_HIT_HEI - index_offset]);
-  joints_[BACK_UPPER_HIT_ANG].ptr->SetPosition(0, joint_positions_[BACK_UPPER_HIT_ANG - index_offset]);
+  joints_[FRONT_LOWER_HIT_ANG].ptr->SetPosition(0, joints_[FRONT_LOWER_HIT_ANG].position);
+  joints_[FRONT_UPPER_HIT_HEI].ptr->SetPosition(0, joints_[FRONT_UPPER_HIT_HEI].position);
+  joints_[FRONT_UPPER_HIT_ANG].ptr->SetPosition(0, joints_[FRONT_UPPER_HIT_ANG].position);
+  joints_[BACK_LOWER_HIT_ANG].ptr->SetPosition(0, joints_[BACK_LOWER_HIT_ANG].position);
+  joints_[BACK_UPPER_HIT_HEI].ptr->SetPosition(0, joints_[BACK_UPPER_HIT_HEI].position);
+  joints_[BACK_UPPER_HIT_ANG].ptr->SetPosition(0, joints_[BACK_UPPER_HIT_ANG].position);
 }
 
 void GazeboRosAgribot::cmdVelCallback(const agribot_msgs::AgribotCaterpillar::ConstPtr& cmd_msg)
@@ -356,9 +355,9 @@ void GazeboRosAgribot::cmdToolsFrontCallback(const agribot_msgs::AgribotTool::Co
   front_cart_tool_encoder_.blue_valve_flow = tool_msg->blue_valve_flow;
   front_cart_tool_encoder_.pto_rpm = tool_msg->pto_rpm;
 
-  joint_positions_[FRONT_LOWER_HIT_ANG - index_offset] = -tool_msg->tpl_angle;
-  joint_positions_[FRONT_UPPER_HIT_HEI - index_offset] = -tool_msg->tpl_height;
-  joint_positions_[FRONT_UPPER_HIT_ANG - index_offset] = 0;
+  joints_[FRONT_LOWER_HIT_ANG].position = -tool_msg->tpl_angle;
+  joints_[FRONT_UPPER_HIT_HEI].position = -tool_msg->tpl_height;
+  joints_[FRONT_UPPER_HIT_ANG].position = 0;
 }
 
 void GazeboRosAgribot::cmdToolsBackCallback(const agribot_msgs::AgribotTool::ConstPtr& tool_msg)
@@ -368,9 +367,9 @@ void GazeboRosAgribot::cmdToolsBackCallback(const agribot_msgs::AgribotTool::Con
   back_cart_tool_encoder_.blue_valve_flow = tool_msg->blue_valve_flow;
   back_cart_tool_encoder_.pto_rpm = tool_msg->pto_rpm;
 
-  joint_positions_[BACK_LOWER_HIT_ANG - index_offset] = -tool_msg->tpl_angle;
-  joint_positions_[BACK_UPPER_HIT_HEI - index_offset] = -tool_msg->tpl_height;
-  joint_positions_[BACK_UPPER_HIT_ANG - index_offset] = 0;
+  joints_[BACK_LOWER_HIT_ANG].position = -tool_msg->tpl_angle;
+  joints_[BACK_UPPER_HIT_HEI].position = -tool_msg->tpl_height;
+  joints_[BACK_UPPER_HIT_ANG].position = 0;
 }
 
 void GazeboRosAgribot::QueueThread()
