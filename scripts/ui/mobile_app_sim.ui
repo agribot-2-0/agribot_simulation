@@ -50,7 +50,14 @@
               </widget>
              </item>
              <item>
-              <widget class="QLineEdit" name="text_task_name"/>
+              <widget class="QComboBox" name="combo_task_name">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+              </widget>
              </item>
              <item>
               <widget class="QPushButton" name="button_send_task">

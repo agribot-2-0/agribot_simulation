@@ -109,13 +109,21 @@ class MobileAppSim(QWidget):
         rospy.wait_for_service('/gazebo/reset_world')
         self.reset_world = rospy.ServiceProxy('/gazebo/reset_world', Empty)
 
+        tasks_path = os.path.join(rospack.get_path('agribot_map'), "tasks")
+        tasks = [
+            os.path.splitext(f)[0] for f in os.listdir(tasks_path)
+            if os.path.isfile(os.path.join(tasks_path, f))
+        ]
+        for item in tasks:
+            self.combo_task_name.addItem(item)
+
         timestamp_thread = threading.Thread(target=self.rosloop)
         timestamp_thread.setDaemon(True)
         timestamp_thread.start()
 
     def send_task(self):
         msg = String()
-        msg.data = self.text_task_name.text()
+        msg.data = self.combo_task_name.currentText()
         self.task.publish(msg)
 
     def autonomous_mode(self):
