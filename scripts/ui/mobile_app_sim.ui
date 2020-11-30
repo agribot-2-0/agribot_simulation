@@ -17,7 +17,7 @@
    <item row="0" column="1">
     <widget class="QTabWidget" name="tabWid">
      <property name="currentIndex">
-      <number>0</number>
+      <number>2</number>
      </property>
      <widget class="QWidget" name="Main">
       <attribute name="title">
@@ -1046,13 +1046,6 @@
           </widget>
          </item>
         </layout>
-       </item>
-       <item row="1" column="0" colspan="2">
-        <widget class="QPushButton" name="button_send_tpl">
-         <property name="text">
-          <string>Send TPL config</string>
-         </property>
-        </widget>
        </item>
       </layout>
      </widget>

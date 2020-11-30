@@ -29,7 +29,6 @@ class MobileAppSim(QWidget):
     max_linear_velocity = 2.0
     max_circle_radius = 11.0
     no_tags = "0"
-    send_tpl = False
     min_tpl_angle = -15 # deg
     max_tpl_angle = 60 # deg
     max_tpl_height = 45 # cm
@@ -64,11 +63,11 @@ class MobileAppSim(QWidget):
                                               AgribotManualControl,
                                               queue_size=10)
 
-        self.front_tpl = rospy.Publisher('/agribot/control/tool/front',
+        self.front_tpl = rospy.Publisher('/agribot/control/tool/front_manual',
                                          AgribotTool,
                                          queue_size=1)
 
-        self.back_tpl = rospy.Publisher('/agribot/control/tool/back',
+        self.back_tpl = rospy.Publisher('/agribot/control/tool/back_manual',
                                         AgribotTool,
                                         queue_size=1)
 
@@ -89,7 +88,6 @@ class MobileAppSim(QWidget):
         self.button_no_obstacle.clicked.connect(self.no_obstacle_detected)
         self.button_reset_gazebo.clicked.connect(self.gazebo_reset_world)
         self.button_scan_tags.clicked.connect(self.scan_for_tags)
-        self.button_send_tpl.clicked.connect(self.set_tpl)
         self.manual_msg = AgribotManualControl()
 
         # List init
@@ -118,7 +116,7 @@ class MobileAppSim(QWidget):
         self.slider_blue_valve_flow_bk.valueChanged.connect(self.val_change_blue_valve_flow_bk)
         self.slider_pto_rpm_bk.valueChanged.connect(self.val_change_pto_rpm_bk)
 
-        rospy.wait_for_service('/gazebo/reset_world')
+        #rospy.wait_for_service('/gazebo/reset_world')
         self.reset_world = rospy.ServiceProxy('/gazebo/reset_world', Empty)
 
         tasks_path = os.path.join(rospack.get_path('agribot_map'), "tasks")
@@ -194,15 +192,6 @@ class MobileAppSim(QWidget):
             for tag in resp.ids:
                 self.back_tags.addItem(str(tag))
 
-    def set_tpl(self):
-        try:
-            self.tags_scan(ToolManagerStateRequest.SET_TPL)
-        except rospy.ServiceException as exc:
-            rospy.logerr("Service call failed: {}".format(exc))
-            self.send_tpl = False
-        else:
-            self.send_tpl = True
-
     def val_change_tpl_angle_fr(self):
         self.tpl_angle_val_fr.setText(str(self.slider_tpl_angle_fr.value()))
 
@@ -269,8 +258,7 @@ class MobileAppSim(QWidget):
                 self.slider_angular.value() *
                 self.max_circle_radius) / self.slider_angular.maximum()
             self.manual_control.publish(self.manual_msg)
-            if self.send_tpl:
-                self.send_tpl_config()
+            self.send_tpl_config()
             rate.sleep()
 
 
