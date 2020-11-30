@@ -32,7 +32,7 @@ class MobileAppSim(QWidget):
     send_tpl = False
     min_tpl_angle = -15 # deg
     max_tpl_angle = 60 # deg
-    max_tpl_heigth = 45 # cm
+    max_tpl_height = 45 # cm
 
 
     def __init__(self, parent=None):
@@ -103,7 +103,7 @@ class MobileAppSim(QWidget):
         self.slider_tpl_angle_fr.setMinimum(self.min_tpl_angle)
         self.slider_tpl_angle_fr.setMaximum(self.max_tpl_angle)
         self.slider_tpl_height_fr.valueChanged.connect(self.val_change_tpl_height_fr)
-        self.slider_tpl_height_fr.setMaximum(self.max_tpl_heigth)
+        self.slider_tpl_height_fr.setMaximum(self.max_tpl_height)
         self.slider_red_valve_flow_fr.valueChanged.connect(self.val_change_red_valve_flow_fr)
         self.slider_green_valve_flow_fr.valueChanged.connect(self.val_change_green_valve_flow_fr)
         self.slider_blue_valve_flow_fr.valueChanged.connect(self.val_change_blue_valve_flow_fr)
@@ -112,7 +112,7 @@ class MobileAppSim(QWidget):
         self.slider_tpl_angle_bk.setMinimum(self.min_tpl_angle)
         self.slider_tpl_angle_bk.setMaximum(self.max_tpl_angle)
         self.slider_tpl_height_bk.valueChanged.connect(self.val_change_tpl_height_bk)
-        self.slider_tpl_height_bk.setMaximum(self.max_tpl_heigth)
+        self.slider_tpl_height_bk.setMaximum(self.max_tpl_height)
         self.slider_red_valve_flow_bk.valueChanged.connect(self.val_change_red_valve_flow_bk)
         self.slider_green_valve_flow_bk.valueChanged.connect(self.val_change_green_valve_flow_bk)
         self.slider_blue_valve_flow_bk.valueChanged.connect(self.val_change_blue_valve_flow_bk)

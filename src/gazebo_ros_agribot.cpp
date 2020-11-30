@@ -272,8 +272,8 @@ void GazeboRosAgribot::onUpdate()
     publishTools();
     last_update_time_ = current_time;
   }
-  UpdateVelocities();
-  UpdatePositions();
+  updateVelocities();
+  updatePositions();
 }
 
 void GazeboRosAgribot::updateJointPosition(int joint_index)
@@ -296,7 +296,7 @@ auto GazeboRosAgribot::getJointVelocity(int joint_index) const
   return joints_[joint_index].ptr->GetVelocity(0);
 }
 
-void GazeboRosAgribot::UpdateVelocities()
+void GazeboRosAgribot::updateVelocities()
 {
 #ifdef DEBUG_VEL
   double current_speed[4];
@@ -324,7 +324,7 @@ void GazeboRosAgribot::UpdateVelocities()
 #endif
 }
 
-void GazeboRosAgribot::UpdatePositions()
+void GazeboRosAgribot::updatePositions()
 {
   updateJointPosition(FRONT_LOWER_HIT_ANG);
   updateJointPosition(FRONT_UPPER_HIT_HEI);
@@ -338,6 +338,7 @@ void GazeboRosAgribot::cmdVelCallback(const agribot_msgs::AgribotCaterpillar::Co
 {
   boost::mutex::scoped_lock scoped_lock(lock);
 
+  // TODO(abojda): Check equations.
   // v_r_p = ((2 * v_p) + (w_p * L)) / (2 * R) = (2*v+w*L/2)/R
   // v_l_p = ((2 * v_p) - (w_p * L)) / (2 * R) = (2*v-w*L/2)/R
   // v_r_p = ((2 * v_t) + (w_t * L)) / (2 * R) = (2*v+w*L/2)/R
