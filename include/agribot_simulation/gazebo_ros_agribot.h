@@ -35,6 +35,7 @@
 #include <ros/callback_queue.h>
 
 #include <map>
+#include <unordered_map>
 #include <string>
 #include <vector>
 
@@ -55,19 +56,35 @@ class GazeboRosAgribot : public ModelPlugin
     WORLD = 1,
   };
 
-public:
+ public:
   GazeboRosAgribot();
   ~GazeboRosAgribot();
   void Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf);
   void onUpdate();
 
-private:
+ private:
+  struct JointHandle
+  {
+    physics::JointPtr ptr;
+    std::string name;
+    double speed;
+    double position;
+    JointHandle() : name(""), speed(0.0), position(0.0) {}
+  };
+
+ private:
   void publishOdometry(double step_time);
   void publishEncoder();
   void publishCarts();
   void publishTools();
   void CreatePubsAndSubs();
-  void UpdateVelocities();
+  void updateJointPosition(int joint_index);
+  auto getJointPosition(int joint_index) const;
+  void updateJointVelocity(int joint_index);
+  auto getJointVelocity(int joint_index) const;
+
+  void updateVelocities();
+  void updatePositions();
 
   GazeboRosPtr gazebo_ros_;
   physics::WorldPtr world;
@@ -78,14 +95,10 @@ private:
   double wheel_radius_;
   double chasis_length_;
   double wheel_torque;
-  double wheel_speed_[4];
-  double cart_speed_[4];
-  double cart_angle_[2];
   double wheel_accel;
   double wheel_speed_instr_[4];
 
-  std::vector<physics::JointPtr> joints_;
-  std::vector<std::string> joints_name_;
+  std::vector<JointHandle> joints_;
 
   // ROS STUFF
   ros::NodeHandle* rosnode_;
