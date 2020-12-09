@@ -17,8 +17,8 @@ from agribot_msgs.msg import AgribotAppErrorFlag
 from agribot_msgs.msg import AgribotManualControl
 from agribot_msgs.msg import AgribotObstacleDetection
 from agribot_msgs.msg import AgribotTool
-from agribot_msgs.srv import ToolManagerState
-from agribot_msgs.srv import ToolManagerStateRequest
+from agribot_msgs.srv import ToolManagerScan
+from agribot_msgs.srv import ToolManagerScanRequest
 
 import rospy
 import rospkg
@@ -72,8 +72,8 @@ class MobileAppSim(QWidget):
                                         queue_size=1)
 
         try:
-            self.tags_scan = rospy.ServiceProxy('/agribot/tool_management_state',
-                                                ToolManagerState)
+            self.tags_scan = rospy.ServiceProxy('/agribot/tool_management_scan',
+                                                ToolManagerScan)
         except rospy.ServiceException as exc:
             rospy.logerr("Service init failed: {}".format(exc))
 
@@ -178,14 +178,14 @@ class MobileAppSim(QWidget):
         self.front_tags.clear()
         self.back_tags.clear()
         try:
-            resp = self.tags_scan(ToolManagerStateRequest.SCAN_FRONT)
+            resp = self.tags_scan(ToolManagerScanRequest.SCAN_FRONT)
         except rospy.ServiceException as exc:
             rospy.logerr("Service call failed: {}".format(exc))
         else:
             for tag in resp.ids:
                 self.front_tags.addItem(str(tag))
         try:
-            resp = self.tags_scan(ToolManagerStateRequest.SCAN_BACK)
+            resp = self.tags_scan(ToolManagerScanRequest.SCAN_BACK)
         except rospy.ServiceException as exc:
             rospy.logerr("Service call failed: {}".format(exc))
         else:
