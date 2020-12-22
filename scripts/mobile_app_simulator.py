@@ -116,7 +116,7 @@ class MobileAppSim(QWidget):
         self.slider_blue_valve_flow_bk.valueChanged.connect(self.val_change_blue_valve_flow_bk)
         self.slider_pto_rpm_bk.valueChanged.connect(self.val_change_pto_rpm_bk)
 
-        #rospy.wait_for_service('/gazebo/reset_world')
+        rospy.wait_for_service('/gazebo/reset_world')
         self.reset_world = rospy.ServiceProxy('/gazebo/reset_world', Empty)
 
         tasks_path = os.path.join(rospack.get_path('agribot_map'), "tasks")
