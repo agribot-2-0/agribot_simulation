@@ -63,11 +63,11 @@ class MobileAppSim(QWidget):
                                               AgribotManualControl,
                                               queue_size=10)
 
-        self.front_tpl = rospy.Publisher('/agribot/control/tool/front_manual',
+        self.front_tpl = rospy.Publisher('/agribot/control/tool/front/manual',
                                          AgribotTool,
                                          queue_size=1)
 
-        self.back_tpl = rospy.Publisher('/agribot/control/tool/back_manual',
+        self.back_tpl = rospy.Publisher('/agribot/control/tool/back/manual',
                                         AgribotTool,
                                         queue_size=1)
 
