@@ -72,7 +72,7 @@ class MobileAppSim(QWidget):
                                         queue_size=1)
 
         try:
-            self.tags_scan = rospy.ServiceProxy('/agribot/tool_management_scan',
+            self.tags_scan = rospy.ServiceProxy('/agribot/tool_management/scan',
                                                 ToolManagerScan)
         except rospy.ServiceException as exc:
             rospy.logerr("Service init failed: {}".format(exc))
