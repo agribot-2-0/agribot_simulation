@@ -10,6 +10,8 @@
 constexpr double min_power_dbm = 17.0;
 constexpr double max_power_dbm = 33.0;
 constexpr int max_possible_number = 101;
+constexpr uint8_t twelve_byte_tag = 12;
+constexpr uint8_t twenty_byte_tag = 20;
 
 // The boundaries below were selected in order to ensure
 // specified chances of detecting tags, depending on
@@ -42,8 +44,8 @@ GazeboRfid::GazeboRfid()
   // can be tested in agribot_tool_manager.
   front_ant_pwr_ = min_power_dbm;
   back_ant_pwr_ = max_power_dbm;
-  tags_ids_.push_back(createTagEpc(12));
-  tags_ids_.push_back(createTagEpc(25));
+  tags_ids_.push_back(createTagEpc(twelve_byte_tag));
+  tags_ids_.push_back(createTagEpc(twenty_byte_tag));
 }
 
 GazeboRfid::~GazeboRfid()
