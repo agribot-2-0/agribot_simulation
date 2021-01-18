@@ -44,8 +44,11 @@ GazeboRfid::GazeboRfid()
   // can be tested in agribot_tool_manager.
   front_ant_pwr_ = min_power_dbm;
   back_ant_pwr_ = max_power_dbm;
-  tags_ids_.push_back(createTagEpc(twelve_byte_tag));
-  tags_ids_.push_back(createTagEpc(twenty_byte_tag));
+  std::vector<uint8_t> tag_epc;
+  createTagEpc(twelve_byte_tag, tag_epc);
+  tags_ids_.push_back(tag_epc);
+  createTagEpc(twenty_byte_tag, tag_epc);
+  tags_ids_.push_back(tag_epc);
 }
 
 GazeboRfid::~GazeboRfid()
@@ -54,14 +57,12 @@ GazeboRfid::~GazeboRfid()
   delete node_handle_;
 }
 
-std::vector<uint8_t> GazeboRfid::createTagEpc(std::size_t bytes)
+void GazeboRfid::createTagEpc(std::size_t bytes, std::vector<uint8_t>& epc)  // NOLINT(runtime/references)
 {
-  std::vector<uint8_t> epc;
-  for (std::size_t i = 0; i < bytes; ++i)
-  {
-    epc.push_back(i);
-  }
-  return epc;
+  epc.clear();
+  epc.resize(bytes);
+  std::iota(epc.begin(), epc.end(), 0);
+  std::shuffle(epc.begin(), epc.end(), std::mt19937{std::random_device{}()});
 }
 
 double GazeboRfid::calculateSecondDegreePolynomial(double a, double b, double c, double x)
