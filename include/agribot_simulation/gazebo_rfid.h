@@ -38,7 +38,9 @@ private:
   std::vector<uint16_t> tags_;
   double front_ant_pwr_;
   double back_ant_pwr_;
+  std::vector<std::vector<uint8_t>> tags_ids_;
 
+  std::vector<uint8_t> createTagEpc(std::size_t bytes);  // NOLINT(runtime/references)
   double calculateSecondDegreePolynomial(double a, double b, double c, double x);
   std::pair<double, double> calculateConditionsToDrawFrom(double ant_pwr);
   std::size_t draw(auto lower_cond, auto upper_cond);

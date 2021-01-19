@@ -9,8 +9,9 @@
 
 constexpr double min_power_dbm = 17.0;
 constexpr double max_power_dbm = 33.0;
-constexpr uint8_t tags_ids[] = { 0xaa, 0xbb };
 constexpr int max_possible_number = 101;
+constexpr uint8_t twelve_byte_tag = 12;
+constexpr uint8_t twenty_byte_tag = 20;
 
 // The boundaries below were selected in order to ensure
 // specified chances of detecting tags, depending on
@@ -43,12 +44,22 @@ GazeboRfid::GazeboRfid()
   // can be tested in agribot_tool_manager.
   front_ant_pwr_ = min_power_dbm;
   back_ant_pwr_ = max_power_dbm;
+  tags_ids_.push_back(createTagEpc(twelve_byte_tag));
+  tags_ids_.push_back(createTagEpc(twenty_byte_tag));
 }
 
 GazeboRfid::~GazeboRfid()
 {
   node_handle_->shutdown();
   delete node_handle_;
+}
+
+std::vector<uint8_t> GazeboRfid::createTagEpc(std::size_t bytes)  // NOLINT(runtime/references)
+{
+  std::vector<uint8_t> epc;
+  epc.resize(bytes);
+  std::iota(epc.begin(), epc.end(), 0);
+  return epc;
 }
 
 double GazeboRfid::calculateSecondDegreePolynomial(double a, double b, double c, double x)
@@ -116,9 +127,11 @@ bool GazeboRfid::scan(agribot_msgs::Tags::Request& req,   // NOLINT(runtime/refe
   double pwr = getPower(req);
   std::size_t detected_tags = drawNumberOfTags(pwr);
   ROS_INFO_STREAM("[GAZEBO RFID] Tags detected = " << static_cast<int>(detected_tags));
+  agribot_msgs::Tag tmp;
   for (std::size_t i = 0; i < detected_tags; i++)
   {
-    res.ids.push_back(tags_ids[i]);
+    tmp.epc = tags_ids_[i];
+    res.ids.push_back(tmp);
   }
   return true;
 }
