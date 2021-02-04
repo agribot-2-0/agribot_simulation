@@ -124,7 +124,8 @@ class MobileAppSim(QWidget):
             return
 
         tasks = [
-            os.path.splitext(f)[0] for f in os.listdir(tasks_path)
+            os.path.splitext(f)[0]
+            for f in os.listdir(tasks_path)
             if os.path.isfile(os.path.join(tasks_path, f))
         ]
         for item in tasks:
@@ -255,9 +256,9 @@ class MobileAppSim(QWidget):
         rate = rospy.Rate(10)
         while not rospy.is_shutdown():
             self.manual_msg.linear_velocity = (self.slider_linear.value() * self.max_linear_velocity
-                                               ) / self.slider_linear.maximum()
+                                              ) / self.slider_linear.maximum()
             self.manual_msg.circle_radius = (self.slider_angular.value() * self.max_circle_radius
-                                             ) / self.slider_angular.maximum()
+                                            ) / self.slider_angular.maximum()
             self.manual_control.publish(self.manual_msg)
             self.send_tpl_config()
             rate.sleep()
