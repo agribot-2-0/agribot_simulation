@@ -20,8 +20,12 @@ from agribot_msgs.msg import AgribotTool
 from agribot_msgs.srv import ToolManagerScan
 from agribot_msgs.srv import ToolManagerScanRequest
 
+from agribot_common.agribot_parameters import get_parameter
+
 import rospy
 import rospkg
+
+LOG_TAG = "MobileAppSimulator"
 
 
 class MobileAppSim(QWidget):
@@ -29,10 +33,9 @@ class MobileAppSim(QWidget):
     max_linear_velocity = 2.0
     max_circle_radius = 11.0
     no_tags = "0"
-    min_tpl_angle = -15 # deg
-    max_tpl_angle = 60 # deg
-    max_tpl_height = 45 # cm
-
+    min_tpl_angle = -15  # deg
+    max_tpl_angle = 60  # deg
+    max_tpl_height = 45  # cm
 
     def __init__(self, parent=None):
         super(MobileAppSim, self).__init__(parent)
@@ -67,13 +70,13 @@ class MobileAppSim(QWidget):
                                          AgribotTool,
                                          queue_size=1)
 
-        self.back_tpl = rospy.Publisher('/agribot/control/tool/back/manual',
+        self.back_tpl = rospy.Publisher("/agribot/control/tool/back/manual",
                                         AgribotTool,
                                         queue_size=1)
 
         try:
-            self.tags_scan = rospy.ServiceProxy('/agribot/tool_management/scan',
-                                                ToolManagerScan)
+            self.tags_scan = rospy.ServiceProxy(
+                "/agribot/tool_management/scan", ToolManagerScan)
         except rospy.ServiceException as exc:
             rospy.logerr("Service init failed: {}".format(exc))
 
@@ -97,29 +100,46 @@ class MobileAppSim(QWidget):
         self.front_tags.addItem(self.no_tags)
 
         # Sliders init
-        self.slider_tpl_angle_fr.valueChanged.connect(self.val_change_tpl_angle_fr)
+        self.slider_tpl_angle_fr.valueChanged.connect(
+            self.val_change_tpl_angle_fr)
         self.slider_tpl_angle_fr.setMinimum(self.min_tpl_angle)
         self.slider_tpl_angle_fr.setMaximum(self.max_tpl_angle)
-        self.slider_tpl_height_fr.valueChanged.connect(self.val_change_tpl_height_fr)
+        self.slider_tpl_height_fr.valueChanged.connect(
+            self.val_change_tpl_height_fr)
         self.slider_tpl_height_fr.setMaximum(self.max_tpl_height)
-        self.slider_red_valve_flow_fr.valueChanged.connect(self.val_change_red_valve_flow_fr)
-        self.slider_green_valve_flow_fr.valueChanged.connect(self.val_change_green_valve_flow_fr)
-        self.slider_blue_valve_flow_fr.valueChanged.connect(self.val_change_blue_valve_flow_fr)
+        self.slider_red_valve_flow_fr.valueChanged.connect(
+            self.val_change_red_valve_flow_fr)
+        self.slider_green_valve_flow_fr.valueChanged.connect(
+            self.val_change_green_valve_flow_fr)
+        self.slider_blue_valve_flow_fr.valueChanged.connect(
+            self.val_change_blue_valve_flow_fr)
         self.slider_pto_rpm_fr.valueChanged.connect(self.val_change_pto_rpm_fr)
-        self.slider_tpl_angle_bk.valueChanged.connect(self.val_change_tpl_angle_bk)
+        self.slider_tpl_angle_bk.valueChanged.connect(
+            self.val_change_tpl_angle_bk)
         self.slider_tpl_angle_bk.setMinimum(self.min_tpl_angle)
         self.slider_tpl_angle_bk.setMaximum(self.max_tpl_angle)
-        self.slider_tpl_height_bk.valueChanged.connect(self.val_change_tpl_height_bk)
+        self.slider_tpl_height_bk.valueChanged.connect(
+            self.val_change_tpl_height_bk)
         self.slider_tpl_height_bk.setMaximum(self.max_tpl_height)
-        self.slider_red_valve_flow_bk.valueChanged.connect(self.val_change_red_valve_flow_bk)
-        self.slider_green_valve_flow_bk.valueChanged.connect(self.val_change_green_valve_flow_bk)
-        self.slider_blue_valve_flow_bk.valueChanged.connect(self.val_change_blue_valve_flow_bk)
+        self.slider_red_valve_flow_bk.valueChanged.connect(
+            self.val_change_red_valve_flow_bk)
+        self.slider_green_valve_flow_bk.valueChanged.connect(
+            self.val_change_green_valve_flow_bk)
+        self.slider_blue_valve_flow_bk.valueChanged.connect(
+            self.val_change_blue_valve_flow_bk)
         self.slider_pto_rpm_bk.valueChanged.connect(self.val_change_pto_rpm_bk)
 
-        rospy.wait_for_service('/gazebo/reset_world')
-        self.reset_world = rospy.ServiceProxy('/gazebo/reset_world', Empty)
+        rospy.wait_for_service("/gazebo/reset_world")
+        self.reset_world = rospy.ServiceProxy("/gazebo/reset_world", Empty)
 
-        tasks_path = os.path.join(rospack.get_path('agribot_map'), "tasks")
+        tasks_path = os.path.join(rospack.get_path("agribot_map"), "tasks")
+        try:
+            tasks_path = os.path.join(os.environ.get("AGRIBOT_HOME"),
+                                      get_parameter("/agribot_map/tasks_path"))
+        except ValueError as exception_msg:
+            rospy.logerr("[{}] {}".format(LOG_TAG, exception_msg))
+            return
+
         tasks = [
             os.path.splitext(f)[0] for f in os.listdir(tasks_path)
             if os.path.isfile(os.path.join(tasks_path, f))
@@ -180,14 +200,14 @@ class MobileAppSim(QWidget):
         try:
             resp = self.tags_scan(ToolManagerScanRequest.SCAN_FRONT)
         except rospy.ServiceException as exc:
-            rospy.logerr("Service call failed: {}".format(exc))
+            rospy.logerr("[{}] Service call failed: {}".format(LOG_TAG, exc))
         else:
             for tag in resp.ids:
                 self.front_tags.addItem(str(tag))
         try:
             resp = self.tags_scan(ToolManagerScanRequest.SCAN_BACK)
         except rospy.ServiceException as exc:
-            rospy.logerr("Service call failed: {}".format(exc))
+            rospy.logerr("[{}] Service call failed: {}".format(LOG_TAG, exc))
         else:
             for tag in resp.ids:
                 self.back_tags.addItem(str(tag))
@@ -199,13 +219,16 @@ class MobileAppSim(QWidget):
         self.tpl_height_val_fr.setText(str(self.slider_tpl_height_fr.value()))
 
     def val_change_red_valve_flow_fr(self):
-        self.red_valve_flow_val_fr.setText(str(self.slider_red_valve_flow_fr.value()))
+        self.red_valve_flow_val_fr.setText(
+            str(self.slider_red_valve_flow_fr.value()))
 
     def val_change_blue_valve_flow_fr(self):
-        self.blue_valve_flow_val_fr.setText(str(self.slider_blue_valve_flow_fr.value()))
+        self.blue_valve_flow_val_fr.setText(
+            str(self.slider_blue_valve_flow_fr.value()))
 
     def val_change_green_valve_flow_fr(self):
-        self.green_valve_flow_val_fr.setText(str(self.slider_green_valve_flow_fr.value()))
+        self.green_valve_flow_val_fr.setText(
+            str(self.slider_green_valve_flow_fr.value()))
 
     def val_change_pto_rpm_fr(self):
         self.pto_rpm_val_fr.setText(str(self.slider_pto_rpm_fr.value()))
@@ -217,19 +240,22 @@ class MobileAppSim(QWidget):
         self.tpl_height_val_bk.setText(str(self.slider_tpl_height_bk.value()))
 
     def val_change_red_valve_flow_bk(self):
-        self.red_valve_flow_val_bk.setText(str(self.slider_red_valve_flow_bk.value()))
+        self.red_valve_flow_val_bk.setText(
+            str(self.slider_red_valve_flow_bk.value()))
 
     def val_change_blue_valve_flow_bk(self):
-        self.blue_valve_flow_val_bk.setText(str(self.slider_blue_valve_flow_bk.value()))
+        self.blue_valve_flow_val_bk.setText(
+            str(self.slider_blue_valve_flow_bk.value()))
 
     def val_change_green_valve_flow_bk(self):
-        self.green_valve_flow_val_bk.setText(str(self.slider_green_valve_flow_bk.value()))
+        self.green_valve_flow_val_bk.setText(
+            str(self.slider_green_valve_flow_bk.value()))
 
     def val_change_pto_rpm_bk(self):
         self.pto_rpm_val_bk.setText(str(self.slider_pto_rpm_bk.value()))
 
-    def cm_to_m(self, val): # pylint: disable=no-self-use
-        return val*0.01
+    def cm_to_m(self, val):  # pylint: disable=no-self-use
+        return val * 0.01
 
     def send_tpl_config(self):
         msg = AgribotTool()
@@ -269,6 +295,6 @@ def main():
     sys.exit(app.exec_())
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     signal.signal(signal.SIGINT, signal.SIG_DFL)
     main()

@@ -1,3 +1,5 @@
 <launch>
+  <rosparam command="load" file="$(env AGRIBOT_HOME)/agribot/configs/base/map/config.yaml" />
+
   <node name="mobile_app_simulator" pkg="agribot_simulation" type="mobile_app_simulator.py" />
 </launch>
