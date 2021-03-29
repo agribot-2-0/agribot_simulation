@@ -69,7 +69,10 @@ class GazeboRosAgribot : public ModelPlugin
     std::string name;
     double speed;
     double position;
-    JointHandle() : name(""), speed(0.0), position(0.0) {}
+    double effort;
+    JointHandle() : name(""), speed(0.0), position(0.0)
+    {
+    }
   };
 
  private:
@@ -85,6 +88,7 @@ class GazeboRosAgribot : public ModelPlugin
 
   void updateVelocities();
   void updatePositions();
+  void updateJointEffort(int joint_index);
 
   GazeboRosPtr gazebo_ros_;
   physics::WorldPtr world;
