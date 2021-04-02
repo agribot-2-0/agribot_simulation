@@ -47,24 +47,18 @@ class MobileAppSim(QWidget):
         loadUi(ui_file, self)
         self.setWindowTitle("Mobile App Simulator")
 
-        self.mode = rospy.Publisher('/agribot/state_machine/mode',
-                                    RobotMode,
-                                    queue_size=1)
+        self.mode = rospy.Publisher('/agribot/state_machine/mode', RobotMode, queue_size=1)
 
         self.error = rospy.Publisher('/agribot/state_machine/error',
                                      AgribotAppErrorFlag,
                                      queue_size=1)
-        self.task = rospy.Publisher('/agribot/state_machine/task',
-                                    String,
-                                    queue_size=1)
+        self.task = rospy.Publisher('/agribot/state_machine/task', String, queue_size=1)
 
         self.obstacle = rospy.Publisher('/agribot/obstacle_detected',
                                         AgribotObstacleDetection,
                                         queue_size=1)
 
-        self.manual_control = rospy.Publisher('cmd_vel_manual',
-                                              AgribotManualControl,
-                                              queue_size=10)
+        self.manual_control = rospy.Publisher('cmd_vel_manual', AgribotManualControl, queue_size=10)
 
         self.front_tpl = rospy.Publisher('/agribot/control/tool/front/manual',
                                          AgribotTool,
@@ -75,10 +69,12 @@ class MobileAppSim(QWidget):
                                         queue_size=1)
 
         try:
-            self.tags_scan = rospy.ServiceProxy(
-                "/agribot/tool_management/scan", ToolManagerScan)
+            self.tags_scan = rospy.ServiceProxy("/agribot/tool_management/scan", ToolManagerScan)
+            self.gazebo_reset = rospy.ServiceProxy("/gazebo/reset_world", Empty)
+            self.gazebo_pause = rospy.ServiceProxy("/gazebo/pause_physics", Empty)
+            self.gazebo_unpause = rospy.ServiceProxy("/gazebo/unpause_physics", Empty)
         except rospy.ServiceException as exc:
-            rospy.logerr("Service init failed: {}".format(exc))
+            rospy.logerr("[{}] Service init failed: {}".format(LOG_TAG, exc))
 
         # Buttons init
         self.button_send_task.clicked.connect(self.send_task)
@@ -90,6 +86,8 @@ class MobileAppSim(QWidget):
         self.button_obstacle.clicked.connect(self.obstacle_detected)
         self.button_no_obstacle.clicked.connect(self.no_obstacle_detected)
         self.button_reset_gazebo.clicked.connect(self.gazebo_reset_world)
+        self.button_pause_gazebo.clicked.connect(self.gazebo_pause_world)
+        self.button_unpause_gazebo.clicked.connect(self.gazebo_unpause_world)
         self.button_scan_tags.clicked.connect(self.scan_for_tags)
         self.manual_msg = AgribotManualControl()
 
@@ -100,37 +98,24 @@ class MobileAppSim(QWidget):
         self.front_tags.addItem(self.no_tags)
 
         # Sliders init
-        self.slider_tpl_angle_fr.valueChanged.connect(
-            self.val_change_tpl_angle_fr)
+        self.slider_tpl_angle_fr.valueChanged.connect(self.val_change_tpl_angle_fr)
         self.slider_tpl_angle_fr.setMinimum(self.min_tpl_angle)
         self.slider_tpl_angle_fr.setMaximum(self.max_tpl_angle)
-        self.slider_tpl_height_fr.valueChanged.connect(
-            self.val_change_tpl_height_fr)
+        self.slider_tpl_height_fr.valueChanged.connect(self.val_change_tpl_height_fr)
         self.slider_tpl_height_fr.setMaximum(self.max_tpl_height)
-        self.slider_red_valve_flow_fr.valueChanged.connect(
-            self.val_change_red_valve_flow_fr)
-        self.slider_green_valve_flow_fr.valueChanged.connect(
-            self.val_change_green_valve_flow_fr)
-        self.slider_blue_valve_flow_fr.valueChanged.connect(
-            self.val_change_blue_valve_flow_fr)
+        self.slider_red_valve_flow_fr.valueChanged.connect(self.val_change_red_valve_flow_fr)
+        self.slider_green_valve_flow_fr.valueChanged.connect(self.val_change_green_valve_flow_fr)
+        self.slider_blue_valve_flow_fr.valueChanged.connect(self.val_change_blue_valve_flow_fr)
         self.slider_pto_rpm_fr.valueChanged.connect(self.val_change_pto_rpm_fr)
-        self.slider_tpl_angle_bk.valueChanged.connect(
-            self.val_change_tpl_angle_bk)
+        self.slider_tpl_angle_bk.valueChanged.connect(self.val_change_tpl_angle_bk)
         self.slider_tpl_angle_bk.setMinimum(self.min_tpl_angle)
         self.slider_tpl_angle_bk.setMaximum(self.max_tpl_angle)
-        self.slider_tpl_height_bk.valueChanged.connect(
-            self.val_change_tpl_height_bk)
+        self.slider_tpl_height_bk.valueChanged.connect(self.val_change_tpl_height_bk)
         self.slider_tpl_height_bk.setMaximum(self.max_tpl_height)
-        self.slider_red_valve_flow_bk.valueChanged.connect(
-            self.val_change_red_valve_flow_bk)
-        self.slider_green_valve_flow_bk.valueChanged.connect(
-            self.val_change_green_valve_flow_bk)
-        self.slider_blue_valve_flow_bk.valueChanged.connect(
-            self.val_change_blue_valve_flow_bk)
+        self.slider_red_valve_flow_bk.valueChanged.connect(self.val_change_red_valve_flow_bk)
+        self.slider_green_valve_flow_bk.valueChanged.connect(self.val_change_green_valve_flow_bk)
+        self.slider_blue_valve_flow_bk.valueChanged.connect(self.val_change_blue_valve_flow_bk)
         self.slider_pto_rpm_bk.valueChanged.connect(self.val_change_pto_rpm_bk)
-
-        rospy.wait_for_service("/gazebo/reset_world")
-        self.reset_world = rospy.ServiceProxy("/gazebo/reset_world", Empty)
 
         tasks_path = os.path.join(rospack.get_path("agribot_map"), "tasks")
         try:
@@ -192,7 +177,22 @@ class MobileAppSim(QWidget):
         self.obstacle.publish(msg)
 
     def gazebo_reset_world(self):
-        self.reset_world()
+        try:
+            self.gazebo_reset()
+        except rospy.ServiceException as exception_msg:
+            rospy.logerr("[{}]: {}".format(LOG_TAG, exception_msg))
+
+    def gazebo_pause_world(self):
+        try:
+            self.gazebo_pause()
+        except rospy.ServiceException as exception_msg:
+            rospy.logerr("[{}]: {}".format(LOG_TAG, exception_msg))
+
+    def gazebo_unpause_world(self):
+        try:
+            self.gazebo_unpause()
+        except rospy.ServiceException as exception_msg:
+            rospy.logerr("[{}]: {}".format(LOG_TAG, exception_msg))
 
     def scan_for_tags(self):
         self.front_tags.clear()
@@ -219,16 +219,13 @@ class MobileAppSim(QWidget):
         self.tpl_height_val_fr.setText(str(self.slider_tpl_height_fr.value()))
 
     def val_change_red_valve_flow_fr(self):
-        self.red_valve_flow_val_fr.setText(
-            str(self.slider_red_valve_flow_fr.value()))
+        self.red_valve_flow_val_fr.setText(str(self.slider_red_valve_flow_fr.value()))
 
     def val_change_blue_valve_flow_fr(self):
-        self.blue_valve_flow_val_fr.setText(
-            str(self.slider_blue_valve_flow_fr.value()))
+        self.blue_valve_flow_val_fr.setText(str(self.slider_blue_valve_flow_fr.value()))
 
     def val_change_green_valve_flow_fr(self):
-        self.green_valve_flow_val_fr.setText(
-            str(self.slider_green_valve_flow_fr.value()))
+        self.green_valve_flow_val_fr.setText(str(self.slider_green_valve_flow_fr.value()))
 
     def val_change_pto_rpm_fr(self):
         self.pto_rpm_val_fr.setText(str(self.slider_pto_rpm_fr.value()))
@@ -240,16 +237,13 @@ class MobileAppSim(QWidget):
         self.tpl_height_val_bk.setText(str(self.slider_tpl_height_bk.value()))
 
     def val_change_red_valve_flow_bk(self):
-        self.red_valve_flow_val_bk.setText(
-            str(self.slider_red_valve_flow_bk.value()))
+        self.red_valve_flow_val_bk.setText(str(self.slider_red_valve_flow_bk.value()))
 
     def val_change_blue_valve_flow_bk(self):
-        self.blue_valve_flow_val_bk.setText(
-            str(self.slider_blue_valve_flow_bk.value()))
+        self.blue_valve_flow_val_bk.setText(str(self.slider_blue_valve_flow_bk.value()))
 
     def val_change_green_valve_flow_bk(self):
-        self.green_valve_flow_val_bk.setText(
-            str(self.slider_green_valve_flow_bk.value()))
+        self.green_valve_flow_val_bk.setText(str(self.slider_green_valve_flow_bk.value()))
 
     def val_change_pto_rpm_bk(self):
         self.pto_rpm_val_bk.setText(str(self.slider_pto_rpm_bk.value()))
@@ -274,15 +268,19 @@ class MobileAppSim(QWidget):
         msg.pto_rpm = self.slider_pto_rpm_bk.value()
         self.back_tpl.publish(msg)
 
+    def get_linear(self):
+        return (self.slider_linear.value() *
+                self.max_linear_velocity) / self.slider_linear.maximum()
+
+    def get_circle_radius(self):
+        return (self.slider_angular.value() *
+                self.max_circle_radius) / self.slider_angular.maximum()
+
     def rosloop(self):
         rate = rospy.Rate(10)
         while not rospy.is_shutdown():
-            self.manual_msg.linear_velocity = (
-                self.slider_linear.value() *
-                self.max_linear_velocity) / self.slider_linear.maximum()
-            self.manual_msg.circle_radius = (
-                self.slider_angular.value() *
-                self.max_circle_radius) / self.slider_angular.maximum()
+            self.manual_msg.linear_velocity = self.get_linear()
+            self.manual_msg.circle_radius = self.get_circle_radius()
             self.manual_control.publish(self.manual_msg)
             self.send_tpl_config()
             rate.sleep()
