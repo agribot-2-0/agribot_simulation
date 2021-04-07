@@ -58,7 +58,7 @@ class MobileAppSim(QWidget):
                                         AgribotObstacleDetection,
                                         queue_size=1)
 
-        self.manual_control = rospy.Publisher('cmd_vel_manual', AgribotManualControl, queue_size=10)
+        self.manual_control = rospy.Publisher('cmd_vel_manual', AgribotManualControl, queue_size=1)
 
         self.front_tpl = rospy.Publisher('/agribot/control/tool/front/manual',
                                          AgribotTool,
