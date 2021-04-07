@@ -85,10 +85,11 @@ class GazeboRosAgribot : public ModelPlugin
   auto getJointPosition(int joint_index) const;
   void updateJointVelocity(int joint_index);
   auto getJointVelocity(int joint_index) const;
+  void updateJointEffort(int joint_index);
 
   void updateVelocities();
   void updatePositions();
-  void updateJointEffort(int joint_index);
+  void updateEfforts();
 
   GazeboRosPtr gazebo_ros_;
   physics::WorldPtr world;

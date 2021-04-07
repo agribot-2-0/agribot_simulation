@@ -238,11 +238,11 @@ void GazeboRosAgribot::CreatePubsAndSubs()
   ros::SubscribeOptions so = ros::SubscribeOptions::create<agribot_msgs::AgribotCaterpillar>(
       command_sub_topic_, 1, boost::bind(&GazeboRosAgribot::cmdVelCallback, this, _1), ros::VoidPtr(), &queue_);
   ros::SubscribeOptions sub_cmd_tool_front = ros::SubscribeOptions::create<agribot_msgs::AgribotTool>(
-      "agribot/control/tool/front/valves", 1, boost::bind(&GazeboRosAgribot::cmdToolsFrontCallback, this, _1), ros::VoidPtr(),
-      &queue_);
+      "agribot/control/tool/front/valves", 1, boost::bind(&GazeboRosAgribot::cmdToolsFrontCallback, this, _1),
+      ros::VoidPtr(), &queue_);
   ros::SubscribeOptions sub_cmd_tool_back = ros::SubscribeOptions::create<agribot_msgs::AgribotTool>(
-      "agribot/control/tool/back/valves", 1, boost::bind(&GazeboRosAgribot::cmdToolsBackCallback, this, _1), ros::VoidPtr(),
-      &queue_);
+      "agribot/control/tool/back/valves", 1, boost::bind(&GazeboRosAgribot::cmdToolsBackCallback, this, _1),
+      ros::VoidPtr(), &queue_);
 
   rosnode_ = new ros::NodeHandle(this->robot_namespace_);
   cmd_vel_subscriber_ = rosnode_->subscribe(so);
@@ -274,6 +274,7 @@ void GazeboRosAgribot::onUpdate()
   }
   updateVelocities();
   updatePositions();
+  updateEfforts();
 }
 
 void GazeboRosAgribot::updateJointPosition(int joint_index)
@@ -293,7 +294,10 @@ void GazeboRosAgribot::updateJointVelocity(int joint_index)
 
 void GazeboRosAgribot::updateJointEffort(int joint_index)
 {
+  //joints_[joint_index].ptr->SetVelocity(0, joints_[joint_index].effort);
+  //joints_[joint_index].ptr->SetParam("vel", 0, 1000.0);
   joints_[joint_index].ptr->SetForce(0, joints_[joint_index].effort);
+  ROS_ERROR_STREAM("Setting joint " << joint_index << " to " << joints_[joint_index].effort);
 }
 
 auto GazeboRosAgribot::getJointVelocity(int joint_index) const
@@ -319,8 +323,8 @@ void GazeboRosAgribot::updateVelocities()
   ROS_DEBUG_NAMED("agribot_drive",
                   "Set  FL  speed = %lf, FR speed= %lf,"
                   " BL speed = %lf, BR speed= %lf",
-                  joints_[FRONT_LEFT_WHEEL].speed, joints_[FRONT_RIGHT_WHEEL].speed,
-                  joints_[BACK_LEFT_WHEEL].speed, joints_[BACK_RIGHT_WHEEL].speed);
+                  joints_[FRONT_LEFT_WHEEL].speed, joints_[FRONT_RIGHT_WHEEL].speed, joints_[BACK_LEFT_WHEEL].speed,
+                  joints_[BACK_RIGHT_WHEEL].speed);
   ROS_DEBUG_NAMED("agribot_drive",
                   "Current  speed = %lf, FR speed= %lf,"
                   " BL speed = %lf, BR speed= %lf",
@@ -331,12 +335,16 @@ void GazeboRosAgribot::updateVelocities()
 
 void GazeboRosAgribot::updatePositions()
 {
+  updateJointPosition(FRONT_UPPER_HIT_ANG);
+  updateJointPosition(BACK_UPPER_HIT_ANG);
+}
+
+void GazeboRosAgribot::updateEfforts()
+{
   updateJointEffort(FRONT_LOWER_HIT_ANG);
   updateJointEffort(FRONT_UPPER_HIT_HEI);
-  updateJointPosition(FRONT_UPPER_HIT_ANG);
   updateJointEffort(BACK_LOWER_HIT_ANG);
   updateJointEffort(BACK_UPPER_HIT_HEI);
-  updateJointPosition(BACK_UPPER_HIT_ANG);
 }
 
 void GazeboRosAgribot::cmdVelCallback(const agribot_msgs::AgribotCaterpillar::ConstPtr& cmd_msg)
@@ -349,14 +357,11 @@ void GazeboRosAgribot::cmdVelCallback(const agribot_msgs::AgribotCaterpillar::Co
   // v_r_p = ((2 * v_t) + (w_t * L)) / (2 * R) = (2*v+w*L/2)/R
   // v_l_p = ((2 * v_t) - (w_t * L)) / (2 * R) = (2*v-w*L/2)/R
   // v_t=sin(theta_1)/sin(theta_2)*v_p
-  joints_[FRONT_RIGHT_WHEEL].speed =
-      cmd_msg->front_linear + wheel_separation_ / 2.0 * cmd_msg->front_angular;
-  joints_[FRONT_LEFT_WHEEL].speed =
-      cmd_msg->front_linear - wheel_separation_ / 2.0 * cmd_msg->front_angular;
-  joints_[BACK_RIGHT_WHEEL].speed =
-      cmd_msg->back_linear; + wheel_separation_ / 2.0 * cmd_msg->back_angular;
-  joints_[BACK_LEFT_WHEEL].speed =
-      cmd_msg->back_linear - wheel_separation_ / 2.0 * cmd_msg->back_angular;
+  joints_[FRONT_RIGHT_WHEEL].speed = cmd_msg->front_linear + wheel_separation_ / 2.0 * cmd_msg->front_angular;
+  joints_[FRONT_LEFT_WHEEL].speed = cmd_msg->front_linear - wheel_separation_ / 2.0 * cmd_msg->front_angular;
+  joints_[BACK_RIGHT_WHEEL].speed = cmd_msg->back_linear;
+  +wheel_separation_ / 2.0 * cmd_msg->back_angular;
+  joints_[BACK_LEFT_WHEEL].speed = cmd_msg->back_linear - wheel_separation_ / 2.0 * cmd_msg->back_angular;
 }
 
 void GazeboRosAgribot::cmdToolsFrontCallback(const agribot_msgs::AgribotTool::ConstPtr& tool_msg)
