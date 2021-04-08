@@ -27,6 +27,7 @@
 #include <sensor_msgs/Imu.h>
 #include <sensor_msgs/JointState.h>
 #include <std_msgs/Float32.h>
+#include <std_msgs/Float64.h>
 #include <tf/transform_broadcaster.h>
 #include <tf/transform_listener.h>
 
@@ -56,13 +57,13 @@ class GazeboRosAgribot : public ModelPlugin
     WORLD = 1,
   };
 
- public:
+public:
   GazeboRosAgribot();
   ~GazeboRosAgribot();
   void Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf);
   void onUpdate();
 
- private:
+private:
   struct JointHandle
   {
     physics::JointPtr ptr;
@@ -74,7 +75,7 @@ class GazeboRosAgribot : public ModelPlugin
     }
   };
 
- private:
+private:
   void publishOdometry(double step_time);
   void publishEncoder();
   void publishCarts();
@@ -113,6 +114,10 @@ class GazeboRosAgribot : public ModelPlugin
   ros::Publisher catterpilar_wheels_publisher_;
   ros::Publisher front_tool_publisher_;
   ros::Publisher back_tool_publisher_;
+  ros::Publisher back_tpl_lower_hitches_revolute_command_pub_;
+  ros::Publisher back_tpl_upper_hitch_prismatic_command_pub_;
+  ros::Publisher front_tpl_lower_hitches_revolute_command_pub_;
+  ros::Publisher front_tpl_upper_hitch_prismatic_command_pub_;
   gazebo::transport::NodePtr node_handle_;
   tf::TransformBroadcaster* transform_broadcaster_;
   agribot_msgs::AgribotCaterpillar encoder_;
@@ -142,6 +147,7 @@ class GazeboRosAgribot : public ModelPlugin
   // Tools callbacks
   void cmdToolsFrontCallback(const agribot_msgs::AgribotTool::ConstPtr& tool_msg);
   void cmdToolsBackCallback(const agribot_msgs::AgribotTool::ConstPtr& tool_msg);
+  void publishToolsControllerCommands() const;
 
   bool alive_;
   //
@@ -154,8 +160,8 @@ class GazeboRosAgribot : public ModelPlugin
   geometry_msgs::Pose2D pose_encoder_;
   common::Time last_odom_update_;
   // Tools msgs:
-  agribot_msgs::AgribotTool front_cart_tool_encoder_;
-  agribot_msgs::AgribotTool back_cart_tool_encoder_;
+  agribot_msgs::AgribotTool front_cart_tool_setpoint_;
+  agribot_msgs::AgribotTool back_cart_tool_setpoint_;
 
   double covariance_x_;
   double covariance_y_;
