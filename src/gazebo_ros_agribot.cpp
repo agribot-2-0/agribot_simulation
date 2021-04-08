@@ -465,11 +465,11 @@ void GazeboRosAgribot::publishCarts()
 
 void GazeboRosAgribot::publishTools()
 {
-  front_cart_tool_encoder_.tpl_angle = -getJointPosition(FRONT_LOWER_HIT_ANG);
-  front_cart_tool_encoder_.tpl_height = -getJointPosition(FRONT_UPPER_HIT_HEI);
+  front_cart_tool_encoder_.tpl_angle = getJointPosition(FRONT_LOWER_HIT_ANG);
+  front_cart_tool_encoder_.tpl_height = getJointPosition(FRONT_UPPER_HIT_HEI);
   front_tool_publisher_.publish(front_cart_tool_encoder_);
-  back_cart_tool_encoder_.tpl_angle = -getJointPosition(BACK_LOWER_HIT_ANG);
-  back_cart_tool_encoder_.tpl_height = -getJointPosition(BACK_UPPER_HIT_HEI);
+  back_cart_tool_encoder_.tpl_angle = getJointPosition(BACK_LOWER_HIT_ANG);
+  back_cart_tool_encoder_.tpl_height = getJointPosition(BACK_UPPER_HIT_HEI);
   back_tool_publisher_.publish(back_cart_tool_encoder_);
 }
 
