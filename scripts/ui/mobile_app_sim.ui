@@ -41,6 +41,16 @@
             <number>8</number>
            </property>
            <item>
+            <widget class="QLabel" name="label_19">
+             <property name="text">
+              <string>Robot state</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignCenter</set>
+             </property>
+            </widget>
+           </item>
+           <item>
             <layout class="QHBoxLayout" name="horizontalLayout_3">
              <item>
               <widget class="QLabel" name="label_2">
@@ -172,11 +182,35 @@
             </widget>
            </item>
            <item>
-            <layout class="QHBoxLayout" name="horizontalLayout_7">
+            <widget class="QLabel" name="label_18">
+             <property name="text">
+              <string>Gazebo</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignCenter</set>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <layout class="QHBoxLayout" name="horizontalLayout_22">
+             <item>
+              <widget class="QPushButton" name="button_pause_gazebo">
+               <property name="text">
+                <string>Pause</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="button_unpause_gazebo">
+               <property name="text">
+                <string>Unpause</string>
+               </property>
+              </widget>
+             </item>
              <item>
               <widget class="QPushButton" name="button_reset_gazebo">
                <property name="text">
-                <string>Reset Gazebo</string>
+                <string>Reset</string>
                </property>
               </widget>
              </item>
