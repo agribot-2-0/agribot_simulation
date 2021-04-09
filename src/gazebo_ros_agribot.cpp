@@ -238,11 +238,11 @@ void GazeboRosAgribot::CreatePubsAndSubs()
   ros::SubscribeOptions so = ros::SubscribeOptions::create<agribot_msgs::AgribotCaterpillar>(
       command_sub_topic_, 1, boost::bind(&GazeboRosAgribot::cmdVelCallback, this, _1), ros::VoidPtr(), &queue_);
   ros::SubscribeOptions sub_cmd_tool_front = ros::SubscribeOptions::create<agribot_msgs::AgribotTool>(
-      "agribot/control/tool/front", 1, boost::bind(&GazeboRosAgribot::cmdToolsFrontCallback, this, _1),
-      ros::VoidPtr(), &queue_);
+      "agribot/control/tool/front", 1, boost::bind(&GazeboRosAgribot::cmdToolsFrontCallback, this, _1), ros::VoidPtr(),
+      &queue_);
   ros::SubscribeOptions sub_cmd_tool_back = ros::SubscribeOptions::create<agribot_msgs::AgribotTool>(
-      "agribot/control/tool/back", 1, boost::bind(&GazeboRosAgribot::cmdToolsBackCallback, this, _1),
-      ros::VoidPtr(), &queue_);
+      "agribot/control/tool/back", 1, boost::bind(&GazeboRosAgribot::cmdToolsBackCallback, this, _1), ros::VoidPtr(),
+      &queue_);
 
   rosnode_ = new ros::NodeHandle(this->robot_namespace_);
   cmd_vel_subscriber_ = rosnode_->subscribe(so);
@@ -353,8 +353,7 @@ void GazeboRosAgribot::cmdVelCallback(const agribot_msgs::AgribotCaterpillar::Co
   // v_t=sin(theta_1)/sin(theta_2)*v_p
   joints_[FRONT_RIGHT_WHEEL].speed = cmd_msg->front_linear + wheel_separation_ / 2.0 * cmd_msg->front_angular;
   joints_[FRONT_LEFT_WHEEL].speed = cmd_msg->front_linear - wheel_separation_ / 2.0 * cmd_msg->front_angular;
-  joints_[BACK_RIGHT_WHEEL].speed = cmd_msg->back_linear;
-  +wheel_separation_ / 2.0 * cmd_msg->back_angular;
+  joints_[BACK_RIGHT_WHEEL].speed = cmd_msg->back_linear + wheel_separation_ / 2.0 * cmd_msg->back_angular;
   joints_[BACK_LEFT_WHEEL].speed = cmd_msg->back_linear - wheel_separation_ / 2.0 * cmd_msg->back_angular;
 }
 
