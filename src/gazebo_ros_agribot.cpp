@@ -258,6 +258,23 @@ void GazeboRosAgribot::CreatePubsAndSubs()
   back_tool_publisher_ = rosnode_->advertise<agribot_msgs::AgribotTool>("agribot/encoder/tool/back", 1);
   tf_prefix_ = tf::getPrefixParam(*rosnode_);
   transform_broadcaster_ = new tf::TransformBroadcaster();
+  front_tpl_lower_hitches_revolute_command_pub_ = rosnode_->advertise<std_msgs::Float64>("/agribot/controller/position/"
+                                                                                         "front_tpl_lower_hitches_"
+                                                                                         "revolute_control/command",
+                                                                                         1);
+  front_tpl_upper_hitch_prismatic_command_pub_ = rosnode_->advertise<std_msgs::Float64>("/agribot/controller/position/"
+                                                                                        "front_tpl_upper_hitch_"
+                                                                                        "prismatic_control/command",
+                                                                                        1);
+  back_tpl_lower_hitches_revolute_command_pub_ = rosnode_->advertise<std_msgs::Float64>("/agribot/controller/"
+                                                                                        "position/"
+                                                                                        "back_tpl_lower_hitches_"
+                                                                                        "revolute_control/command",
+                                                                                        1);
+  back_tpl_upper_hitch_prismatic_command_pub_ = rosnode_->advertise<std_msgs::Float64>("/agribot/controller/position/"
+                                                                                       "back_tpl_upper_hitch_prismatic_"
+                                                                                       "control/command",
+                                                                                       1);
 }
 
 void GazeboRosAgribot::onUpdate()
@@ -273,7 +290,7 @@ void GazeboRosAgribot::onUpdate()
     last_update_time_ = current_time;
   }
   updateVelocities();
-  updatePositions();
+  publishToolsControllerCommands();
 }
 
 void GazeboRosAgribot::updateJointPosition(int joint_index)
@@ -314,24 +331,14 @@ void GazeboRosAgribot::updateVelocities()
   ROS_DEBUG_NAMED("agribot_drive",
                   "Set  FL  speed = %lf, FR speed= %lf,"
                   " BL speed = %lf, BR speed= %lf",
-                  joints_[FRONT_LEFT_WHEEL].speed, joints_[FRONT_RIGHT_WHEEL].speed,
-                  joints_[BACK_LEFT_WHEEL].speed, joints_[BACK_RIGHT_WHEEL].speed);
+                  joints_[FRONT_LEFT_WHEEL].speed, joints_[FRONT_RIGHT_WHEEL].speed, joints_[BACK_LEFT_WHEEL].speed,
+                  joints_[BACK_RIGHT_WHEEL].speed);
   ROS_DEBUG_NAMED("agribot_drive",
                   "Current  speed = %lf, FR speed= %lf,"
                   " BL speed = %lf, BR speed= %lf",
                   current_speed[FRONT_LEFT_WHEEL], current_speed[FRONT_RIGHT_WHEEL], current_speed[BACK_LEFT_WHEEL],
                   current_speed[BACK_RIGHT_WHEEL]);
 #endif
-}
-
-void GazeboRosAgribot::updatePositions()
-{
-  updateJointPosition(FRONT_LOWER_HIT_ANG);
-  updateJointPosition(FRONT_UPPER_HIT_HEI);
-  updateJointPosition(FRONT_UPPER_HIT_ANG);
-  updateJointPosition(BACK_LOWER_HIT_ANG);
-  updateJointPosition(BACK_UPPER_HIT_HEI);
-  updateJointPosition(BACK_UPPER_HIT_ANG);
 }
 
 void GazeboRosAgribot::cmdVelCallback(const agribot_msgs::AgribotCaterpillar::ConstPtr& cmd_msg)
@@ -344,38 +351,30 @@ void GazeboRosAgribot::cmdVelCallback(const agribot_msgs::AgribotCaterpillar::Co
   // v_r_p = ((2 * v_t) + (w_t * L)) / (2 * R) = (2*v+w*L/2)/R
   // v_l_p = ((2 * v_t) - (w_t * L)) / (2 * R) = (2*v-w*L/2)/R
   // v_t=sin(theta_1)/sin(theta_2)*v_p
-  joints_[FRONT_RIGHT_WHEEL].speed =
-      cmd_msg->front_linear + wheel_separation_ / 2.0 * cmd_msg->front_angular;
-  joints_[FRONT_LEFT_WHEEL].speed =
-      cmd_msg->front_linear - wheel_separation_ / 2.0 * cmd_msg->front_angular;
-  joints_[BACK_RIGHT_WHEEL].speed =
-      cmd_msg->back_linear; + wheel_separation_ / 2.0 * cmd_msg->back_angular;
-  joints_[BACK_LEFT_WHEEL].speed =
-      cmd_msg->back_linear - wheel_separation_ / 2.0 * cmd_msg->back_angular;
+  joints_[FRONT_RIGHT_WHEEL].speed = cmd_msg->front_linear + wheel_separation_ / 2.0 * cmd_msg->front_angular;
+  joints_[FRONT_LEFT_WHEEL].speed = cmd_msg->front_linear - wheel_separation_ / 2.0 * cmd_msg->front_angular;
+  joints_[BACK_RIGHT_WHEEL].speed = cmd_msg->back_linear + wheel_separation_ / 2.0 * cmd_msg->back_angular;
+  joints_[BACK_LEFT_WHEEL].speed = cmd_msg->back_linear - wheel_separation_ / 2.0 * cmd_msg->back_angular;
 }
 
 void GazeboRosAgribot::cmdToolsFrontCallback(const agribot_msgs::AgribotTool::ConstPtr& tool_msg)
 {
-  front_cart_tool_encoder_.red_valve_flow = tool_msg->red_valve_flow;
-  front_cart_tool_encoder_.green_valve_flow = tool_msg->green_valve_flow;
-  front_cart_tool_encoder_.blue_valve_flow = tool_msg->blue_valve_flow;
-  front_cart_tool_encoder_.pto_rpm = tool_msg->pto_rpm;
-
-  joints_[FRONT_LOWER_HIT_ANG].position = -tool_msg->tpl_angle;
-  joints_[FRONT_UPPER_HIT_HEI].position = -tool_msg->tpl_height;
-  joints_[FRONT_UPPER_HIT_ANG].position = 0;
+  front_cart_tool_setpoint_.red_valve_flow = tool_msg->red_valve_flow;
+  front_cart_tool_setpoint_.green_valve_flow = tool_msg->green_valve_flow;
+  front_cart_tool_setpoint_.blue_valve_flow = tool_msg->blue_valve_flow;
+  front_cart_tool_setpoint_.pto_rpm = tool_msg->pto_rpm;
+  front_cart_tool_setpoint_.tpl_height = tool_msg->tpl_height;
+  front_cart_tool_setpoint_.tpl_angle = tool_msg->tpl_angle;
 }
 
 void GazeboRosAgribot::cmdToolsBackCallback(const agribot_msgs::AgribotTool::ConstPtr& tool_msg)
 {
-  back_cart_tool_encoder_.red_valve_flow = tool_msg->red_valve_flow;
-  back_cart_tool_encoder_.green_valve_flow = tool_msg->green_valve_flow;
-  back_cart_tool_encoder_.blue_valve_flow = tool_msg->blue_valve_flow;
-  back_cart_tool_encoder_.pto_rpm = tool_msg->pto_rpm;
-
-  joints_[BACK_LOWER_HIT_ANG].position = -tool_msg->tpl_angle;
-  joints_[BACK_UPPER_HIT_HEI].position = -tool_msg->tpl_height;
-  joints_[BACK_UPPER_HIT_ANG].position = 0;
+  back_cart_tool_setpoint_.red_valve_flow = tool_msg->red_valve_flow;
+  back_cart_tool_setpoint_.green_valve_flow = tool_msg->green_valve_flow;
+  back_cart_tool_setpoint_.blue_valve_flow = tool_msg->blue_valve_flow;
+  back_cart_tool_setpoint_.pto_rpm = tool_msg->pto_rpm;
+  back_cart_tool_setpoint_.tpl_height = tool_msg->tpl_height;
+  back_cart_tool_setpoint_.tpl_angle = tool_msg->tpl_angle;
 }
 
 void GazeboRosAgribot::QueueThread()
@@ -483,12 +482,26 @@ void GazeboRosAgribot::publishCarts()
 
 void GazeboRosAgribot::publishTools()
 {
-  front_cart_tool_encoder_.tpl_angle = -getJointPosition(FRONT_LOWER_HIT_ANG);
-  front_cart_tool_encoder_.tpl_height = -getJointPosition(FRONT_UPPER_HIT_HEI);
-  front_tool_publisher_.publish(front_cart_tool_encoder_);
-  back_cart_tool_encoder_.tpl_angle = -getJointPosition(BACK_LOWER_HIT_ANG);
-  back_cart_tool_encoder_.tpl_height = -getJointPosition(BACK_UPPER_HIT_HEI);
-  back_tool_publisher_.publish(back_cart_tool_encoder_);
+  agribot_msgs::AgribotTool msg;
+  msg.tpl_angle = getJointPosition(FRONT_LOWER_HIT_ANG);
+  msg.tpl_height = getJointPosition(FRONT_UPPER_HIT_HEI);
+  front_tool_publisher_.publish(msg);
+  msg.tpl_angle = getJointPosition(BACK_LOWER_HIT_ANG);
+  msg.tpl_height = getJointPosition(BACK_UPPER_HIT_HEI);
+  back_tool_publisher_.publish(msg);
+}
+
+void GazeboRosAgribot::publishToolsControllerCommands() const
+{
+  std_msgs::Float64 msg;
+  msg.data = front_cart_tool_setpoint_.tpl_angle;
+  front_tpl_lower_hitches_revolute_command_pub_.publish(msg);
+  msg.data = front_cart_tool_setpoint_.tpl_height;
+  front_tpl_upper_hitch_prismatic_command_pub_.publish(msg);
+  msg.data = back_cart_tool_setpoint_.tpl_angle;
+  back_tpl_lower_hitches_revolute_command_pub_.publish(msg);
+  msg.data = back_cart_tool_setpoint_.tpl_height;
+  back_tpl_upper_hitch_prismatic_command_pub_.publish(msg);
 }
 
 GZ_REGISTER_MODEL_PLUGIN(GazeboRosAgribot)

@@ -33,9 +33,9 @@ class MobileAppSim(QWidget):
     max_linear_velocity = 2.0
     max_circle_radius = 11.0
     no_tags = "0"
-    min_tpl_angle = -15  # deg
-    max_tpl_angle = 60  # deg
-    max_tpl_height = 45  # cm
+    min_tpl_angle = -1  # deg
+    max_tpl_angle = 51  # deg
+    max_tpl_height = 25  # cm
 
     def __init__(self, parent=None):
         super(MobileAppSim, self).__init__(parent)
