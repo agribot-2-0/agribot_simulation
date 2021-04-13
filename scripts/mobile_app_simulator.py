@@ -4,7 +4,7 @@ import os
 import signal
 import sys
 import threading
-
+import time
 import math
 
 from python_qt_binding import loadUi
@@ -140,6 +140,10 @@ class MobileAppSim(QWidget):
         msg = String()
         msg.data = self.combo_task_name.currentText()
         self.task.publish(msg)
+        time.sleep(0.1)
+        msg = RobotMode()
+        msg.val = RobotMode.AUTO
+        self.mode.publish(msg)
 
     def autonomous_mode(self):
         msg = RobotMode()
@@ -277,13 +281,16 @@ class MobileAppSim(QWidget):
                 self.max_circle_radius) / self.slider_angular.maximum()
 
     def rosloop(self):
-        rate = rospy.Rate(10)
-        while not rospy.is_shutdown():
-            self.manual_msg.linear_velocity = self.get_linear()
-            self.manual_msg.circle_radius = self.get_circle_radius()
-            self.manual_control.publish(self.manual_msg)
-            self.send_tpl_config()
-            rate.sleep()
+        try:
+            rate = rospy.Rate(10)
+            while not rospy.is_shutdown():
+                self.manual_msg.linear_velocity = self.get_linear()
+                self.manual_msg.circle_radius = self.get_circle_radius()
+                self.manual_control.publish(self.manual_msg)
+                self.send_tpl_config()
+                rate.sleep()
+        except rospy.ROSInterruptException:
+            pass
 
 
 def main():
