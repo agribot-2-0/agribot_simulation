@@ -7,7 +7,7 @@
       <real_time_update_rate>100</real_time_update_rate>
     </physics>
 
-    <gui fullscreen='1'>
+    <gui fullscreen='0'>
       <camera name='user_camera'>
         <pose frame=''>-2.4 -66 90 0 0.96 0.74</pose>
         <view_controller>orbit</view_controller>
@@ -39,12 +39,12 @@
           <uri>model://vineyard</uri>
         </include>
       </model>
-      <pose>50 -6.5 0 0 0 -0.068</pose>
+      <pose>45 -5.1 0 0 0 -0.068</pose>
       <distribution>
         <type>grid</type>
         <rows>5</rows>
         <cols>8</cols>
-        <step>10 4 0</step>
+        <step>10 3 0</step>
       </distribution>
     </population>
 
