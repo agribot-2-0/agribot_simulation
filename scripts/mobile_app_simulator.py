@@ -89,6 +89,16 @@ class MobileAppSim(QWidget):
         self.button_pause_gazebo.clicked.connect(self.gazebo_pause_world)
         self.button_unpause_gazebo.clicked.connect(self.gazebo_unpause_world)
         self.button_scan_tags.clicked.connect(self.scan_for_tags)
+        self.button_4m_left.clicked.connect(lambda: self.set_circle_radius(4))
+        self.button_2m_left.clicked.connect(lambda: self.set_circle_radius(2))
+        self.button_0m.clicked.connect(lambda: self.set_circle_radius(0))
+        self.button_2m_right.clicked.connect(lambda: self.set_circle_radius(-2))
+        self.button_4m_right.clicked.connect(lambda: self.set_circle_radius(-4))
+        self.button_1ms_forward.clicked.connect(lambda: self.set_linear(1))
+        self.button_03ms_forward.clicked.connect(lambda: self.set_linear(0.3))
+        self.button_0ms.clicked.connect(lambda: self.set_linear(0))
+        self.button_03ms_backward.clicked.connect(lambda: self.set_linear(-0.3))
+        self.button_1ms_backward.clicked.connect(lambda: self.set_linear(-1))
         self.manual_msg = AgribotManualControl()
 
         # List init
@@ -276,9 +286,17 @@ class MobileAppSim(QWidget):
         return (self.slider_linear.value() *
                 self.max_linear_velocity) / self.slider_linear.maximum()
 
+    def set_linear(self, linear_velocity):
+        self.slider_linear.setValue(
+            int((linear_velocity * self.slider_linear.maximum()) / self.max_linear_velocity))
+
     def get_circle_radius(self):
         return (self.slider_angular.value() *
                 self.max_circle_radius) / self.slider_angular.maximum()
+
+    def set_circle_radius(self, radius):
+        self.slider_angular.setValue(
+            int((radius * self.slider_angular.maximum()) / self.max_circle_radius))
 
     def rosloop(self):
         try:
