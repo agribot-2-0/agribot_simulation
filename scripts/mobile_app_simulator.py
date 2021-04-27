@@ -19,6 +19,8 @@ from agribot_msgs.msg import AgribotObstacleDetection
 from agribot_msgs.msg import AgribotTool
 from agribot_msgs.srv import ToolManagerScan
 from agribot_msgs.srv import ToolManagerScanRequest
+from agribot_msgs.srv import SteeringMode
+from agribot_msgs.srv import SteeringModeRequest
 
 from agribot_common.agribot_parameters import get_parameter
 
@@ -70,6 +72,8 @@ class MobileAppSim(QWidget):
 
         try:
             self.tags_scan = rospy.ServiceProxy("/agribot/tool_management/scan", ToolManagerScan)
+            self.kinematics_mode = rospy.ServiceProxy(
+                "/agribot/kinematics_controller/steering_mode", SteeringMode)
             self.gazebo_reset = rospy.ServiceProxy("/gazebo/reset_world", Empty)
             self.gazebo_pause = rospy.ServiceProxy("/gazebo/pause_physics", Empty)
             self.gazebo_unpause = rospy.ServiceProxy("/gazebo/unpause_physics", Empty)
@@ -78,13 +82,18 @@ class MobileAppSim(QWidget):
 
         # Buttons init
         self.button_send_task.clicked.connect(self.send_task)
-        self.button_autonomous.clicked.connect(self.autonomous_mode)
-        self.button_manual.clicked.connect(self.manual_mode)
-        self.button_error_frame.clicked.connect(self.send_error_frame)
-        self.button_error_manual.clicked.connect(self.send_manual_error)
-        self.button_no_error.clicked.connect(self.send_no_error)
-        self.button_obstacle.clicked.connect(self.obstacle_detected)
-        self.button_no_obstacle.clicked.connect(self.no_obstacle_detected)
+        self.button_autonomous.clicked.connect(lambda: self.send_mode(RobotMode.AUTO))
+        self.button_manual.clicked.connect(lambda: self.send_mode(RobotMode.MANUAL))
+        self.button_error_frame.clicked.connect(
+            lambda: self.send_error_frame(AgribotAppErrorFlag.APP_PROTOCOL_ERROR))
+        self.button_error_manual.clicked.connect(
+            lambda: self.send_error_frame(AgribotAppErrorFlag.APP_MANUAL_ERROR))
+        self.button_no_error.clicked.connect(
+            lambda: self.send_error_frame(AgribotAppErrorFlag.NO_APP_ERRORS))
+        self.button_obstacle.clicked.connect(
+            lambda: self.send_is_obstacle_detected(AgribotObstacleDetection.OBSTACLE_DETECTED))
+        self.button_no_obstacle.clicked.connect(
+            lambda: self.send_is_obstacle_detected(AgribotObstacleDetection.NO_OBSTACLE))
         self.button_reset_gazebo.clicked.connect(self.gazebo_reset_world)
         self.button_pause_gazebo.clicked.connect(self.gazebo_pause_world)
         self.button_unpause_gazebo.clicked.connect(self.gazebo_unpause_world)
@@ -99,6 +108,13 @@ class MobileAppSim(QWidget):
         self.button_0ms.clicked.connect(lambda: self.set_linear(0))
         self.button_03ms_backward.clicked.connect(lambda: self.set_linear(-0.3))
         self.button_1ms_backward.clicked.connect(lambda: self.set_linear(-1))
+        self.button_kinematics_four.clicked.connect(
+            lambda: self.set_kinematics(SteeringModeRequest.FOUR_WHEEL))
+        self.button_kinematics_front.clicked.connect(
+            lambda: self.set_kinematics(SteeringModeRequest.FRONT_WHEEL))
+        self.button_kinematics_crab.clicked.connect(
+            lambda: self.set_kinematics(SteeringModeRequest.CRAB))
+
         self.manual_msg = AgribotManualControl()
 
         # List init
@@ -151,43 +167,21 @@ class MobileAppSim(QWidget):
         msg.data = self.combo_task_name.currentText()
         self.task.publish(msg)
         time.sleep(0.1)
+        self.send_mode(RobotMode.AUTO)
+
+    def send_mode(self, mode):
         msg = RobotMode()
-        msg.val = RobotMode.AUTO
+        msg.val = mode
         self.mode.publish(msg)
 
-    def autonomous_mode(self):
-        msg = RobotMode()
-        msg.val = RobotMode.AUTO
-        self.mode.publish(msg)
-
-    def manual_mode(self):
-        msg = RobotMode()
-        msg.val = RobotMode.MANUAL
-        self.mode.publish(msg)
-
-    def send_error_frame(self):
+    def send_error_frame(self, error_type):
         msg = AgribotAppErrorFlag()
-        msg.error_flag = AgribotAppErrorFlag.APP_PROTOCOL_ERROR
+        msg.error_flag = error_type
         self.error.publish(msg)
 
-    def send_manual_error(self):
-        msg = AgribotAppErrorFlag()
-        msg.error_flag = AgribotAppErrorFlag.APP_MANUAL_ERROR
-        self.error.publish(msg)
-
-    def send_no_error(self):
-        msg = AgribotAppErrorFlag()
-        msg.error_flag = AgribotAppErrorFlag.NO_APP_ERRORS
-        self.error.publish(msg)
-
-    def obstacle_detected(self):
+    def send_is_obstacle_detected(self, is_detected):
         msg = AgribotObstacleDetection()
-        msg.status = AgribotObstacleDetection.OBSTACLE_DETECTED
-        self.obstacle.publish(msg)
-
-    def no_obstacle_detected(self):
-        msg = AgribotObstacleDetection()
-        msg.status = AgribotObstacleDetection.NO_OBSTACLE
+        msg.status = is_detected
         self.obstacle.publish(msg)
 
     def gazebo_reset_world(self):
@@ -297,6 +291,12 @@ class MobileAppSim(QWidget):
     def set_circle_radius(self, radius):
         self.slider_angular.setValue(
             int((radius * self.slider_angular.maximum()) / self.max_circle_radius))
+
+    def set_kinematics(self, mode):
+        try:
+            self.kinematics_mode(mode)
+        except rospy.ServiceException as exception_msg:
+            rospy.logerr("[{}]: {}".format(LOG_TAG, exception_msg))
 
     def rosloop(self):
         try:
