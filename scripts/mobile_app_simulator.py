@@ -81,7 +81,9 @@ class MobileAppSim(QWidget):
             rospy.logerr("[{}] Service init failed: {}".format(LOG_TAG, exc))
 
         # Buttons init
-        self.button_send_task.clicked.connect(self.send_task)
+        self.button_send_task.clicked.connect(
+            lambda: self.send_task(self.combo_task_name.currentText()))
+        self.button_cancel_task.clicked.connect(self.cancel_task)
         self.button_autonomous.clicked.connect(lambda: self.send_mode(RobotMode.AUTO))
         self.button_manual.clicked.connect(lambda: self.send_mode(RobotMode.MANUAL))
         self.button_error_frame.clicked.connect(
@@ -162,12 +164,19 @@ class MobileAppSim(QWidget):
         timestamp_thread.setDaemon(True)
         timestamp_thread.start()
 
-    def send_task(self):
+    def send_task(self, task_name):
         msg = String()
-        msg.data = self.combo_task_name.currentText()
+        msg.data = task_name
         self.task.publish(msg)
         time.sleep(0.1)
         self.send_mode(RobotMode.AUTO)
+
+    def cancel_task(self):
+        msg = String()
+        msg.data = ""
+        self.task.publish(msg)
+        time.sleep(0.1)
+        self.send_mode(RobotMode.UNKNOWN)
 
     def send_mode(self, mode):
         msg = RobotMode()
