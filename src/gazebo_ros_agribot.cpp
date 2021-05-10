@@ -245,6 +245,8 @@ void GazeboRosAgribot::CreatePubsAndSubs()
       &queue_);
 
   rosnode_ = new ros::NodeHandle(this->robot_namespace_);
+  lamps_control_service_ = rosnode_->advertiseService("/agribot/hal_lights/change_lamps_configuration",
+                                                      &GazeboRosAgribot::lampControlServiceCallback, this);
   cmd_vel_subscriber_ = rosnode_->subscribe(so);
   cmd_front_tool_subscriber_ = rosnode_->subscribe(sub_cmd_tool_front);
   cmd_back_tool_subscriber_ = rosnode_->subscribe(sub_cmd_tool_back);
@@ -502,6 +504,13 @@ void GazeboRosAgribot::publishToolsControllerCommands() const
   back_tpl_lower_hitches_revolute_command_pub_.publish(msg);
   msg.data = back_cart_tool_setpoint_.tpl_height;
   back_tpl_upper_hitch_prismatic_command_pub_.publish(msg);
+}
+
+bool GazeboRosAgribot::lampControlServiceCallback(
+    agribot_msgs::LampsControl::Request& req,   // NOLINT(runtime/references)
+    agribot_msgs::LampsControl::Response& res)  // NOLINT(runtime/references)
+{
+  return true;
 }
 
 GZ_REGISTER_MODEL_PLUGIN(GazeboRosAgribot)

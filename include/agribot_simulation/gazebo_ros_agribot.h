@@ -21,6 +21,7 @@
 #include <agribot_msgs/AgribotCaterpillar.h>
 #include <agribot_msgs/AgribotCaterpillarWheelsRotation.h>
 #include <agribot_msgs/AgribotTool.h>
+#include <agribot_msgs/LampsControl.h>
 #include <geometry_msgs/Pose2D.h>
 #include <nav_msgs/Odometry.h>
 #include <ros/ros.h>
@@ -36,8 +37,8 @@
 #include <ros/callback_queue.h>
 
 #include <map>
-#include <unordered_map>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 // Boost
@@ -76,6 +77,8 @@ private:
   };
 
 private:
+  bool lampControlServiceCallback(agribot_msgs::LampsControl::Request& req,    // NOLINT(runtime/references)
+                                  agribot_msgs::LampsControl::Response& res);  // NOLINT(runtime/references)
   void publishOdometry(double step_time);
   void publishEncoder();
   void publishCarts();
@@ -104,6 +107,7 @@ private:
 
   // ROS STUFF
   ros::NodeHandle* rosnode_;
+  ros::ServiceServer lamps_control_service_;
   ros::Subscriber cmd_vel_subscriber_;
   ros::Subscriber cmd_front_tool_subscriber_;
   ros::Subscriber cmd_back_tool_subscriber_;
