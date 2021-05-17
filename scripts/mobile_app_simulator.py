@@ -10,6 +10,7 @@ import math
 from python_qt_binding import loadUi
 from python_qt_binding.QtWidgets import QWidget, QApplication  # pylint: disable=no-name-in-module
 
+import actionlib
 from industrial_msgs.msg import RobotMode
 from std_msgs.msg import String
 from std_srvs.srv import Empty
@@ -17,6 +18,8 @@ from agribot_msgs.msg import AgribotAppErrorFlag
 from agribot_msgs.msg import AgribotManualControl
 from agribot_msgs.msg import AgribotObstacleDetection
 from agribot_msgs.msg import AgribotTool
+from agribot_msgs.msg import PerformAutonomousTaskAction
+from agribot_msgs.msg import PerformAutonomousTaskGoal
 from agribot_msgs.srv import ToolManagerScan
 from agribot_msgs.srv import ToolManagerScanRequest
 from agribot_msgs.srv import SteeringMode
@@ -54,7 +57,9 @@ class MobileAppSim(QWidget):
         self.error = rospy.Publisher('/agribot/state_machine/error',
                                      AgribotAppErrorFlag,
                                      queue_size=1)
-        self.task = rospy.Publisher('/agribot/state_machine/task', String, queue_size=1)
+
+        self.task_action_client = actionlib.SimpleActionClient('/agribot/behavior_tree/task_action',
+                                                               PerformAutonomousTaskAction)
 
         self.obstacle = rospy.Publisher('/agribot/obstacle_detected',
                                         AgribotObstacleDetection,
@@ -164,19 +169,13 @@ class MobileAppSim(QWidget):
         timestamp_thread.setDaemon(True)
         timestamp_thread.start()
 
-    def send_task(self, task_name):
-        msg = String()
-        msg.data = task_name
-        self.task.publish(msg)
-        time.sleep(0.1)
-        self.send_mode(RobotMode.AUTO)
+    def send_task(self, task):
+        goal = PerformAutonomousTaskGoal(task_name=task)
+        self.task_action_client.send_goal(goal)
 
     def cancel_task(self):
-        msg = String()
-        msg.data = ""
-        self.task.publish(msg)
-        time.sleep(0.1)
-        self.send_mode(RobotMode.UNKNOWN)
+        goal = PerformAutonomousTaskGoal(task_name="")
+        self.task_action_client.send_goal(goal)
 
     def send_mode(self, mode):
         msg = RobotMode()
