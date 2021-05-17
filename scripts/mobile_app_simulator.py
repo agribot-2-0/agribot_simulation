@@ -4,7 +4,6 @@ import os
 import signal
 import sys
 import threading
-import time
 import math
 
 from python_qt_binding import loadUi
@@ -12,7 +11,6 @@ from python_qt_binding.QtWidgets import QWidget, QApplication  # pylint: disable
 
 import actionlib
 from industrial_msgs.msg import RobotMode
-from std_msgs.msg import String
 from std_srvs.srv import Empty
 from agribot_msgs.msg import AgribotAppErrorFlag
 from agribot_msgs.msg import AgribotManualControl
