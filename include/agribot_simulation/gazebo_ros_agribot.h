@@ -84,6 +84,10 @@ private:
                                 std_srvs::Trigger::Response& res);             // NOLINT(runtime/references)
   bool setSafeStateService(std_srvs::Trigger::Request& req,                    // NOLINT(runtime/references)
                            std_srvs::Trigger::Response& res);                  // NOLINT(runtime/references)
+  bool engineStartService(std_srvs::Trigger::Request& req,                     // NOLINT(runtime/references)
+                          std_srvs::Trigger::Response& res);                   // NOLINT(runtime/references)
+  bool engineStopService(std_srvs::Trigger::Request& req,                      // NOLINT(runtime/references)
+                         std_srvs::Trigger::Response& res);                    // NOLINT(runtime/references)
   void publishOdometry(double step_time);
   void publishEncoder();
   void publishCarts();
@@ -115,6 +119,8 @@ private:
   ros::ServiceServer lamps_control_service_;
   ros::ServiceServer ttcontrol_set_safe_state_service_;
   ros::ServiceServer ttcontrol_set_autonomous_state_service_;
+  ros::ServiceServer service_engine_start_;
+  ros::ServiceServer service_engine_stop_;
   ros::Subscriber cmd_vel_subscriber_;
   ros::Subscriber cmd_front_tool_subscriber_;
   ros::Subscriber cmd_back_tool_subscriber_;

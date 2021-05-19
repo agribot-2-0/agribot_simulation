@@ -251,6 +251,9 @@ void GazeboRosAgribot::CreatePubsAndSubs()
       rosnode_->advertiseService("/agribot/set_autonomous_mode", &GazeboRosAgribot::setAutonomousModeService, this);
   ttcontrol_set_autonomous_state_service_ =
       rosnode_->advertiseService("/agribot/set_safe_state", &GazeboRosAgribot::setSafeStateService, this);
+  service_engine_start_ =
+      rosnode_->advertiseService("/agribot/engine_start", &GazeboRosAgribot::engineStartService, this);
+  service_engine_stop_ = rosnode_->advertiseService("/agribot/engine_stop", &GazeboRosAgribot::engineStopService, this);
   cmd_vel_subscriber_ = rosnode_->subscribe(so);
   cmd_front_tool_subscriber_ = rosnode_->subscribe(sub_cmd_tool_front);
   cmd_back_tool_subscriber_ = rosnode_->subscribe(sub_cmd_tool_back);
@@ -520,11 +523,25 @@ bool GazeboRosAgribot::lampControlServiceCallback(
 bool GazeboRosAgribot::setAutonomousModeService(std_srvs::Trigger::Request& req,   // NOLINT(runtime/references)
                                                 std_srvs::Trigger::Response& res)  // NOLINT(runtime/references)
 {
+  res.success = true;
   return true;
 }
 
 bool GazeboRosAgribot::setSafeStateService(std_srvs::Trigger::Request& req,   // NOLINT(runtime/references)
                                            std_srvs::Trigger::Response& res)  // NOLINT(runtime/references)
+{
+  res.success = true;
+  return true;
+}
+
+bool GazeboRosAgribot::engineStartService(std_srvs::Trigger::Request& req,   // NOLINT(runtime/references)
+                                          std_srvs::Trigger::Response& res)  // NOLINT(runtime/references)
+{
+  return true;
+}
+
+bool GazeboRosAgribot::engineStopService(std_srvs::Trigger::Request& req,   // NOLINT(runtime/references)
+                                         std_srvs::Trigger::Response& res)  // NOLINT(runtime/references)
 {
   return true;
 }
