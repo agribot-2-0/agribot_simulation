@@ -10,8 +10,8 @@ from python_qt_binding import loadUi
 from python_qt_binding.QtWidgets import QWidget, QApplication  # pylint: disable=no-name-in-module
 
 import actionlib
-from industrial_msgs.msg import RobotMode
 from std_srvs.srv import Empty
+from agribot_msgs.msg import AgribotTtcontrolState
 from agribot_msgs.msg import AgribotAppErrorFlag
 from agribot_msgs.msg import AgribotManualControl
 from agribot_msgs.msg import AgribotObstacleDetection
@@ -50,7 +50,7 @@ class MobileAppSim(QWidget):
         loadUi(ui_file, self)
         self.setWindowTitle("Mobile App Simulator")
 
-        self.mode = rospy.Publisher('/agribot/state_machine/mode', RobotMode, queue_size=1)
+        self.ttcontrol_state_publisher = rospy.Publisher('/agribot/ttcontrol_state', AgribotTtcontrolState, queue_size=1)
 
         self.error = rospy.Publisher('/agribot/state_machine/error',
                                      AgribotAppErrorFlag,
@@ -87,8 +87,8 @@ class MobileAppSim(QWidget):
         self.button_send_task.clicked.connect(
             lambda: self.send_task(self.combo_task_name.currentText()))
         self.button_cancel_task.clicked.connect(self.cancel_task)
-        self.button_autonomous.clicked.connect(lambda: self.send_mode(RobotMode.AUTO))
-        self.button_manual.clicked.connect(lambda: self.send_mode(RobotMode.MANUAL))
+        self.button_manual.clicked.connect(lambda: self.send_ttcontrol_manual_state())
+        self.button_safe.clicked.connect(lambda: self.send_ttcontrol_safe_state())
         self.button_error_frame.clicked.connect(
             lambda: self.send_error_frame(AgribotAppErrorFlag.APP_PROTOCOL_ERROR))
         self.button_error_manual.clicked.connect(
@@ -175,10 +175,17 @@ class MobileAppSim(QWidget):
         goal = PerformAutonomousTaskGoal(task_name="")
         self.task_action_client.send_goal(goal)
 
-    def send_mode(self, mode):
-        msg = RobotMode()
-        msg.val = mode
-        self.mode.publish(msg)
+    def send_ttcontrol_manual_state(self):
+        msg = AgribotTtcontrolState()
+        msg.manual_state = AgribotTtcontrolState.STEERING_ACTIVE
+        msg.automatic_state = AgribotTtcontrolState.COMMUNICATION_ACTIVE
+        self.ttcontrol_state_publisher.publish(msg)
+
+    def send_ttcontrol_safe_state(self):
+        msg = AgribotTtcontrolState()
+        msg.manual_state = AgribotTtcontrolState.COMMUNICATION_ACTIVE
+        msg.automatic_state = AgribotTtcontrolState.COMMUNICATION_ACTIVE
+        self.ttcontrol_state_publisher.publish(msg)
 
     def send_error_frame(self, error_type):
         msg = AgribotAppErrorFlag()
