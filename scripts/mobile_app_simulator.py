@@ -50,7 +50,8 @@ class MobileAppSim(QWidget):
         loadUi(ui_file, self)
         self.setWindowTitle("Mobile App Simulator")
 
-        self.ttcontrol_state_publisher = rospy.Publisher('/agribot/ttcontrol_state', AgribotTtcontrolState, queue_size=1)
+        self.ttcontrol_state_publisher = rospy.Publisher('/agribot/ttcontrol_state',
+                                                         AgribotTtcontrolState, queue_size=1)
 
         self.error = rospy.Publisher('/agribot/state_machine/error',
                                      AgribotAppErrorFlag,
@@ -87,8 +88,8 @@ class MobileAppSim(QWidget):
         self.button_send_task.clicked.connect(
             lambda: self.send_task(self.combo_task_name.currentText()))
         self.button_cancel_task.clicked.connect(self.cancel_task)
-        self.button_manual.clicked.connect(lambda: self.send_ttcontrol_manual_state())
-        self.button_safe.clicked.connect(lambda: self.send_ttcontrol_safe_state())
+        self.button_manual.clicked.connect(self.send_ttcontrol_manual_state())
+        self.button_safe.clicked.connect(self.send_ttcontrol_safe_state())
         self.button_error_frame.clicked.connect(
             lambda: self.send_error_frame(AgribotAppErrorFlag.APP_PROTOCOL_ERROR))
         self.button_error_manual.clicked.connect(
