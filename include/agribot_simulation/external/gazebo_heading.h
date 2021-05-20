@@ -67,6 +67,8 @@ private:
   std::string link_name_;
   std::string frame_id_;
 
+  double reference_heading_;
+
   SensorModel3 sensor_model_;
 
   UpdateTimer updateTimer;
