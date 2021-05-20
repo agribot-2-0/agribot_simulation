@@ -88,8 +88,8 @@ class MobileAppSim(QWidget):
         self.button_send_task.clicked.connect(
             lambda: self.send_task(self.combo_task_name.currentText()))
         self.button_cancel_task.clicked.connect(self.cancel_task)
-        self.button_manual.clicked.connect(self.send_ttcontrol_manual_state())
-        self.button_safe.clicked.connect(self.send_ttcontrol_safe_state())
+        self.button_manual.clicked.connect(self.send_ttcontrol_manual_state)
+        self.button_safe.clicked.connect(self.send_ttcontrol_safe_state)
         self.button_error_frame.clicked.connect(
             lambda: self.send_error_frame(AgribotAppErrorFlag.APP_PROTOCOL_ERROR))
         self.button_error_manual.clicked.connect(
