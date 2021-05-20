@@ -4,19 +4,20 @@ import os
 import signal
 import sys
 import threading
-import time
 import math
 
 from python_qt_binding import loadUi
 from python_qt_binding.QtWidgets import QWidget, QApplication  # pylint: disable=no-name-in-module
 
-from industrial_msgs.msg import RobotMode
-from std_msgs.msg import String
+import actionlib
 from std_srvs.srv import Empty
+from agribot_msgs.msg import AgribotTtcontrolState
 from agribot_msgs.msg import AgribotAppErrorFlag
 from agribot_msgs.msg import AgribotManualControl
 from agribot_msgs.msg import AgribotObstacleDetection
 from agribot_msgs.msg import AgribotTool
+from agribot_msgs.msg import PerformAutonomousTaskAction
+from agribot_msgs.msg import PerformAutonomousTaskGoal
 from agribot_msgs.srv import ToolManagerScan
 from agribot_msgs.srv import ToolManagerScanRequest
 from agribot_msgs.srv import SteeringMode
@@ -49,12 +50,15 @@ class MobileAppSim(QWidget):
         loadUi(ui_file, self)
         self.setWindowTitle("Mobile App Simulator")
 
-        self.mode = rospy.Publisher('/agribot/state_machine/mode', RobotMode, queue_size=1)
+        self.ttcontrol_state_publisher = rospy.Publisher('/agribot/ttcontrol_state',
+                                                         AgribotTtcontrolState, queue_size=1)
 
         self.error = rospy.Publisher('/agribot/state_machine/error',
                                      AgribotAppErrorFlag,
                                      queue_size=1)
-        self.task = rospy.Publisher('/agribot/state_machine/task', String, queue_size=1)
+
+        self.task_action_client = actionlib.SimpleActionClient('/agribot/behavior_tree/task_action',
+                                                               PerformAutonomousTaskAction)
 
         self.obstacle = rospy.Publisher('/agribot/obstacle_detected',
                                         AgribotObstacleDetection,
@@ -84,8 +88,8 @@ class MobileAppSim(QWidget):
         self.button_send_task.clicked.connect(
             lambda: self.send_task(self.combo_task_name.currentText()))
         self.button_cancel_task.clicked.connect(self.cancel_task)
-        self.button_autonomous.clicked.connect(lambda: self.send_mode(RobotMode.AUTO))
-        self.button_manual.clicked.connect(lambda: self.send_mode(RobotMode.MANUAL))
+        self.button_manual.clicked.connect(self.send_ttcontrol_manual_state)
+        self.button_safe.clicked.connect(self.send_ttcontrol_safe_state)
         self.button_error_frame.clicked.connect(
             lambda: self.send_error_frame(AgribotAppErrorFlag.APP_PROTOCOL_ERROR))
         self.button_error_manual.clicked.connect(
@@ -164,24 +168,25 @@ class MobileAppSim(QWidget):
         timestamp_thread.setDaemon(True)
         timestamp_thread.start()
 
-    def send_task(self, task_name):
-        msg = String()
-        msg.data = task_name
-        self.task.publish(msg)
-        time.sleep(0.1)
-        self.send_mode(RobotMode.AUTO)
+    def send_task(self, task):
+        goal = PerformAutonomousTaskGoal(task_name=task)
+        self.task_action_client.send_goal(goal)
 
     def cancel_task(self):
-        msg = String()
-        msg.data = ""
-        self.task.publish(msg)
-        time.sleep(0.1)
-        self.send_mode(RobotMode.UNKNOWN)
+        goal = PerformAutonomousTaskGoal(task_name="")
+        self.task_action_client.send_goal(goal)
 
-    def send_mode(self, mode):
-        msg = RobotMode()
-        msg.val = mode
-        self.mode.publish(msg)
+    def send_ttcontrol_manual_state(self):
+        msg = AgribotTtcontrolState()
+        msg.manual_state = AgribotTtcontrolState.STEERING_ACTIVE
+        msg.automatic_state = AgribotTtcontrolState.COMMUNICATION_ACTIVE
+        self.ttcontrol_state_publisher.publish(msg)
+
+    def send_ttcontrol_safe_state(self):
+        msg = AgribotTtcontrolState()
+        msg.manual_state = AgribotTtcontrolState.COMMUNICATION_ACTIVE
+        msg.automatic_state = AgribotTtcontrolState.COMMUNICATION_ACTIVE
+        self.ttcontrol_state_publisher.publish(msg)
 
     def send_error_frame(self, error_type):
         msg = AgribotAppErrorFlag()

@@ -29,6 +29,7 @@
 #include <sensor_msgs/JointState.h>
 #include <std_msgs/Float32.h>
 #include <std_msgs/Float64.h>
+#include <std_srvs/Trigger.h>
 #include <tf/transform_broadcaster.h>
 #include <tf/transform_listener.h>
 
@@ -79,6 +80,14 @@ private:
 private:
   bool lampControlServiceCallback(agribot_msgs::LampsControl::Request& req,    // NOLINT(runtime/references)
                                   agribot_msgs::LampsControl::Response& res);  // NOLINT(runtime/references)
+  bool setAutonomousModeService(std_srvs::Trigger::Request& req,               // NOLINT(runtime/references)
+                                std_srvs::Trigger::Response& res);             // NOLINT(runtime/references)
+  bool setSafeStateService(std_srvs::Trigger::Request& req,                    // NOLINT(runtime/references)
+                           std_srvs::Trigger::Response& res);                  // NOLINT(runtime/references)
+  bool engineStartService(std_srvs::Trigger::Request& req,                     // NOLINT(runtime/references)
+                          std_srvs::Trigger::Response& res);                   // NOLINT(runtime/references)
+  bool engineStopService(std_srvs::Trigger::Request& req,                      // NOLINT(runtime/references)
+                         std_srvs::Trigger::Response& res);                    // NOLINT(runtime/references)
   void publishOdometry(double step_time);
   void publishEncoder();
   void publishCarts();
@@ -108,6 +117,10 @@ private:
   // ROS STUFF
   ros::NodeHandle* rosnode_;
   ros::ServiceServer lamps_control_service_;
+  ros::ServiceServer ttcontrol_set_safe_state_service_;
+  ros::ServiceServer ttcontrol_set_autonomous_state_service_;
+  ros::ServiceServer service_engine_start_;
+  ros::ServiceServer service_engine_stop_;
   ros::Subscriber cmd_vel_subscriber_;
   ros::Subscriber cmd_front_tool_subscriber_;
   ros::Subscriber cmd_back_tool_subscriber_;

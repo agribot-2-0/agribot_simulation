@@ -96,6 +96,13 @@
               </widget>
              </item>
              <item>
+              <widget class="QPushButton" name="button_safe">
+               <property name="text">
+                <string>Safe</string>
+               </property>
+              </widget>
+             </item>
+             <item>
               <widget class="QPushButton" name="button_manual">
                <property name="text">
                 <string>Manual</string>
