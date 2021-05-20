@@ -537,12 +537,14 @@ bool GazeboRosAgribot::setSafeStateService(std_srvs::Trigger::Request& req,   //
 bool GazeboRosAgribot::engineStartService(std_srvs::Trigger::Request& req,   // NOLINT(runtime/references)
                                           std_srvs::Trigger::Response& res)  // NOLINT(runtime/references)
 {
+  res.success = true;
   return true;
 }
 
 bool GazeboRosAgribot::engineStopService(std_srvs::Trigger::Request& req,   // NOLINT(runtime/references)
                                          std_srvs::Trigger::Response& res)  // NOLINT(runtime/references)
 {
+  res.success = true;
   return true;
 }
 
