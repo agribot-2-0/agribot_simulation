@@ -108,7 +108,7 @@ void GazeboHeading::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
 
   if (_sdf->HasElement("referenceHeading")) {
     if (_sdf->GetElement("referenceHeading")->GetValue()->Get(reference_heading_)) {
-      reference_heading_ *= M_PI/180.0;
+      reference_heading_ = common_functions::radians(reference_heading_);
     }
   }
 
