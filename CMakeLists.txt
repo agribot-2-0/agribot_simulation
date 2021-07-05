@@ -12,6 +12,7 @@ cmake_policy(SET CMP0054 OLD)
 find_package(catkin REQUIRED COMPONENTS
   gazebo_ros
   geometry_msgs
+  agribot_common
   agribot_msgs
   nav_msgs
   roscpp

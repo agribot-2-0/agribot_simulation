@@ -36,9 +36,10 @@
 #include <hector_gazebo_plugins/sensor_model.h>
 #include <hector_gazebo_plugins/update_timer.h>
 
+#include <agribot_common/CommonFunctions/common_functions.h>
+
 namespace gazebo
 {
-
 class GazeboHeading : public ModelPlugin
 {
 public:
@@ -67,12 +68,14 @@ private:
   std::string link_name_;
   std::string frame_id_;
 
+  double reference_heading_;
+
   SensorModel3 sensor_model_;
 
   UpdateTimer updateTimer;
   event::ConnectionPtr updateConnection;
 };
 
-} // namespace gazebo
+}  // namespace gazebo
 
-#endif // AGRIBOT_SENSORS_PLUGINS_GAZEBO_ROS_HEADING_H
+#endif  // AGRIBOT_SENSORS_PLUGINS_GAZEBO_ROS_HEADING_H

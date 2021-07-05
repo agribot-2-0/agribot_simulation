@@ -106,6 +106,12 @@ void GazeboHeading::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
     }
   }
 
+  if (_sdf->HasElement("referenceHeading")) {
+    if (_sdf->GetElement("referenceHeading")->GetValue()->Get(reference_heading_)) {
+      reference_heading_ = common_functions::radians(reference_heading_);
+    }
+  }
+
 #if (GAZEBO_MAJOR_VERSION >= 8)
   heading_.orientation_covariance[0] = sensor_model_.drift.X()*sensor_model_.drift.X() + sensor_model_.gaussian_noise.X()*sensor_model_.gaussian_noise.X();
   heading_.orientation_covariance[4] = sensor_model_.drift.Y()*sensor_model_.drift.Y() + sensor_model_.gaussian_noise.Y()*sensor_model_.gaussian_noise.Y();
@@ -152,7 +158,7 @@ void GazeboHeading::Update()
   ignition::math::Vector3d orientation = sensor_model_(pose.Rot().Euler(), dt);
 
   heading_.header.stamp = ros::Time(sim_time.sec, sim_time.nsec);
-  heading_.orientation = tf::createQuaternionMsgFromRollPitchYaw(0,0,orientation.Z());
+  heading_.orientation = tf::createQuaternionMsgFromRollPitchYaw(0,0,orientation.Z() + reference_heading_);
   heading_.orientation_covariance[0] = sensor_model_.drift.X()*sensor_model_.drift.X() + sensor_model_.gaussian_noise.X()*sensor_model_.gaussian_noise.X();
   heading_.orientation_covariance[4] = sensor_model_.drift.Y()*sensor_model_.drift.Y() + sensor_model_.gaussian_noise.Y()*sensor_model_.gaussian_noise.Y();
   heading_.orientation_covariance[8] = sensor_model_.drift.Z()*sensor_model_.drift.Z() + sensor_model_.gaussian_noise.Z()*sensor_model_.gaussian_noise.Z();
