@@ -14,7 +14,7 @@ from std_srvs.srv import Empty
 from agribot_msgs.msg import AgribotTtcontrolState
 from agribot_msgs.msg import AgribotAppErrorFlag
 from agribot_msgs.msg import AgribotManualControl
-from agribot_msgs.msg import AgribotObstacleDetection
+from agribot_msgs.msg import ObstacleDetectionStatus
 from agribot_msgs.msg import AgribotTool
 from agribot_msgs.msg import PerformAutonomousTaskAction
 from agribot_msgs.msg import PerformAutonomousTaskGoal
@@ -51,7 +51,8 @@ class MobileAppSim(QWidget):
         self.setWindowTitle("Mobile App Simulator")
 
         self.ttcontrol_state_publisher = rospy.Publisher('/agribot/ttcontrol_state',
-                                                         AgribotTtcontrolState, queue_size=1)
+                                                         AgribotTtcontrolState,
+                                                         queue_size=1)
 
         self.error = rospy.Publisher('/agribot/state_machine/error',
                                      AgribotAppErrorFlag,
@@ -60,8 +61,8 @@ class MobileAppSim(QWidget):
         self.task_action_client = actionlib.SimpleActionClient('/agribot/behavior_tree/task_action',
                                                                PerformAutonomousTaskAction)
 
-        self.obstacle = rospy.Publisher('/agribot/obstacle_detected',
-                                        AgribotObstacleDetection,
+        self.obstacle = rospy.Publisher('/agribot/obstacle_detection/front/status',
+                                        ObstacleDetectionStatus,
                                         queue_size=1)
 
         self.manual_control = rospy.Publisher('cmd_vel_manual', AgribotManualControl, queue_size=1)
@@ -97,9 +98,9 @@ class MobileAppSim(QWidget):
         self.button_no_error.clicked.connect(
             lambda: self.send_error_frame(AgribotAppErrorFlag.NO_APP_ERRORS))
         self.button_obstacle.clicked.connect(
-            lambda: self.send_is_obstacle_detected(AgribotObstacleDetection.OBSTACLE_DETECTED))
+            lambda: self.send_is_obstacle_detected(ObstacleDetectionStatus.OBSTACLE_DETECTED))
         self.button_no_obstacle.clicked.connect(
-            lambda: self.send_is_obstacle_detected(AgribotObstacleDetection.NO_OBSTACLE))
+            lambda: self.send_is_obstacle_detected(ObstacleDetectionStatus.NO_OBSTACLE))
         self.button_reset_gazebo.clicked.connect(self.gazebo_reset_world)
         self.button_pause_gazebo.clicked.connect(self.gazebo_pause_world)
         self.button_unpause_gazebo.clicked.connect(self.gazebo_unpause_world)
@@ -194,7 +195,7 @@ class MobileAppSim(QWidget):
         self.error.publish(msg)
 
     def send_is_obstacle_detected(self, is_detected):
-        msg = AgribotObstacleDetection()
+        msg = ObstacleDetectionStatus()
         msg.status = is_detected
         self.obstacle.publish(msg)
 
