@@ -39,7 +39,9 @@ private:
   std::unique_ptr<ros::NodeHandle> rosnode_;
   event::ConnectionPtr update_connection_;
 
-  bool callback_start_stream(std_srvs::Empty::Request& req, std_srvs::Empty::Response& res);
-  bool callback_stop_stream(std_srvs::Empty::Request& req, std_srvs::Empty::Response& res);
+  bool callback_start_stream(std_srvs::Empty::Request& req,
+                             std_srvs::Empty::Response& res);  // NOLINT(runtime/references)
+  bool callback_stop_stream(std_srvs::Empty::Request& req,
+                            std_srvs::Empty::Response& res);  // NOLINT(runtime/references)
 };
 }  // namespace gazebo
