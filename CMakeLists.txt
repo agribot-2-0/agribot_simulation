@@ -164,6 +164,10 @@ add_library(gazebo_weather
   src/gazebo_weather.cpp
 )
 
+add_library(gazebo_video_streaming
+  src/gazebo_video_streaming.cpp
+)
+
 
 target_link_libraries(gazebo_ros_agribot
   gazebo_inclinometer
@@ -173,6 +177,7 @@ target_link_libraries(gazebo_ros_agribot
   gazebo_magnetic
   gazebo_rfid
   gazebo_weather
+  gazebo_video_streaming
   ${GAZEBO_LIBRARIES}
   ${catkin_LIBRARIES}
   ${Boost_LIBRARIES}
@@ -223,6 +228,7 @@ install(TARGETS
   gazebo_magnetic
   gazebo_rfid
   gazebo_weather
+  gazebo_video_streaming
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
 )
