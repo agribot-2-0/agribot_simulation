@@ -34,14 +34,14 @@ void GazeboVideoStreaming::Load(physics::ModelPtr parent, sdf::ElementPtr sdf)
   stop_stream_service_ = rosnode_->advertiseService("stop_stream", &GazeboVideoStreaming::callback_stop_stream, this);
 }
 
-bool GazeboVideoStreaming::callback_start_stream(std_srvs::Empty::Request& req,
+bool GazeboVideoStreaming::callback_start_stream(std_srvs::Empty::Request& req,   // NOLINT(runtime/references)
                                                  std_srvs::Empty::Response& res)  // NOLINT(runtime/references)
 {
   ROS_INFO_STREAM("[GazeboVideoStreaming] Video streaming started.");
   return true;
 }
 
-bool GazeboVideoStreaming::callback_stop_stream(std_srvs::Empty::Request& req,
+bool GazeboVideoStreaming::callback_stop_stream(std_srvs::Empty::Request& req,   // NOLINT(runtime/references)
                                                 std_srvs::Empty::Response& res)  // NOLINT(runtime/references)
 {
   ROS_INFO_STREAM("[GazeboVideoStreaming] Video streaming stopped.");
