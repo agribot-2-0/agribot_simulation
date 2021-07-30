@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Agribot. All rights reserved.
+ * Copyright (C) 2021 Agribot. All rights reserved.
  */
 
 #pragma once
@@ -21,9 +21,6 @@ namespace gazebo
 class GazeboVideoStreaming : public ModelPlugin
 {
 public:
-  GazeboVideoStreaming();
-  virtual ~GazeboVideoStreaming();
-
   virtual void Load(physics::ModelPtr parent, sdf::ElementPtr sdf);
 
 private:
@@ -36,7 +33,7 @@ private:
   // gazebo
   physics::ModelPtr model_;
   physics::WorldPtr world_;
-  std::unique_ptr<ros::NodeHandle> rosnode_;
+  std::unique_ptr<ros::NodeHandle> nh_;
   event::ConnectionPtr update_connection_;
 
   bool callback_start_stream(std_srvs::Empty::Request& req,    // NOLINT(runtime/references)

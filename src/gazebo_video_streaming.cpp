@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Agribot. All rights reserved.
+ * Copyright (C) 2021 Agribot. All rights reserved.
  */
 
 #include <agribot_simulation/gazebo_video_streaming.h>
@@ -7,31 +7,21 @@
 #include <gazebo/common/Events.hh>
 #include <gazebo/physics/Model.hh>
 
-// c++
 #include <cstdlib>
 #include <ctime>
 #include <memory>
 
 namespace gazebo
 {
-GazeboVideoStreaming::GazeboVideoStreaming()
-{
-}
-
-GazeboVideoStreaming::~GazeboVideoStreaming()
-{
-}
-
 void GazeboVideoStreaming::Load(physics::ModelPtr parent, sdf::ElementPtr sdf)
 {
   this->model_ = parent;
   this->world_ = parent->GetWorld();
 
-  rosnode_ = std::make_unique<ros::NodeHandle>(ros::NodeHandle("hal_video_stream"));
+  nh_ = std::make_unique<ros::NodeHandle>("hal_video_stream");
 
-  start_stream_service_ =
-      rosnode_->advertiseService("start_stream", &GazeboVideoStreaming::callback_start_stream, this);
-  stop_stream_service_ = rosnode_->advertiseService("stop_stream", &GazeboVideoStreaming::callback_stop_stream, this);
+  start_stream_service_ = nh_->advertiseService("start_stream", &GazeboVideoStreaming::callback_start_stream, this);
+  stop_stream_service_ = nh_->advertiseService("stop_stream", &GazeboVideoStreaming::callback_stop_stream, this);
 }
 
 bool GazeboVideoStreaming::callback_start_stream(std_srvs::Empty::Request& req,   // NOLINT(runtime/references)
